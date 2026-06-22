@@ -1,0 +1,26 @@
+@if (_confirmService.confirmData(); as data) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+    <div class="bg-white  rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl">
+      <h3 class="text-lg font-semibold text-gray-900  mb-2">
+        {{ 'common.confirm' | translate}}
+      </h3>
+      <p class="text-gray-600 mb-6">
+        {{ data.message }}
+      </p>
+      <div class="flex justify-end gap-3">
+        <button
+          (click)="_confirmService.confirm(false)"
+          class="px-4 py-2 rounded-lg border border-gray-300 "
+        >
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button
+          (click)="_confirmService.confirm(true)"
+          class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+        >
+          {{ 'common.yes_clear' | translate}}
+        </button>
+      </div>
+    </div>
+  </div>
+}

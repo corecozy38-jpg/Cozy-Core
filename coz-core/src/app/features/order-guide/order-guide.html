@@ -1,0 +1,89 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-4">
+    {{ 'order_guide.title' | translate }}
+  </h1>
+  <p class="text-gray-500 text-center max-w-2xl mx-auto mb-8">
+    {{ 'order_guide.subtitle' | translate }}
+  </p>
+  <div class="w-16 h-1 bg-gray-900 mx-auto rounded-full mb-10"></div>
+
+  @if (loading) {
+    <div class="flex justify-center py-16">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  } @else {
+    @if (images.length === 0) {
+      <p class="text-gray-500 text-center py-12">{{ 'order_guide.no_images' | translate }}</p>
+    } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (img of images; track img.publicId; let i = $index) {
+          <div
+            (click)="openModal(i)"
+            class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition group cursor-pointer"
+          >
+            <div class="aspect-w-3 aspect-h-4 bg-gray-100">
+              <img
+                [src]="img.url"
+                [alt]="getStepAlt(i)"
+                class="w-full h-full object-cover transition duration-500 group-hover:scale-105"
+              />
+            </div>
+            <div class="p-4 text-center border-t border-gray-50">
+              <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                {{ 'order_guide.step' | translate }} {{ i + 1 }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+@if (isModalOpen) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+    (click)="closeModal()"
+  >
+    <button
+      (click)="closeModal()"
+      class="absolute top-4 right-4 text-white hover:text-gray-300 transition z-10 p-2"
+      aria-label="Close modal"
+    >
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <button
+      (click)="$event.stopPropagation(); prevImage()"
+      class="absolute left-2 sm:left-4 text-white hover:text-gray-300 transition p-2 z-10 bg-black/50 rounded-full hover:bg-black/70"
+      aria-label="Previous image"
+    >
+      <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+
+    <button
+      (click)="$event.stopPropagation(); nextImage()"
+      class="absolute right-2 sm:right-4 text-white hover:text-gray-300 transition p-2 z-10 bg-black/50 rounded-full hover:bg-black/70"
+      aria-label="Next image"
+    >
+      <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+
+    <img
+      [src]="images[currentIndex].url"
+      [alt]="getStepAlt(currentIndex)"
+      class="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+      (click)="$event.stopPropagation()"
+    />
+
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm bg-black/50 px-4 py-1 rounded-full">
+      {{ currentIndex + 1 }} / {{ images.length }}
+    </div>
+  </div>
+}

@@ -1,0 +1,81 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <button (click)="goBack()" class="mb-6 flex bg-gray-100 rounded-full px-4 py-2 items-center gap-2 text-gray-600 hover:text-gray-900">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    </svg>
+    {{ 'orders.back_to_orders' | translate }}
+  </button>
+
+  <!-- Loading -->
+  @if (loading()) {
+  <div class="flex justify-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-gray-900"></div>
+  </div>
+  }
+
+  <!-- Error -->
+  @if (error() && !loading()) {
+  <div class="bg-red-50 text-red-600 p-4 rounded-xl text-center">
+    {{ error() | translate }}
+  </div>
+  }
+
+  <!-- Order details -->
+  @if (order(); as ord) {
+  <div class="space-y-6">
+    <!-- Header: Order # and status -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div class="flex flex-wrap justify-between items-start gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-gray-800">{{ 'orders.order_details' | translate }}</h1>
+          <p class="text-sm text-gray-500 mt-1">
+            {{ 'orders.order_id' | translate }}: <span class="font-mono">{{ ord._id }}</span>
+          </p>
+          <p class="text-sm text-gray-500">{{ 'orders.placed_on' | translate }}: {{ formatDate(ord.createdAt) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ 'orders.items' | translate }}</h2>
+      <div class="space-y-4">
+        @for (item of ord.items; track item.product._id) {
+        <div class="flex gap-4 pb-4 border-b last:border-0">
+          <img [src]="item.variant.images[0]?.url || '/placeholder.jpg'" class="w-20 h-20 object-cover rounded-lg" />
+          <div class="flex-1">
+            <div class="flex justify-between flex-wrap gap-2">
+              <div>
+                <p class="font-medium text-gray-800">{{ item.product.name }}</p>
+                <p class="text-sm text-gray-500">{{ item.variant.colorName }} / {{ item.size }}</p>
+                <p class="text-sm text-gray-500 mt-1">{{ 'orders.quantity' | translate }}: {{ item.quantity }}</p>
+              </div>
+              <p class="font-semibold text-gray-900">{{ item.unitPrice }} {{ 'product.currency' | translate }}</p>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      <div class="border-t pt-4 mt-4 text-right">
+        <p class="text-lg font-bold text-gray-900">
+          {{ 'orders.total_amount' | translate }}: {{ ord.totalAmount }} {{ 'product.currency' | translate }}
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ 'orders.shipping_address' | translate }}</h2>
+      <div class="space-y-1 text-gray-700">
+        <p><strong>{{ ord.shippingAddress.fullName }}</strong></p>
+        <p>{{ ord.shippingAddress.street }}, {{ ord.shippingAddress.city }}, {{ ord.shippingAddress.governorate }}</p>
+        <p>{{ ord.shippingAddress.country }} @if (ord.shippingAddress.postalCode) { - {{ ord.shippingAddress.postalCode
+          }} }</p>
+        <p>{{ 'auth.phone' | translate }}: {{ ord.shippingAddress.phone }}</p>
+        <p>{{ 'auth.email' | translate }}: {{ ord.shippingAddress.email }}</p>
+        @if (ord.notes) {
+        <p class="mt-2 text-sm text-gray-500"><strong>{{ 'orders.notes' | translate }}:</strong> {{ ord.notes }}</p>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</div>

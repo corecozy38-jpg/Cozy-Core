@@ -1,0 +1,206 @@
+<nav class="bg-white/90 border-b border-gray-200 sticky top-0 z-50 transition-all duration-300 hover:shadow-md ">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16 gap-4">
+      <div class="flex items-center gap-2 mobile-menu">
+        <button (click)="toggleMobileMenu()"
+          class="md:hidden p-2 rounded-full text-gray-700 hover:bg-gray-100 transition-all">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <a routerLink="/" class="hidden md:flex items-center text-xl lg:text-2xl font-extrabold tracking-tight logo">
+          <span class="text-gray-900 ">COZY</span><span class="text-gray-400">CORE</span>
+        </a>
+      </div>
+
+      <div class="absolute left-1/2 transform -translate-x-1/2 md:hidden">
+        <a routerLink="/" class="text-lg font-extrabold tracking-tight logo">
+          <span class="text-gray-900 ">COZY</span><span class="text-gray-400">CORE</span>
+        </a>
+      </div>
+
+      <div class="hidden md:flex items-center gap-6 lg:gap-8">
+        <a routerLink="/home" class="text-gray-700 hover:text-gray-900 font-medium transition hover:scale-105">
+          {{ 'nav.home' | translate }}
+        </a>
+        <div class="relative collections-dropdown">
+          <button (click)="toggleCollections()"
+            class="flex items-center gap-1 text-gray-700 hover:text-gray-900 font-medium transition focus:outline-none">
+            {{ 'nav.collections' | translate }}
+            <svg class="w-4 h-4 transition-transform" [class.rotate-180]="isCollectionsOpen" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          @if (isCollectionsOpen) {
+          <div class="absolute  mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20">
+            <a routerLink="/collections/summer"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:pl-5 transition-all">{{
+              'nav.summer_collection' | translate }}</a>
+            <a routerLink="/collections/winter"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:pl-5 transition-all">{{
+              'nav.winter_collection' | translate }}</a>
+            <a routerLink="/products"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:pl-5 transition-all">{{
+              'nav.all_products' | translate }}</a>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 md:gap-4">
+        @if(!hideSearch) {
+        <button (click)="openSearchModal()"
+          class="p-2 rounded-full text-gray-700 hover:bg-gray-100 transition-all hover:scale-105 ">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        }
+
+        <div class="flex items-center gap-1">
+          <span class="text-xs font-medium text-gray-500 rtl:hidden hidden sm:inline">EN</span>
+          <span class="text-xs font-medium text-gray-500 ltr:hidden hidden sm:inline">عربي</span>
+          <button (click)="toggleLanguage()"
+            class="relative w-10 h-5 rounded-full transition-colors duration-300 focus:outline-none hover:scale-105"
+            [class.bg-gray-700]="(_languageService.currentLang$ | async) === 'en'"
+            [class.bg-gray-400]="(_languageService.currentLang$ | async) === 'ar'">
+            <span
+              class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300"
+              [class.translate-x-5]="(_languageService.currentLang$ | async) === 'ar'"></span>
+          </button>
+        </div>
+
+        <a routerLink="/cart"
+          class="hidden md:flex  relative p-2 rounded-full text-gray-700 hover:bg-gray-100 transition-all hover:scale-105">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          </svg>
+          @if (cartCount > 0) {
+          <span
+            class="absolute -top-1 -right-1 bg-gray-800 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            {{ cartCount }}
+          </span>
+          }
+        </a>
+
+
+        @if (isLoggedIn) {
+        <div class="relative hidden md:block profile-dropdown">
+          <button (click)="toggleProfileMenu()"
+            class="flex items-center gap-1 p-1 rounded-full hover:bg-gray-100 transition-all">
+            <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <svg class="w-4 h-4 transition-transform" [class.rotate-180]="isProfileMenuOpen" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          @if (isProfileMenuOpen) {
+          <div
+            class="absolute ltr:right-0 rtl:left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20">
+            <a routerLink="user/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+              {{ 'nav.profile' | translate }}
+            </a>
+
+
+            <a routerLink="/user/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+              {{ 'nav.orders' | translate }}
+            </a>
+            
+          </div>
+          }
+        </div>
+        } @else {
+        <a routerLink="/auth"
+          class="hidden md:block px-4 py-2 rounded-full bg-gray-800 text-white text-sm font-medium hover:bg-gray-700 transition-all hover:scale-105 shadow-sm">
+          {{ 'nav.sign_in' | translate }}
+        </a>
+        }
+      </div>
+    </div>
+
+    @if (isMobileMenuOpen) {
+    <div
+      class="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 py-4 px-4 space-y-3 max-h-[calc(100vh-4rem)] overflow-y-auto">
+      <a routerLink="/" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">{{
+        'nav.home' | translate
+        }}</a>
+      <div class="py-2">
+        <div class="font-medium text-gray-700 px-2">{{ 'nav.collections' | translate }}</div>
+        <div class="pl-4 space-y-1">
+          <a routerLink="/collections/summer"
+            class="block py-1 text-sm text-gray-600 hover:bg-gray-50 px-2 rounded-md">{{ 'nav.summer_collection' |
+            translate }}</a>
+          <a routerLink="/collections/winter"
+            class="block py-1 text-sm text-gray-600 hover:bg-gray-50 px-2 rounded-md">{{ 'nav.winter_collection' |
+            translate }}</a>
+          <a routerLink="/products" class="block py-1 text-sm text-gray-600 hover:bg-gray-50 px-2 rounded-md">{{
+            'nav.all_products' | translate }}</a>
+        </div>
+      </div>
+      @if(!isAdmin) {
+      <a routerLink="/cart" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M5.5 19h13" />
+        </svg>
+        {{ 'nav.cart' | translate }}
+        @if (cartCount > 0) {
+        <span class="bg-gray-800 text-white text-xs rounded-full px-2 py-0.5">{{
+          cartCount
+          }}</span>
+        }
+      </a>
+      }
+      @if (isLoggedIn) {
+      <div class="border-t border-gray-100 pt-2 mt-2">
+        <a routerLink="/profile" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">
+          {{ 'nav.profile' | translate }}</a>
+        @if (isAdmin) {
+        <a routerLink="/admin/dashboard" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">{{
+          'nav.dashboard' | translate }}</a>
+        } @else {
+        <a routerLink="/orders" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">{{ 'nav.orders' |
+          translate }}</a>
+        }
+      </div>
+      } @else {
+      <a routerLink="/auth/login" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">{{ 'nav.sign_in' |
+        translate }}</a>
+      }
+    </div>
+    }
+
+    @if (isSearchModalOpen ) {
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-all duration-300"
+      (click)="closeSearchModal()">
+      <div class="w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden"
+        (click)="$event.stopPropagation()">
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-gray-800">{{ 'nav.search' | translate }}</h3>
+          <button (click)="closeSearchModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-4">
+          <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="performSearch()" autofocus
+            placeholder="{{ 'nav.search_placeholder' | translate }}"
+            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all" />
+          <button (click)="performSearch()"
+            class="mt-4 w-full bg-gray-800 text-white py-2 rounded-full hover:bg-gray-700 transition-colors">
+            {{ 'nav.search_btn' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+</nav>

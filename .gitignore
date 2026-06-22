@@ -1,0 +1,15 @@
+# Frontend (coz-core)
+coz-core/node_modules/
+coz-core/.angular/
+coz-core/dist/
+
+
+# Backend (coz-core-backend)
+coz-core-backend/node_modules/
+coz-core-backend/.env
+coz-core-backend/seeder.js
+
+*.log
+.DS_Store
+*.swp
+*.swo

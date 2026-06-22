@@ -1,0 +1,417 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+  @if (loading) {
+  <div class="flex justify-center items-center h-96">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+  </div>
+  }
+  @if (error) {
+  <div class="text-center py-10">
+    <p class="text-red-500">{{ 'product.error' | translate }}</p>
+    <a routerLink="/" class="text-blue-500 underline">{{ 'product.go_back' | translate }}</a>
+  </div>
+  }
+
+  @if (product && !loading && !error) {
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+    <div class="space-y-3">
+      <div class="relative overflow-hidden rounded-xl bg-gray-100">
+        <img [src]="galleryImages[currentImageIndex] || 'https://via.placeholder.com/600x700'" priority [alt]="product.name"
+          class="w-full max-h-[350px] md:max-h-[450px] object-contain transition-transform duration-300 hover:scale-105" />
+        @if (galleryImages.length > 1) {
+        <button (click)="prevImage()"
+          class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 shadow-md transition z-10"
+          aria-label="Previous">
+          <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <button (click)="nextImage()"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 shadow-md transition z-10"
+          aria-label="Next">
+          <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+        <div
+          class="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+          {{ currentImageIndex + 1 }} / {{ galleryImages.length }}
+        </div>
+        }
+      </div>
+      @if (galleryImages.length > 1) {
+      <div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+        @for (img of galleryImages; track img; let i = $index) {
+        <button (click)="setMainImage(img, i)"
+          class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all"
+          [class.border-gray-900]="currentImageIndex === i" [class.border-gray-200]="currentImageIndex !== i">
+          <img [src]="img" class="w-full h-full object-cover" />
+        </button>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="space-y-5">
+      <div>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+          {{ currentLang === 'ar' ? (product.name_ar || product.name) : product.name }}
+        </h1>
+        <div class="flex items-center gap-2 mt-2">
+          <div class="flex text-yellow-400">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+            <svg class="w-4 h-4 md:w-5 md:h-5 fill-current" [class.text-gray-300]="star > (product.rating || 0)"
+              viewBox="0 0 24 24">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+            </svg>
+            }
+          </div>
+          <span class="text-gray-500 text-xs md:text-sm">({{ product.reviewsCount }} {{ 'product.reviews' | translate
+            }})</span>
+        </div>
+      </div>
+
+      <div class="flex items-baseline gap-3">
+        @if (oldPrice) {
+        <span class="text-xl md:text-2xl text-gray-400 line-through">{{ oldPrice }} {{ 'product.currency' | translate
+          }}</span>
+        }
+        <span class="text-2xl md:text-3xl font-bold text-gray-900">{{ currentPrice }} {{ 'product.currency' | translate
+          }}</span>
+        @if (discountPercent > 0) {
+        <span class="bg-rose-100 text-rose-700 text-xs md:text-sm font-semibold px-2 py-0.5 rounded-full">-{{
+          discountPercent }}%</span>
+        }
+      </div>
+
+      @if (product.variants.length >= 1) {
+      <div>
+        <h3 class="text-gray-700 font-medium mb-2">{{ 'product.color' | translate }}</h3>
+        <div class="flex flex-wrap gap-3">
+          @for (variant of product.variants; track variant._id; let idx = $index) {
+          <div class="flex flex-col items-center gap-1">
+            <button (click)="selectColor(idx)"
+              class="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-lg overflow-hidden border-2 transition-all hover:scale-105"
+              [class.border-gray-900]="selectedColorIndex === idx" [class.border-gray-200]="selectedColorIndex !== idx">
+              <img [src]="variant.images[0]?.url || 'https://via.placeholder.com/60'" [alt]="variant.colorName"
+                class="w-full h-full object-cover" />
+            </button>
+            <span class="text-xs text-gray-600">{{ currentLang === 'ar' ? (variant.colorName_ar || variant.colorName) :
+              variant.colorName }}</span>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      @if (product.variants[selectedColorIndex]?.sizes) {
+      <div>
+        <h3 class="text-gray-700 font-medium mb-2">{{ 'product.size' | translate }}</h3>
+        <div class="flex flex-wrap gap-2">
+          @for (sizeObj of product.variants[selectedColorIndex].sizes; track sizeObj.size) {
+          <button (click)="selectSize(sizeObj.size)" [disabled]="sizeObj.stock === 0"
+            class="px-3 py-1.5 md:px-4 md:py-2 border rounded-full text-xs md:text-sm font-medium transition-all"
+            [class.bg-gray-900]="selectedSize === sizeObj.size && sizeObj.stock > 0"
+            [class.text-white]="selectedSize === sizeObj.size && sizeObj.stock > 0"
+            [class.border-gray-300]="selectedSize !== sizeObj.size" [class.text-gray-400]="sizeObj.stock === 0"
+            [class.cursor-not-allowed]="sizeObj.stock === 0">
+            {{ sizeObj.size }}
+            @if (sizeObj.stock === 0) {
+            <span class="ml-1 text-xs">({{ 'product.out_of_stock' | translate }})</span>
+            }
+          </button>
+          }
+        </div>
+      </div>
+      }
+
+      <div class="border-t border-gray-200 pt-5 mt-4">
+        <div class="flex border-b border-gray-200">
+          <button (click)="setActiveTab('features')"
+            class="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-colors"
+            [class.text-gray-900]="activeTab === 'features'" [class.border-b-2]="activeTab === 'features'"
+            [class.border-gray-900]="activeTab === 'features'" [class.text-gray-500]="activeTab !== 'features'">
+            {{ 'product.features' | translate }}
+          </button>
+          <button (click)="setActiveTab('size')"
+            class="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-colors"
+            [class.text-gray-900]="activeTab === 'size'" [class.border-b-2]="activeTab === 'size'"
+            [class.border-gray-900]="activeTab === 'size'" [class.text-gray-500]="activeTab !== 'size'">
+            {{ 'product.size_fit' | translate }}
+          </button>
+        </div>
+        <div class="pt-4 text-gray-600 text-xs md:text-sm">
+          @if (activeTab === 'features') {
+          <ul class="list-disc pl-5 space-y-1">
+            @for (feature of (currentLang === 'ar' ? (product.features_ar || product.features) : product.features);
+            track feature) {
+            <li>{{ feature }}</li>
+            }
+          </ul>
+          }
+          @if (activeTab === 'size') {
+          <div class="space-y-2">
+            <p><strong>{{ 'product.fit_type' | translate }}:</strong> {{ currentLang === 'ar' ?
+              (product.sizeFit_ar?.fitType || product.sizeFit?.fitType) : product.sizeFit?.fitType }}</p>
+            @if (product.sizeFit?.modelHeight) {
+            <p><strong>{{ 'product.model_height' | translate }}:</strong> {{ product.sizeFit.modelHeight }} cm</p>
+            }
+            @if (product.sizeFit?.wearingSize) {
+            <p><strong>{{ 'product.wearing_size' | translate }}:</strong> {{ product.sizeFit.wearingSize }}</p>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      @if (product.sizeGuid?.image?.url || product.sizeGuid?.description) {
+      <div class="border-t border-gray-200 pt-5 mt-2">
+        <button (click)="isSizeGuideOpen = !isSizeGuideOpen"
+          class="flex justify-between items-center w-full text-left group">
+          <h3 class="text-gray-800 font-semibold group-hover:text-gray-600 transition">{{ 'product.size_guide_title' |
+            translate }}</h3>
+          <svg class="w-5 h-5 text-gray-500 transition-transform duration-200" [class.rotate-180]="isSizeGuideOpen"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        @if (isSizeGuideOpen) {
+        <div class="mt-3 pt-2 border-t border-gray-100 animate-fadeIn">
+          @if (product.sizeGuid) {
+          @if (product.sizeGuid.description) {
+          <p class="text-gray-600 text-sm mb-3">{{ currentLang === 'ar' ? (product.sizeGuid_ar?.description ||
+            product.sizeGuid.description) : product.sizeGuid.description }}</p>
+          }
+          @if (product.sizeGuid.image && product.sizeGuid.image.url) {
+          <img [src]="product.sizeGuid.image.url" alt="Size Guide"
+            class="max-w-full h-auto rounded-lg border border-gray-200" />
+          }
+          }
+        </div>
+        }
+      </div>
+      }
+
+      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div class="flex items-center border border-gray-300 rounded-full">
+          <button (click)="decrementQuantity()" [disabled]="quantity <= 1 || isSelectedSizeOutOfStock"
+            class="px-3 py-1.5 md:px-4 md:py-2 text-gray-600 hover:bg-gray-100 ltr:rounded-l-full rtl:rounded-r-full disabled:opacity-50 disabled:cursor-not-allowed">-</button>
+          <span class="px-3 py-1.5 md:px-4 md:py-2 text-gray-800 font-medium">{{ quantity }}</span>
+          <button (click)="incrementQuantity()" [disabled]="quantity >= maxQuantity || isSelectedSizeOutOfStock"
+            class="px-3 py-1.5 md:px-4 md:py-2 text-gray-600 hover:bg-gray-100 ltr:rounded-r-full rtl:rounded-l-full disabled:opacity-50 disabled:cursor-not-allowed">+</button>
+        </div>
+        <button (click)="addToCart()" [disabled]="isSelectedSizeOutOfStock"
+          class="flex-1 py-2.5 px-2 rounded-full text-sm text-white md:text-base font-semibold transition shadow-md active:scale-95"
+          [class.bg-gray-900]="!isSelectedSizeOutOfStock" [class.hover:bg-gray-800]="!isSelectedSizeOutOfStock"
+          [class.bg-gray-400]="isSelectedSizeOutOfStock" [class.cursor-not-allowed]="isSelectedSizeOutOfStock">
+          {{ 'products.add_to_cart' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-12 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mx-auto w-full max-w-2xl">
+    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <span class="w-1 h-6 bg-gray-900 rounded-full"></span>
+      {{ 'product.write_review' | translate }}
+    </h3>
+
+    @if (reviewSubmitSuccess) {
+    <div class="bg-green-50 text-green-700 p-3 rounded-xl mb-4 text-sm">
+      {{ 'product.review_submitted' | translate }}
+    </div>
+    }
+
+    <form (ngSubmit)="submitReview()" #reviewNgForm="ngForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.rating' | translate }} *</label>
+        <div class="flex gap-1">
+          @for (star of [1,2,3,4,5]; track star) {
+          <button type="button" (click)="setRating(star)" class="focus:outline-none transition hover:scale-110">
+            <svg class="w-7 h-7 sm:w-8 sm:h-8" viewBox="0 0 24 24"
+              [class.text-yellow-400]="star <= reviewForm.rating" [class.text-gray-300]="star > reviewForm.rating">
+              <path fill="currentColor"
+                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+            </svg>
+          </button>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4 ">
+        <div class="md:col-span-2">
+          <label for="reviewContent" class="block text-sm font-medium text-gray-700 mb-1">
+            {{ 'product.review_comment' | translate }} *
+          </label>
+          <textarea id="reviewContent" rows="3" [(ngModel)]="reviewForm.content" name="content" required
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-transparent transition bg-gray-50 hover:bg-white text-sm"
+            placeholder="{{ 'product.review_placeholder' | translate }}"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            {{ 'product.review_images' | translate }}
+            <span class="text-xs text-gray-400">({{ reviewForm.images.length }}/{{ maxReviewImages }})</span>
+          </label>
+          <div class="flex flex-wrap gap-2 items-center">
+            @for (img of reviewForm.images; track img.publicId; let i = $index) {
+            <div class="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+              <img [src]="img.url" class="w-full h-full object-cover" />
+              <button type="button" (click)="removeReviewImage(i)"
+                class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-red-600 transition">
+                ×
+              </button>
+            </div>
+            }
+            @if (reviewForm.images.length < maxReviewImages) {
+            <label
+              class="w-12 h-12 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex items-center justify-center transition flex-shrink-0"
+              [class.opacity-50]="isUploadingImages">
+              <input type="file" accept="image/*" (change)="onImageSelected($event)" class="hidden"
+                [disabled]="isUploadingImages" />
+              @if (isUploadingImages) {
+              <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-gray-900"></div>
+              } @else {
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              }
+            </label>
+            }
+          </div>
+          <p class="text-xs text-gray-400 mt-1">{{ 'product.review_images_hint' | translate }}</p>
+        </div>
+      </div>
+
+      @if (!isLoggedIn) {
+      <div class="grid grid-cols-1  sm:grid-cols-2 gap-4">
+        <div>
+          <label for="guestName" class="block text-sm font-medium text-gray-700 mb-1">
+            {{ 'product.guest_name' | translate }} *
+          </label>
+          <input type="text" id="guestName" [(ngModel)]="reviewForm.guestName" name="guestName" required
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-transparent transition bg-gray-50 hover:bg-white text-sm" />
+        </div>
+        <div>
+          <label for="guestEmail" class="block text-sm font-medium text-gray-700 mb-1">
+            {{ 'product.guest_email' | translate }} *
+          </label>
+          <input type="email" id="guestEmail" [(ngModel)]="reviewForm.guestEmail" name="guestEmail" required
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-transparent transition bg-gray-50 hover:bg-white text-sm" />
+        </div>
+      </div>
+      }
+
+      @if (reviewSubmitError) {
+      <div class="text-red-600 text-sm">{{ reviewSubmitError }}</div>
+      }
+
+      <button type="submit" [disabled]="reviewSubmitting"
+        class="w-full sm:w-auto px-6 py-2.5 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition disabled:opacity-50 text-sm">
+        @if (reviewSubmitting) {
+        <span class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+        } @else {
+        {{ 'product.submit_review' | translate }}
+        }
+      </button>
+    </form>
+  </div>
+
+  <div class="mt-12">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+        {{ 'product.reviews_title' | translate }} ({{ reviewsTotal }})
+      </h2>
+    </div>
+
+    @if (reviewsLoading && reviewsPage === 1) {
+    <div class="flex justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-gray-900"></div>
+    </div>
+    }
+
+    @if (!reviewsLoading && reviews.length === 0) {
+    <p class="text-gray-500 text-center py-6">{{ 'product.no_reviews' | translate }}</p>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @for (review of reviews; track review._id) {
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-start gap-2">
+          <div>
+            <p class="font-semibold text-gray-800">{{ review.reviewerName || 'Anonymous' }}</p>
+            <div class="flex text-yellow-400 mt-0.5">
+              @for (star of [1,2,3,4,5]; track star) {
+              <svg class="w-4 h-4 fill-current" [class.text-gray-300]="star > review.rating" viewBox="0 0 24 24">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+              </svg>
+              }
+            </div>
+          </div>
+          <span class="text-gray-400 text-xs">{{ review.createdAt | date:'mediumDate' }}</span>
+        </div>
+
+        <p class="text-gray-600 text-sm mt-2 leading-relaxed">{{ review.content }}</p>
+
+        @if (review.images && review.images.length > 0) {
+        <div class="relative mt-3">
+          <div class="flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar">
+            @for (img of review.images; track img.publicId) {
+            <div class="snap-center flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+              <img [src]="img.url" class="w-full h-full object-cover" />
+            </div>
+            }
+          </div>
+          @if (review.images.length > 1) {
+          <button class="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full shadow-md transition text-gray-600 hover:text-gray-900">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button class="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full shadow-md transition text-gray-600 hover:text-gray-900">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          }
+        </div>
+        }
+      </div>
+      }
+    </div>
+
+    @if (!allReviewsLoaded && reviewsTotal > reviewsLimit) {
+    <div class="text-center mt-6">
+      <button (click)="loadMoreReviews()" [disabled]="reviewsLoading"
+        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition disabled:opacity-50 text-sm">
+        @if (reviewsLoading) {
+        <span class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></span>
+        } @else {
+        {{ 'product.load_more' | translate }}
+        }
+      </button>
+    </div>
+    }
+  </div>
+
+  @if (relatedProducts.length) {
+  <div class="mt-16">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl md:text-2xl font-bold text-gray-800">{{ 'product.you_may_also_like' | translate }}</h2>
+    </div>
+    <div class="flex overflow-x-auto gap-3 pb-3 hide-scrollbar scroll-smooth">
+      @for (related of relatedProducts; track related._id) {
+      <div class="w-36 sm:w-40 md:w-48 flex-shrink-0 bg-white border rounded-xl p-2 hover:shadow-md transition">
+        <a [routerLink]="['/product-details', related.slug]">
+          <img [src]="getProductImage(related)" class="w-full h-28 sm:h-32 md:h-40 object-cover rounded-lg" />
+          <h3 class="mt-2 font-medium text-xs md:text-sm line-clamp-2">{{ currentLang === 'ar' ? (related.name_ar ||
+            related.name) : related.name }}</h3>
+          <p class="text-gray-800 font-bold text-sm md:text-base">{{ related.price }} {{ 'product.currency' | translate
+            }}</p>
+        </a>
+      </div>
+      }
+    </div>
+  </div>
+  }
+  }
+</div>

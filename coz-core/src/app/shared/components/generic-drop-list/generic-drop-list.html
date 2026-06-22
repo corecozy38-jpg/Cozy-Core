@@ -1,0 +1,24 @@
+<div class="relative" (click)="$event.stopPropagation()">
+  <button (click)="toggle()"
+    class="flex items-center justify-between gap-2 w-full px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition bg-white">
+    <span [class.text-gray-900]="selectedValue" [class.text-gray-400]="!selectedValue">
+      {{ getSelectedLabel() }}
+    </span>
+    <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" [class.rotate-180]="isOpen" fill="none"
+      stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  @if (isOpen) {
+  <div
+    class=" top-full left-0 mt-1 w-full min-w-[140px] bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[9999] max-h-48 overflow-y-auto">
+    @for (option of options; track option.value) {
+    <button (click)="selectOption(option)" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition"
+      [class.bg-gray-100]="selectedValue === option.value" [class.font-medium]="selectedValue === option.value">
+      {{ option.label | translate }}
+    </button>
+    }
+  </div>
+  }
+</div>

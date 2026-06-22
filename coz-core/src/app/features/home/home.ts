@@ -1,0 +1,206 @@
+import { Component, ElementRef, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
+import { RouterModule } from '@angular/router';
+import { LanguageService } from '../../core/services/language.service';
+import { ProductService } from '../../core/services/product.service';
+import { CommonModule } from '@angular/common';
+import { AdaptedProduct, Product } from '../../core/interfaces/product.interface';
+import { Faq } from '../../core/interfaces/admin.interface';
+import { UserService } from '../../core/services/user.service';
+import { SiteSettingsService } from '../../core/services/site-settings.service';
+
+interface FaqItem extends Faq {
+  isOpen: boolean;
+}
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  imports: [TranslatePipe, RouterModule, CommonModule],
+  templateUrl: './home.html',
+  styleUrls: ['./home.css']
+})
+export class Home implements OnInit, OnDestroy {
+  Math = Math;
+  @ViewChild('productSlider') productSlider!: ElementRef<HTMLDivElement>;
+  @ViewChild('testimonialSlider') testimonialSlider!: ElementRef<HTMLDivElement>;
+
+  products = signal<AdaptedProduct[]>([]);
+  faqItems = signal<FaqItem[]>([]);
+  testimonials = signal<any[]>([
+    { name: 'Ahmed K.', rating: 5, text: 'Best gym wear I’ve ever owned. The fabric quality is incredible.', product: 'Pro Performance Tee' },
+    { name: 'Mohamed S.', rating: 5, text: 'The sweatpants are super comfortable. Highly recommend!', product: 'Ultra Sweatpants' },
+    { name: 'Karim K.', rating: 5, text: 'Premium quality at a great price. Minimalist design is perfect.', product: 'Core Tank Top' },
+    { name: 'Sara L.', rating: 5, text: 'Fast shipping and amazing customer service. Will buy again!', product: 'Essential Tee' },
+    { name: 'Omar A.', rating: 5, text: 'The compression shirt fits like a glove. Very breathable.', product: 'Compression Shirt' }
+  ]);
+
+  isLoadingProducts = signal(true);
+  isLoadingTestimonials = signal(true);
+  isLoadingFaq = signal(true);
+  error = false;
+
+  selectedColorIndexMap = new Map<string, number>();
+  currentIndex = 0;
+  intervalId: any;
+  currentLang: string = 'en';
+
+
+  constructor(
+    private productService: ProductService,
+    public _langService: LanguageService,
+    private _siteSettingService:SiteSettingsService
+  ) {}
+
+  ngOnInit() {
+    this.currentLang = this._langService.getCurrentLang();
+    this._langService.currentLang$.subscribe(lang => {
+      this.currentLang = lang;
+    });
+    
+    this.loadTopProducts();
+    this.loadActiveFaqs();
+    this.startAutoPlay();
+
+    setTimeout(() => {
+      this.isLoadingTestimonials.set(false);
+      this.isLoadingFaq.set(false);
+    }, 500);
+  }
+
+  loadTopProducts() {
+    this.isLoadingProducts.set(true);
+    this.productService.getTopProducts(10).subscribe({
+      next: (res) => {
+        if (res && res.data) {
+          const adaptedProducts = res.data.map((prod: Product) => this.adaptProduct(prod));
+          this.products.set(adaptedProducts);
+          adaptedProducts.forEach(product => {
+            if (!this.selectedColorIndexMap.has(product.id)) {
+              this.selectedColorIndexMap.set(product.id, 0);
+            }
+          });
+        }
+        this.isLoadingProducts.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load products:', err);
+        this.error = true;
+        this.isLoadingProducts.set(false);
+      }
+    });
+  }
+  loadActiveFaqs(){
+    this.isLoadingFaq.set(true);
+    this. _siteSettingService.getActiveFaqs().subscribe({
+      next: (res) => {
+        if (res && res.data) {
+          const faqItemsData = res.data.map((faq: Faq) => ({
+          ...faq,
+          isOpen: false
+        }));
+        this.faqItems.set(faqItemsData);
+
+        }
+        this.isLoadingFaq.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load faqs:', err);
+        this.error = true;
+        this.isLoadingFaq.set(false);
+      }
+    });
+  }
+
+  private adaptProduct(prod: Product): any {
+    let discountPercent = 0;
+    if (prod.compareAtPrice && prod.compareAtPrice > prod.price) {
+      discountPercent = Math.round(((prod.compareAtPrice - prod.price) / prod.compareAtPrice) * 100);
+    }
+    const isNew = (Date.now() - new Date(prod.createdAt).getTime()) < 30 * 24 * 60 * 60 * 1000;
+
+    const colors = prod.variants.map(variant => ({
+      name: variant.colorName,
+      code: variant.colorCode || '#cccccc',
+      image: variant.images?.[0]?.url || 'https://via.placeholder.com/400x500',
+      hoverImage: variant.images?.[1]?.url || variant.images?.[0]?.url || 'https://via.placeholder.com/400x500'
+    }));
+
+    return {
+      id: prod._id,
+      name: prod.name,
+      slug: prod.slug,
+      price: prod.price,
+      oldPrice: prod.compareAtPrice,
+      rating: prod.rating || 0,
+      reviewsCount: prod.reviewsCount || 0,
+      isNew: isNew,
+      discountPercent: discountPercent,
+      colors: colors
+    };
+  }
+
+  getSelectedColor(product: any) {
+    const index = this.selectedColorIndexMap.get(product.id) ?? 0;
+    return product.colors[index];
+  }
+
+  selectColor(product: any, colorIndex: number) {
+    this.selectedColorIndexMap.set(product.id, colorIndex);
+    this.products.set([...this.products()]);
+  }
+
+  scrollLeft() {
+    this.productSlider?.nativeElement.scrollBy({ left: -300, behavior: 'smooth' });
+  }
+
+  scrollRight() {
+    this.productSlider?.nativeElement.scrollBy({ left: 300, behavior: 'smooth' });
+  }
+
+  scrollTestimonialLeft() {
+    this.testimonialSlider?.nativeElement.scrollBy({ left: -320, behavior: 'smooth' });
+  }
+
+  scrollTestimonialRight() {
+    this.testimonialSlider?.nativeElement.scrollBy({ left: 320, behavior: 'smooth' });
+  }
+
+  startAutoPlay() {
+    this.intervalId = setInterval(() => {
+      this.nextSlide();
+    }, 5000);
+  }
+
+  stopAutoPlay() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+  }
+
+  nextSlide() {
+    this.currentIndex = (this.currentIndex + 1) % this.testimonials().length;
+  }
+
+  prevSlide() {
+    this.currentIndex = (this.currentIndex - 1 + this.testimonials().length) % this.testimonials().length;
+  }
+
+  goToSlide(index: number) {
+    this.currentIndex = index;
+    this.stopAutoPlay();
+    this.startAutoPlay();
+  }
+
+    toggleFaq(index: number) {
+    this.faqItems.update(items => {
+      const updated = [...items];
+      updated[index].isOpen = !updated[index].isOpen;
+      return updated;
+    });
+  }
+
+  ngOnDestroy() {
+    this.stopAutoPlay();
+  }
+}

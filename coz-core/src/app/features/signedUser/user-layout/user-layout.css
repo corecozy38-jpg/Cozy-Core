@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+aside::-webkit-scrollbar {
+  width: 4px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+@media (min-width: 1024px) {
+  aside {
+    top: 0;
+    align-self: stretch;
+  }
+}

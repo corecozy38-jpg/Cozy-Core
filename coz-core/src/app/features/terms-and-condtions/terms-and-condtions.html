@@ -1,0 +1,26 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
+    {{ 'terms.title' | translate }}
+  </h1>
+  <div class="w-16 h-1 bg-gray-900 mx-auto rounded-full mb-10"></div>
+
+  @if (loading) {
+    <div class="flex justify-center py-16">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  } @else {
+    <div class="space-y-6">
+      @for (item of terms; track $index) {
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+          <h2 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+            <span class="w-1 h-6 bg-gray-900 rounded-full"></span>
+            {{ getTitle(item) }}
+          </h2>
+          <p class="mt-2 text-gray-600 text-base leading-relaxed">{{ getContent(item) }}</p>
+        </div>
+      } @empty {
+        <p class="text-gray-500 text-center py-8">{{ 'terms.no_terms' | translate }}</p>
+      }
+    </div>
+  }
+</div>

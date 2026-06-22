@@ -1,0 +1,7 @@
+.bg-gradient-to-tr {
+  background-image: linear-gradient(to top right, #fbbf24, #ec4899, #7c3aed);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+}

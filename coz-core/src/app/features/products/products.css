@@ -1,0 +1,26 @@
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+body.drawer-open {
+  overflow: hidden;
+}
+
+
+
+.product-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+}
+
+button:hover svg {
+  transform: translateX(2px);
+  transition: transform 0.2s ease;
+}

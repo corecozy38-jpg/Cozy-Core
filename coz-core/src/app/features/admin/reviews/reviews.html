@@ -1,0 +1,191 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6 h-full">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <h1 class="text-xl md:text-2xl font-bold text-gray-800">{{ 'admin.reviews.title' | translate }}</h1>
+    <div class="flex flex-wrap gap-1.5">
+      <button
+        (click)="filterByStatus('all')"
+        class="px-3 py-1.5 text-xs font-medium rounded-full transition"
+        [class.bg-gray-900]="statusFilter() === 'all'"
+        [class.text-white]="statusFilter() === 'all'"
+        [class.bg-gray-100]="statusFilter() !== 'all'"
+        [class.text-gray-600]="statusFilter() !== 'all'"
+        [class.hover:bg-gray-200]="statusFilter() !== 'all'"
+      >
+        {{ 'admin.reviews.filter_all' | translate }}
+      </button>
+      <button
+        (click)="filterByStatus('pending')"
+        class="px-3 py-1.5 text-xs font-medium rounded-full transition"
+        [class.bg-yellow-500]="statusFilter() === 'pending'"
+        [class.text-white]="statusFilter() === 'pending'"
+        [class.bg-gray-100]="statusFilter() !== 'pending'"
+        [class.text-gray-600]="statusFilter() !== 'pending'"
+        [class.hover:bg-gray-200]="statusFilter() !== 'pending'"
+      >
+        {{ 'admin.reviews.filter_pending' | translate }}
+      </button>
+      <button
+        (click)="filterByStatus('approved')"
+        class="px-3 py-1.5 text-xs font-medium rounded-full transition"
+        [class.bg-green-500]="statusFilter() === 'approved'"
+        [class.text-white]="statusFilter() === 'approved'"
+        [class.bg-gray-100]="statusFilter() !== 'approved'"
+        [class.text-gray-600]="statusFilter() !== 'approved'"
+        [class.hover:bg-gray-200]="statusFilter() !== 'approved'"
+      >
+        {{ 'admin.reviews.filter_approved' | translate }}
+      </button>
+      <button
+        (click)="filterByStatus('rejected')"
+        class="px-3 py-1.5 text-xs font-medium rounded-full transition"
+        [class.bg-red-500]="statusFilter() === 'rejected'"
+        [class.text-white]="statusFilter() === 'rejected'"
+        [class.bg-gray-100]="statusFilter() !== 'rejected'"
+        [class.text-gray-600]="statusFilter() !== 'rejected'"
+        [class.hover:bg-gray-200]="statusFilter() !== 'rejected'"
+      >
+        {{ 'admin.reviews.filter_rejected' | translate }}
+      </button>
+      <button
+        (click)="filterByStatus('featured')"
+        class="px-3 py-1.5 text-xs font-medium rounded-full transition"
+        [class.bg-amber-500]="statusFilter() === 'featured'"
+        [class.text-white]="statusFilter() === 'featured'"
+        [class.bg-gray-100]="statusFilter() !== 'featured'"
+        [class.text-gray-600]="statusFilter() !== 'featured'"
+        [class.hover:bg-gray-200]="statusFilter() !== 'featured'"
+      >
+      <fa-icon [icon]="faStar" class="text-yellow-400"></fa-icon>
+        {{ 'admin.reviews.filter_featured' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-gray-900"></div>
+    </div>
+  }
+
+  @if (!loading() && reviews().length === 0) {
+    <div class="text-center py-12 text-gray-500">
+      {{ 'admin.reviews.no_reviews' | translate }}
+    </div>
+  }
+
+  @if (!loading() && reviews().length > 0) {
+    <div class="grid grid-cols-1 gap-4">
+      @for (review of reviews(); track review._id) {
+        <div
+          class="rounded-xl p-4 transition-all duration-200 border"
+          [class.border-amber-300]="featuredMap().has(review._id)"
+          [class.border-gray-200]="!featuredMap().has(review._id)"
+          [class.bg-amber-50/50]="featuredMap().has(review._id)"
+          [class.bg-white]="!featuredMap().has(review._id)"
+          [class.shadow-sm]="!featuredMap().has(review._id)"
+          [class.shadow-md]="featuredMap().has(review._id)"
+          [class.hover:shadow-md]="true"
+        >
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-semibold text-gray-800">
+                  {{ review.reviewerName || 'Anonymous' }}
+                </span>
+                @if (review.guestEmail) {
+                  <span class="text-xs text-gray-400">({{ review.guestEmail }})</span>
+                }
+                @if (featuredMap().has(review._id)) {
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-amber-800">
+                    <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                    Featured
+                  </span>
+                }
+              </div>
+
+              <p class="text-sm text-gray-500 mt-0.5">{{ review.product?.name }}</p>
+
+              <div class="flex text-yellow-400 mt-1">
+                @for (star of [1, 2, 3, 4, 5]; track star) {
+                  <svg class="w-4 h-4 fill-current" [class.text-gray-300]="star > review.rating" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                  </svg>
+                }
+              </div>
+
+              <p class="mt-2 text-gray-700 break-words text-sm leading-relaxed">{{ review.content }}</p>
+
+              <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-400">
+                <span>{{ formatDate(review.createdAt) }}</span>
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                  [class.bg-yellow-100]="review.status === 'pending'"
+                  [class.text-yellow-700]="review.status === 'pending'"
+                  [class.bg-green-100]="review.status === 'approved'"
+                  [class.text-green-700]="review.status === 'approved'"
+                  [class.bg-red-100]="review.status === 'rejected'"
+                  [class.text-red-700]="review.status === 'rejected'"
+                >
+                  {{ review.status }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5 flex-shrink-0">
+              @if (review.status !== 'approved') {
+                <button
+                  (click)="updateStatus(review._id, 'approved')"
+                  class="px-3 py-1.5 text-xs font-medium bg-green-500 text-white rounded-full hover:bg-green-600 transition"
+                >
+                  {{ 'admin.reviews.approve' | translate }}
+                </button>
+              }
+
+              @if (review.status !== 'rejected') {
+                <button
+                  (click)="updateStatus(review._id, 'rejected')"
+                  class="px-3 py-1.5 text-xs font-medium bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+                >
+                  {{ 'admin.reviews.reject' | translate }}
+                </button>
+              }
+
+              @if (review.status === 'approved') {
+                <button
+                  (click)="toggleFeatured(review)"
+                  class="px-3 py-1.5 text-xs font-medium rounded-full transition"
+                  [class.bg-amber-400]="featuredMap().has(review._id)"
+                  [class.text-white]="featuredMap().has(review._id)"
+                  [class.bg-gray-200]="!featuredMap().has(review._id)"
+                  [class.text-gray-700]="!featuredMap().has(review._id)"
+                  [class.hover:bg-amber-500]="featuredMap().has(review._id)"
+                  [class.hover:bg-gray-300]="!featuredMap().has(review._id)"
+                >
+                  @if (featuredMap().has(review._id)) {
+                    <span class="flex items-center gap-1">
+                      <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                      </svg>
+                      {{ 'admin.reviews.remove_featured' | translate }}
+                    </span>
+                  } @else {
+                    {{ 'admin.reviews.add_featured' | translate }}
+                  }
+                </button>
+              }
+
+              <button
+                (click)="deleteReview(review._id)"
+                class="px-3 py-1.5 text-xs font-medium bg-gray-500 text-white rounded-full hover:bg-gray-600 transition"
+              >
+                {{ 'admin.reviews.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

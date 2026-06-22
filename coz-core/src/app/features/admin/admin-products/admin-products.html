@@ -1,0 +1,299 @@
+<div class="bg-white rounded-xl shadow-md border border-gray-100 p-4 sm:p-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">{{ 'admin.products.title' | translate }}</h1>
+    <a
+      routerLink="/admin/products/new"
+      class="px-5 py-2.5 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition shadow-sm flex items-center gap-2 text-sm sm:text-base"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      {{ 'admin.products.add_new' | translate }}
+    </a>
+  </div>
+
+  <!-- Search + Filters -->
+  <div class="flex flex-col md:flex-row gap-4 mb-6">
+    <!-- Search -->
+    <div class="relative flex-1 max-w-md">
+      <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      </span>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        placeholder="{{ 'admin.products.search_placeholder' | translate }}"
+        class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition"
+      />
+      @if (searchQuery) {
+        <button
+          (click)="clearSearch()"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      }
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="flex flex-wrap gap-2">
+      @for (opt of filterOptions(); track opt.value) {
+        <button
+          (click)="setStockFilter(opt.value)"
+          class="px-4 py-2 text-sm font-medium rounded-full transition"
+          [class.bg-gray-900]="stockFilter === opt.value"
+          [class.text-white]="stockFilter === opt.value"
+          [class.bg-gray-100]="stockFilter !== opt.value"
+          [class.text-gray-700]="stockFilter !== opt.value"
+          [class.hover:bg-gray-200]="stockFilter !== opt.value"
+        >
+          {{ opt.label()  }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-16">
+      <div
+        class="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-gray-900"
+      ></div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="bg-red-50 text-red-600 p-4 rounded-xl text-center">{{ error() | translate }}</div>
+  }
+
+  @if (!loading() && products().length === 0 && !error()) {
+    <div class="text-center py-16">
+      <svg
+        class="w-16 h-16 mx-auto text-gray-300 mb-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.5"
+          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+        />
+      </svg>
+      <p class="text-gray-500">{{ 'admin.products.no_products' | translate }}</p>
+    </div>
+  }
+
+  @if (!loading() && products().length > 0) {
+    <div class="hidden lg:block overflow-x-auto rounded-xl border border-gray-200">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              {{ 'admin.products.image' | translate }}
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              {{ 'admin.products.name' | translate }}
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              {{ 'admin.products.price' | translate }}
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              {{ 'admin.products.stock' | translate }}
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              {{ 'admin.products.status' | translate }}
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              {{ 'admin.products.actions' | translate }}
+            </th>
+          </tr>
+        </thead>
+        
+        <tbody class="bg-white divide-y divide-gray-100">
+          @for (product of products(); track product._id) {
+            <tr class="hover:bg-gray-50 transition">
+              <td class="px-4 py-3">
+                <img
+                  [src]="product.variants?.[0]?.images?.[0]?.url"
+                  class="w-14 h-14 object-cover rounded-lg shadow-sm border border-gray-200"
+                />
+              </td>
+              <td class="px-4 py-3">
+                <p class="font-medium text-gray-800">{{ currentLang === 'ar' ? (product.name_ar || product.name) : product.name }}</p>
+                <p class="text-xs text-gray-400">
+                  {{ product.variants?.length || 0 }} {{ 'admin.products.colors' | translate }}
+                </p>
+              </td>
+              <td class="px-4 py-3">
+                <span class="font-semibold text-gray-900"
+                  >{{ product.price }} {{ 'product.currency' | translate }}</span
+                >
+                @if (product.compareAtPrice) {
+                  <span class="text-xs text-gray-400 line-through ml-1"
+                    >{{ product.compareAtPrice }} {{ 'product.currency' | translate }}</span
+                  >
+                }
+              </td>
+              <td class="px-4 py-3">
+                <span class="font-medium">{{ getTotalStock(product) }}</span>
+              </td>
+              <td class="px-4 py-3">
+                <span
+                  class="inline-block px-3 py-1 text-xs font-semibold rounded-full {{
+                    getStockStatus(product).class
+                  }}"
+                >
+                  {{ getStockStatus(product).label | translate }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <a
+                    [routerLink]="['/admin/products', product.slug, 'edit']"
+                    class="p-2 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition"
+                    title="{{ 'common.edit' | translate }}"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
+                  </a>
+                  <button
+                    (click)="deleteProduct(product.slug)"
+                    class="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition"
+                    title="{{ 'common.delete' | translate }}"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+      @for (product of products(); track product.slug) {
+        <div
+          class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition"
+        >
+          <div class="flex gap-3">
+            <img
+              [src]="product.variants?.[0]?.images?.[0]?.url"
+              class="w-20 h-20 object-cover rounded-lg border border-gray-200 flex-shrink-0"
+            />
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 truncate">{{ product.name }}</p>
+              <p class="text-xs text-gray-400">
+                {{ product.variants?.length || 0 }} {{ 'admin.products.colors' | translate }}
+              </p>
+              <p class="font-semibold text-gray-900 mt-1">
+                {{ product.price }} {{ 'product.currency' | translate }}
+              </p>
+              <span
+                class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full {{
+                  getStockStatus(product).class
+                }} mt-1"
+              >
+                {{ getStockStatus(product).label | translate }}
+              </span>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
+            <a
+              [routerLink]="['/admin/products', product.slug, 'edit']"
+              class="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-sm hover:bg-amber-200 transition"
+            >
+              {{ 'common.edit' | translate }}
+            </a>
+            <button
+              (click)="deleteProduct(product.slug)"
+              class="px-3 py-1.5 bg-red-100 text-red-600 rounded-full text-sm hover:bg-red-200 transition"
+            >
+              {{ 'common.delete' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+      <p class="text-sm text-gray-500">
+        {{ 'admin.products.showing' | translate }} {{ (currentPage - 1) * limit + 1 }} –
+        {{ Math.min(currentPage * limit, totalProducts) }} {{ 'admin.products.of' | translate }}
+        {{ totalProducts }}
+      </p>
+      @if (totalPages > 1) {
+        <div class="flex flex-wrap gap-1">
+          <button
+            (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="px-3 py-1.5 border rounded-lg disabled:opacity-50 hover:bg-gray-100 transition"
+          >
+            ←
+          </button>
+          @for (page of [].constructor(totalPages); track $index; let i = $index) {
+            <button
+              (click)="goToPage(i + 1)"
+              class="px-3 py-1.5 border rounded-lg transition"
+              [class.bg-gray-900]="currentPage === i + 1"
+              [class.text-white]="currentPage === i + 1"
+              [class.hover:bg-gray-100]="currentPage !== i + 1"
+            >
+              {{ i + 1 }}
+            </button>
+          }
+          <button
+            (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="px-3 py-1.5 border rounded-lg disabled:opacity-50 hover:bg-gray-100 transition"
+          >
+            →
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
