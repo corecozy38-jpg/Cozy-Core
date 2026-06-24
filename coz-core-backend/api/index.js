@@ -69,35 +69,44 @@ app.use(rateLimit({
     }
 }));
 
-const startServer = async () => {
-    await ConnectDB();
-
-    app.use("/admin/upload", ImageRoutes);
-    app.use("/auth", authRoutes);
-    app.use("/products", productsRoutes);
-    app.use("/admin/products", productManagmentRoutes);
-    app.use("/admin/reviews", reviewsManagmentRoutes);
-    app.use("/cart", cartRoutes);
-    app.use("/orders", ordersRoutes);
-    app.use("/user", userRoutes);
-    app.use("/reviews", reviewsRoutes);
-    app.use("/public-settings", systemRoutes);
-    app.use("/featured-reviews", featuredReviewsRoutes);
-    app.use("/admin/settings", adminRoutes);
-
-    app.use(notFoundHandler);
-    app.use(errorHandler);
-
-    if (process.env.NODE_ENV !== 'production') {
-        const PORT = process.env.PORT || 5000;
-        app.listen(PORT, () => {
-            console.log(`Server is running locally on http://localhost:${PORT}`);
-        });
-    } else {
-        console.log("Server ready in production mode (Vercel)");
+let dbConnected = false;
+app.use(async (req, res, next) => {
+    if (!dbConnected) {
+        try {
+            await ConnectDB();
+            dbConnected = true;
+            console.log("DB Connected via middleware");
+        } catch (err) {
+            console.error("DB Connection Failed:", err);
+            return res.status(500).json({ message: "Database connection failed" });
+        }
     }
-};
+    next();
+});
 
-startServer();
+app.use("/admin/upload", ImageRoutes);
+app.use("/auth", authRoutes);
+app.use("/products", productsRoutes);
+app.use("/admin/products", productManagmentRoutes);
+app.use("/admin/reviews", reviewsManagmentRoutes);
+app.use("/cart", cartRoutes);
+app.use("/orders", ordersRoutes);
+app.use("/user", userRoutes);
+app.use("/reviews", reviewsRoutes);
+app.use("/public-settings", systemRoutes);
+app.use("/featured-reviews", featuredReviewsRoutes);
+app.use("/admin/settings", adminRoutes);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+} else {
+    console.log("Server ready in production mode (Vercel)");
+}
 
 export default app;
