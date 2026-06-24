@@ -11,7 +11,6 @@ export const routes: Routes = [
   { path: 'collections/:collectionName', loadComponent: () => import('./features/products/products').then(m => m.Products) },
   { path: 'search', loadComponent: () => import('./features/products/products').then(m => m.Products) },
 
-  // { path: 'auth', loadComponent: () => import('./features/auth/auth').then(m => m.Auth), canActivate: [authGuard] },
   {
     path :'auth',
     canActivate:[authGuard],

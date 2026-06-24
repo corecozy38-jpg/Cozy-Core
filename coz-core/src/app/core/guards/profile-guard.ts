@@ -9,7 +9,7 @@ export const profileGuard: CanActivateFn = (route, state) => {
   // guest can't access to profile pages
   if(!localStorage.getItem('accessToken'))
   {
-    router.navigate(['/home']);
+    router.navigate(['/auth']);
     return false;
   }
   return true;

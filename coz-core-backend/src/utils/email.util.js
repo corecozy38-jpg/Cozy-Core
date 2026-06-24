@@ -101,12 +101,17 @@ const sendOTPEmail = async (to, otp) => {
         </body>
         </html>
     `;
-    await transporter.sendMail({
-        from: process.env.MERCHANT_EMAIL,
-        to: to,
-        subject: "Reset Password OTP",
-        html,
-    });
+    try {
+        await transporter.sendMail({
+            from: process.env.MERCHANT_EMAIL,
+            to: to,
+            subject: "Reset Password OTP",
+            html,
+        });
+    } catch (error) {
+        console.error('OTP Email failed:', error.message);
+        throw new Error('Failed to send OTP email. Please try again later.');
+    }
 };
 
 const sendOrderEmailToMerchant = async (order, cartItems, customerEmail, customerName) => {
@@ -157,13 +162,18 @@ const sendOrderEmailToMerchant = async (order, cartItems, customerEmail, custome
         </div>
     `;
 
-    await transporter.sendMail({
-        from: process.env.MERCHANT_EMAIL,
-        to: process.env.MERCHANT_EMAIL,
-        replyTo: `${customerName} <${customerEmail}>`,
-        subject: `New Order #${order._id}`,
-        html,
-    });
+    try {
+        await transporter.sendMail({
+            from: process.env.MERCHANT_EMAIL,
+            to: process.env.MERCHANT_EMAIL,
+            replyTo: `${customerName} <${customerEmail}>`,
+            subject: `New Order #${order._id}`,
+            html,
+        });
+    } catch (error) {
+        console.error('Order email failed:', error.message);
+        throw new Error('Failed to send order confirmation email.');
+    }
 };
 
 const sendContactEmail = async ({ name, email, subject, message }) => {
@@ -202,13 +212,18 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
         </html>
     `;
 
-    await transporter.sendMail({
-        from: process.env.MERCHANT_EMAIL,
-        to: process.env.MERCHANT_EMAIL,
-        subject: `Contact: ${subject || 'New message from ' + name}`,
-        html,
-        replyTo: email,
-    });
+    try {
+        await transporter.sendMail({
+            from: process.env.MERCHANT_EMAIL,
+            to: process.env.MERCHANT_EMAIL,
+            subject: `Contact: ${subject || 'New message from ' + name}`,
+            html,
+            replyTo: email,
+        });
+    } catch (error) {
+        console.error('Contact email failed:', error.message);
+        throw new Error('Failed to send contact message. Please try again later.');
+    }
 };
 
 export {
