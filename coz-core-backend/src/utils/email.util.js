@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendVerificationEmail = async (email, verificationToken) => {
-    const verificationLink = `${process.env.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
+    const verificationLink = `${process.env.CORS_ORIGIN}auth/verify-email?token=${verificationToken}`;
     const subject = 'Verify your email address';
     const html = `
         <!DOCTYPE html>
@@ -91,7 +91,7 @@ const sendOTPEmail = async (to, otp) => {
                 <div class="content">
                     <p>Use the following OTP to reset your password:</p>
                     <div class="otp">${otp}</div>
-                    <p>This OTP is valid for <strong>10 minutes</strong>.</p>
+                    <p>This OTP is valid for <strong>5 minutes</strong>.</p>
                     <p>If you didn't request this, please ignore this email.</p>
                 </div>
                 <div class="footer">
@@ -124,7 +124,7 @@ const sendOrderEmailToMerchant = async (order, cartItems, customerEmail, custome
             `,
         )
         .join("");
-    const adminOrderLink = `${process.env.FRONTEND_URL}/admin/orders`;
+    const adminOrderLink = `${process.env.CORS_ORIGIN}admin/orders`;
 
     const html = `
         <h1>Order #${order._id}</h1>

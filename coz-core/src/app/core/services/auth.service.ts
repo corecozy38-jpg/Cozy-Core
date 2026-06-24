@@ -95,8 +95,8 @@ export class AuthService {
     return this.http.post<forgetPasswordResponse>(`${this.baseUrl}/auth/forgot-password`, body);
   }
 
-  verifyOtp(body: verfiyOTPBody): Observable<verifyOTPResponse> {
-    return this.http.post<verifyOTPResponse>(`${this.baseUrl}/auth/verify-otp`, body);
+  verifyOtp(header: verfiyOTPBody): Observable<verifyOTPResponse> {
+    return this.http.post<verifyOTPResponse>(`${this.baseUrl}/auth/verify-otp`, {otp: header.otp}, { headers: { Authorization: `Bearer ${header.token}` } });
   }
 
   verifyEmail(token: string): Observable<{ message: string }> {

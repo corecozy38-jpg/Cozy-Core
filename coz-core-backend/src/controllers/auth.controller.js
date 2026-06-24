@@ -80,6 +80,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     const { password, confirmPassword } = req.body;
+    console.log(req.body)
 
     const { error } = resetPasswordValidator({ password, confirmPassword, token });
     if (error) return res.status(400).json({ message: error.details[0].message });

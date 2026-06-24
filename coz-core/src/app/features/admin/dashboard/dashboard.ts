@@ -46,7 +46,6 @@ export class Dashboard implements OnInit, AfterViewInit {
     this._adminService.getDashboard().subscribe({
       next: (res) => {
         this.data.set(res.data);
-        console.log(res.data);
         setTimeout(() => {
           this.updateChart(res.data.salesOverTime);
         }, 100);

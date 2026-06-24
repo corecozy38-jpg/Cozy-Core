@@ -27,12 +27,22 @@ const app = express();
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:4200', 
-    credentials: true,     // for cookie          
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            'http://localhost:4200',          
+            process.env.CORS_ORIGIN           
+        ].filter(Boolean); 
+
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-guest-id']
 };
-
 
 app.use(cors(corsOptions));
 app.use(json());
@@ -75,9 +85,11 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server is running locally on http://localhost:${PORT}`);
-});
 
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 export default app;

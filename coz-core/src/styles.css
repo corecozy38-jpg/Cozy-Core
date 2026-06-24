@@ -24,3 +24,6 @@ body{
 input {
   outline: 0;
 }
+button , a {
+  cursor: pointer;
+}
