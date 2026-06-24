@@ -162,13 +162,10 @@
       <div class="border-t border-gray-100 pt-2 mt-2">
         <a routerLink="/profile" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">
           {{ 'nav.profile' | translate }}</a>
-        @if (isAdmin) {
-        <a routerLink="/admin/dashboard" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">{{
-          'nav.dashboard' | translate }}</a>
-        } @else {
+          
         <a routerLink="/orders" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">{{ 'nav.orders' |
           translate }}</a>
-        }
+        
       </div>
       } @else {
       <a routerLink="/auth" class="block py-2 text-gray-700 hover:bg-gray-50 px-2 rounded-md">{{ 'nav.sign_in' |
