@@ -66,12 +66,21 @@ const createOrderService = async ({ userId, guestId }, orderData) => {
     const savedOrder = await newOrder.save();
 
     for (const item of cartData.items) {
-        const variant = await Variant.findById(item.color.id);
-        await Variant.updateOne(
-            { _id: variant._id, "sizes.size": item.size },
-            { $inc: { "sizes.$.stock": -item.quantity } }
-        );
+    const updatedVariant = await Variant.findOneAndUpdate(
+        {
+            _id: item.color.id,
+            "sizes.size": item.size,
+            "sizes.stock": { $gte: item.quantity } 
+        },
+        {
+            $inc: { "sizes.$.stock": -item.quantity }
+        }
+    );
+
+    if (!updatedVariant) {
+        throw new Error(`Sorry, ${item.product.name} is out of stock or quantity exceeded.`);
     }
+}
 
     if (userId) {
         await clearCartService({ userId });

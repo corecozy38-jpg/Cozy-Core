@@ -242,7 +242,10 @@
     "remove_failed": "Failed to remove item. Please try again.",
     "clear_cart_confirmation": "Are you sure you want to clear your entire cart?",
     "cart_cleared": "Cart cleared successfully.",
-    "clear_failed": "Failed to clear cart. Please try again."
+    "clear_failed": "Failed to clear cart. Please try again.",
+    "out_of_stock": "Out of Stock",
+    "quantity_exceeds_stock": "Quantity exceeds available stock",
+    "cannot_checkout_out_of_stock": "Some items are out of stock. Please remove or adjust quantities to proceed to checkout"
   },
   "governorates": {
     "list": [

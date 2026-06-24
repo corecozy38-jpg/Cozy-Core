@@ -3,6 +3,11 @@ configDotenv();
 import cookieParser from "cookie-parser";
 import express, { json, urlencoded } from "express";
 import cors from "cors";
+import redisClient from "../src/utils/redisClient.util.js";
+
+import { rateLimit } from "express-rate-limit";
+import RedisStore from "rate-limit-redis";
+
 import { ConnectDB } from "../src/config/connectdb.config.js";
 import authRoutes from "../src/routes/auth.route.js";
 import productsRoutes from "../src/routes/products.route.js";
@@ -22,7 +27,7 @@ const app = express();
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'http://localhost:4200', 
+    origin: process.env.CORS_ORIGIN || 'http://localhost:4200', 
     credentials: true,     // for cookie          
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-guest-id']
@@ -32,6 +37,24 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(json());
 app.use(urlencoded({ extended: true }));
+
+const store = new RedisStore({
+    sendCommand: (...args) => redisClient.sendCommand(args),
+});
+
+app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    store: store,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        res.status(429).json({
+            success: false,
+            message: 'Too many requests. Please try again later.',
+        });
+    }
+}));
 
 await ConnectDB();
 
