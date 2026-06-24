@@ -77,8 +77,11 @@ app.use(async (req, res, next) => {
             dbConnected = true;
             console.log("DB Connected via middleware");
         } catch (err) {
-            console.error("DB Connection Failed:", err);
-            return res.status(500).json({ message: "Database connection failed" });
+            console.error("DB Connection Failed:", err.message);
+            return res.status(500).json({ 
+                message: "Database connection failed",
+                error: err.message
+            });
         }
     }
     next();

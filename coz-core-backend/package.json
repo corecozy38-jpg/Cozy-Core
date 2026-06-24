@@ -2,8 +2,8 @@
   "name": "coz-core",
   "version": "1.0.0",
   "description": "e-commerce website",
-  "main": "api/index.js", 
-  "type":"module",
+  "main": "api/index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,7 +27,7 @@
     "mongoose": "^9.6.3",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
-    "nodemailer": "^8.0.10",
+    "nodemailer": "^9.0.1",
     "rate-limit-redis": "^5.0.0",
     "redis": "^6.0.0",
     "slugify": "^1.6.9"
