@@ -1,6 +1,8 @@
 <section class="relative bg-gray-900 text-white overflow-hidden mb-12 shadow-lg">
   <div class="relative w-full pt-[60%] md:pt-[35%] lg:pt-[40%]">
-    <img [src]="banner()?.url || 'banner.jpg'" alt="Hero background"
+    <img [src]="banner()?.url || 'banner.jpg'" alt="Hero background"  loading="eager"
+  fetchpriority="high"
+
       class="absolute inset-0 w-full h-full object-cover object-[center_20%]" />
     <div class="absolute inset-0 bg-black/40"></div>
   </div>

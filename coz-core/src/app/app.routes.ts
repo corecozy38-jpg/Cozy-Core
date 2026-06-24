@@ -11,14 +11,21 @@ export const routes: Routes = [
   { path: 'collections/:collectionName', loadComponent: () => import('./features/products/products').then(m => m.Products) },
   { path: 'search', loadComponent: () => import('./features/products/products').then(m => m.Products) },
 
-  { path: 'auth', loadComponent: () => import('./features/auth/auth').then(m => m.Auth), canActivate: [authGuard] },
-
+  // { path: 'auth', loadComponent: () => import('./features/auth/auth').then(m => m.Auth), canActivate: [authGuard] },
+  {
+    path :'auth',
+    canActivate:[authGuard],
+    loadComponent: () => import('./features/auth/auth').then(m => m.Auth),
+    children: [
+      { path: 'login', loadComponent: () => import('./features/auth/auth').then(m => m.Auth) },
+      { path: 'register', loadComponent: () => import('./features/auth/auth').then(m => m.Auth) },
+      { path: 'reset-password', loadComponent: () => import('./features/auth/auth').then(m => m.Auth) },
+      {path:'', redirectTo:'auth',pathMatch:'full'}
+    ]
+  },
   { path: 'product-details/:slug', loadComponent: () => import('./features/product-details/product-details').then(m => m.ProductDetails) },
-
   { path: 'cart', loadComponent: () => import('./features/cart/cart').then(m => m.Cart) },
-
   { path: 'auth/verify-email', loadComponent: () => import('./features/verify-email/verify-email').then(m => m.VerifyEmail) },
-
   {
     path: 'user',
     loadComponent: () => import('./features/signedUser/user-layout/user-layout').then(m => m.UserLayout),
