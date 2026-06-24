@@ -18,7 +18,8 @@ import {
     updateOrderGuide,
     updateTerms,
     deleteOrderGuideImage,
-    getDashboardData
+    getDashboardData,
+    updateBanner
 } from "../controllers/siteSettings.controller.js"
 import { Router} from "express"
 import { isAdmin, Protect } from "../middlewares/auth.middleware.js";
@@ -56,5 +57,7 @@ router.get("/dashboard", getDashboardData);
 router.get("/orders", getAllOrdersForAdmin);
 router.put("/orders/:orderId/status", updateOrderStatus);
 
+//BANNER
+router.put("/banner", updateBanner);
 
 export default router;

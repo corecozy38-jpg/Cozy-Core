@@ -3,7 +3,7 @@ import { Order } from '../../../core/interfaces/order.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderesService } from '../../../core/services/orderes.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-order-details',
   imports: [TranslatePipe],
@@ -19,7 +19,8 @@ export class OrderDetails {
     private _route: ActivatedRoute,
     private _orderService: OrderesService,
     private _toast: ToastService,
-    private _router: Router
+    private _router: Router,
+    private _translate :TranslateService
   ) {}
 
   ngOnInit() {
@@ -40,7 +41,7 @@ export class OrderDetails {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load order');
+        this.error.set(err.error?.message || this._translate.instant('admin.error.FTL'));
         this.loading.set(false);
         this._toast.error(this.error()!);
       }

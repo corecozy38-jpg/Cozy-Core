@@ -7,6 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Address } from '../../core/interfaces/user.interface';
 import { RefreshTokenService } from '../../core/services/refresh-token.service';
+import { Image } from '../../core/interfaces/product.interface';
+import { SiteSettingsService } from '../../core/services/site-settings.service';
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'verify-otp' | 'reset-password';
 
@@ -19,8 +21,11 @@ type AuthMode = 'login' | 'register' | 'forgot' | 'verify-otp' | 'reset-password
 })
 export class Auth implements OnInit {
   mode = signal<AuthMode>('login');
+  banner = signal<Image | null>(null);
+
   loading = false;
   errorMessage = signal<string | null>(null);
+  isLoadingBanner = signal(true);
 
   fullName = '';
   email = '';
@@ -55,7 +60,8 @@ export class Auth implements OnInit {
     private _router: Router,
     private _authService: AuthService,
     private _refreshTokenService: RefreshTokenService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private _siteSettingService :SiteSettingsService
   ) { }
 
   ngOnInit() {
@@ -64,8 +70,23 @@ export class Auth implements OnInit {
     if (storedVerificationToken) this.verificationToken = storedVerificationToken;
     if (storedResetToken) this.resetToken = storedResetToken;
 
+    this.loadBanner();
     this.loadGovernorates();
     this.initGovernorateTrackers();
+  }
+
+    loadBanner() {
+    this.isLoadingBanner.set(true);
+    this._siteSettingService.getBanner().subscribe({
+      next: (res) => {
+        this.banner.set(res.data);
+        this.isLoadingBanner.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load banner:', err);
+        this.isLoadingBanner.set(false);
+      }
+    });
   }
 
   initGovernorateTrackers() {

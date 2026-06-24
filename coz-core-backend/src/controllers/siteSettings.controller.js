@@ -9,6 +9,8 @@ import {
     updateTermsService,
     updateOrderGuideService,
     deleteOrderGuideImageService,
+    updateBannerService,
+    getBannerService
 } from "../services/siteSettings.service.js";
 import {
     aboutValidator,
@@ -176,6 +178,32 @@ const getDashboardData = asyncHandler(async (req, res) => {
     });
 });
 
+
+const updateBanner = asyncHandler(async (req, res) => {
+    const { url, publicId } = req.body;
+    
+    if (!url || !publicId) {
+        return res.status(400).json({ message: "URL and publicId are required" });
+    }
+    
+    const updatedBy = req.user._id;
+    const banner = await updateBannerService({ url, publicId }, updatedBy);
+    
+    res.status(200).json({
+        message: "Banner updated successfully",
+        data: banner
+    });
+});
+
+
+const getBanner = asyncHandler(async (req, res) => {
+    const banner = await getBannerService();
+    res.status(200).json({
+        message: "Banner retrieved successfully",
+        data: banner
+    });
+});
+
 export {
     getAbout,
     getContact,
@@ -186,5 +214,7 @@ export {
     updateOrderGuide,
     updateTerms,
     deleteOrderGuideImage,
-    getDashboardData
+    getDashboardData,
+    updateBanner,
+    getBanner
 }

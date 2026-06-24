@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { Order } from '../../../core/interfaces/order.interface';
 import { OrderesService } from '../../../core/services/orderes.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -21,7 +21,8 @@ export class Orders {
 
   constructor(
     private _orderService: OrderesService,
-    private _toast: ToastService
+    private _toast: ToastService,
+    private _translate :TranslateService
   ) {}
 
   ngOnInit() {
@@ -41,7 +42,7 @@ export class Orders {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load orders');
+        this.error.set(err.error?.message || this._translate.instant('admin.orders.error'));
         this.loading.set(false);
         this._toast.error(this.error()!);
       }

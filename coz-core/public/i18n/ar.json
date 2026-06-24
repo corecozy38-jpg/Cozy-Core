@@ -454,7 +454,7 @@
       "status_cancelled": "ملغي",
       "status_rejected": "مرفوض",
       "status_updated": "تم تحديث حالة الطلب بنجاح",
-      "update_failed": "فشل تحديث حالة الطلب",
+      "update_failed": "فشل التحديث",
       "customer": "العميل",
       "phone": "الهاتف",
       "address": "العنوان",
@@ -667,5 +667,9 @@
     "description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
     "go_home": "الرجوع للرئيسية",
     "browse_products": "تصفح المنتجات"
+  },
+
+  "error":{
+    "FTL":"فشل تحميل"
   }
 }

@@ -62,7 +62,7 @@ export class UserAddresses {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load addresses');
+        this.error.set(err.error?.message || `${this._translate.instant('error.FTL')} ${this._translate.instant('admin.users.addresses')} `);
         this.loading.set(false);
       }
     });

@@ -114,7 +114,36 @@ const deleteOrderGuideImageService = async (publicId, updatedBy) => {
     return settings.orderGuide;
 };
 
+const updateBannerService = async (bannerData, updatedBy) => {
+    const settings = await getSiteSettingsService();
 
+    const oldPublicId = settings.banner.publicId;
+
+    if (bannerData.url !== undefined) {
+        settings.banner.url = bannerData.url;
+    }
+    if (bannerData.publicId !== undefined) {
+        settings.banner.publicId = bannerData.publicId;
+    }
+
+    if (oldPublicId && oldPublicId !== bannerData.publicId) {
+        try {
+            await cloudinary.uploader.destroy(oldPublicId);
+        } catch (error) {
+            console.error('Failed to delete old banner from Cloudinary:', error.message);
+        }
+    }
+
+    settings.updatedBy = updatedBy;
+    await settings.save();
+    return settings.banner;
+};
+
+
+const getBannerService = async () => {
+    const settings = await getSiteSettingsService();
+    return settings.banner;  
+};
 
 export {
     getAboutService,
@@ -126,6 +155,8 @@ export {
     updateOrderGuideService,
     deleteOrderGuideImageService,
     updateTermsService,
+    updateBannerService,
+    getBannerService
 };
 
 

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {  AboutResponse,  ContactForm,  ContactInfoResponse, OrderGuideResponse, TermsInfoResponse } from '../interfaces/settings';
 import { FaqListResponse } from '../interfaces/admin.interface';
+import { Image } from '../interfaces/product.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -36,5 +37,9 @@ export class SiteSettingsService {
 
   sendMessage(body:ContactForm):Observable<{message :string}>{
     return this._http.post<{message :string}>(`${this.baseUrl}/public-settings/contact-us`,body);
+  }
+
+  getBanner():Observable<{message : string , data:Image}>{
+    return this._http.get<{message : string , data:Image}>(`${this.baseUrl}/public-settings/banner`);
   }
 }

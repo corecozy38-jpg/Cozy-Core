@@ -4,10 +4,11 @@ import { RouterModule } from '@angular/router';
 import { LanguageService } from '../../core/services/language.service';
 import { ProductService } from '../../core/services/product.service';
 import { CommonModule } from '@angular/common';
-import { AdaptedProduct, Product } from '../../core/interfaces/product.interface';
+import { AdaptedProduct, FeaturedReview, Image, Product, Review } from '../../core/interfaces/product.interface';
 import { Faq } from '../../core/interfaces/admin.interface';
 import { UserService } from '../../core/services/user.service';
 import { SiteSettingsService } from '../../core/services/site-settings.service';
+import { ReviewsService } from '../../core/services/reviews.service';
 
 interface FaqItem extends Faq {
   isOpen: boolean;
@@ -26,14 +27,10 @@ export class Home implements OnInit, OnDestroy {
 
   products = signal<AdaptedProduct[]>([]);
   faqItems = signal<FaqItem[]>([]);
-  testimonials = signal<any[]>([
-    { name: 'Ahmed K.', rating: 5, text: 'Best gym wear I’ve ever owned. The fabric quality is incredible.', product: 'Pro Performance Tee' },
-    { name: 'Mohamed S.', rating: 5, text: 'The sweatpants are super comfortable. Highly recommend!', product: 'Ultra Sweatpants' },
-    { name: 'Karim K.', rating: 5, text: 'Premium quality at a great price. Minimalist design is perfect.', product: 'Core Tank Top' },
-    { name: 'Sara L.', rating: 5, text: 'Fast shipping and amazing customer service. Will buy again!', product: 'Essential Tee' },
-    { name: 'Omar A.', rating: 5, text: 'The compression shirt fits like a glove. Very breathable.', product: 'Compression Shirt' }
-  ]);
+  banner = signal<Image | null>(null);
+  testimonials = signal<FeaturedReview[]>([]);
 
+  isLoadingBanner = signal(true);
   isLoadingProducts = signal(true);
   isLoadingTestimonials = signal(true);
   isLoadingFaq = signal(true);
@@ -46,10 +43,11 @@ export class Home implements OnInit, OnDestroy {
 
 
   constructor(
-    private productService: ProductService,
+    private _productService: ProductService,
     public _langService: LanguageService,
-    private _siteSettingService:SiteSettingsService
-  ) {}
+    private _siteSettingService: SiteSettingsService,
+    private _reviewsService: ReviewsService
+  ) { }
 
   ngOnInit() {
     this.currentLang = this._langService.getCurrentLang();
@@ -57,19 +55,32 @@ export class Home implements OnInit, OnDestroy {
       this.currentLang = lang;
     });
     
+    this.loadBanner();
     this.loadTopProducts();
     this.loadActiveFaqs();
+    this.loadFeaturedReviews();
     this.startAutoPlay();
-
-    setTimeout(() => {
-      this.isLoadingTestimonials.set(false);
-      this.isLoadingFaq.set(false);
-    }, 500);
   }
 
+
+
+
+  loadBanner() {
+    this.isLoadingBanner.set(true);
+    this._siteSettingService.getBanner().subscribe({
+      next: (res) => {
+        this.banner.set(res.data);
+        this.isLoadingBanner.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load banner:', err);
+        this.isLoadingBanner.set(false);
+      }
+    });
+  }
   loadTopProducts() {
     this.isLoadingProducts.set(true);
-    this.productService.getTopProducts(10).subscribe({
+    this._productService.getTopProducts(10).subscribe({
       next: (res) => {
         if (res && res.data) {
           const adaptedProducts = res.data.map((prod: Product) => this.adaptProduct(prod));
@@ -89,16 +100,16 @@ export class Home implements OnInit, OnDestroy {
       }
     });
   }
-  loadActiveFaqs(){
+  loadActiveFaqs() {
     this.isLoadingFaq.set(true);
-    this. _siteSettingService.getActiveFaqs().subscribe({
+    this._siteSettingService.getActiveFaqs().subscribe({
       next: (res) => {
         if (res && res.data) {
           const faqItemsData = res.data.map((faq: Faq) => ({
-          ...faq,
-          isOpen: false
-        }));
-        this.faqItems.set(faqItemsData);
+            ...faq,
+            isOpen: false
+          }));
+          this.faqItems.set(faqItemsData);
 
         }
         this.isLoadingFaq.set(false);
@@ -107,6 +118,26 @@ export class Home implements OnInit, OnDestroy {
         console.error('Failed to load faqs:', err);
         this.error = true;
         this.isLoadingFaq.set(false);
+      }
+    });
+  }
+
+  loadFeaturedReviews() {
+    this.isLoadingTestimonials.set(true);
+    this._reviewsService.getFeaturedReviews().subscribe({
+      next: (res) => {
+        if (res && res.data) {
+          const featuredReviews = res.data.map((Freview: FeaturedReview) => ({
+            ...Freview,
+          }));
+          this.testimonials.set(featuredReviews);
+        }
+        this.isLoadingTestimonials.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load testimonials:', err);
+        this.error = true;
+        this.isLoadingTestimonials.set(false);
       }
     });
   }
@@ -192,7 +223,7 @@ export class Home implements OnInit, OnDestroy {
     this.startAutoPlay();
   }
 
-    toggleFaq(index: number) {
+  toggleFaq(index: number) {
     this.faqItems.update(items => {
       const updated = [...items];
       updated[index].isOpen = !updated[index].isOpen;

@@ -3,78 +3,90 @@ import { Schema, model } from "mongoose";
 const siteSettingsSchema = new Schema(
     {
         contact: {
-            phone: { 
+            phone: {
                 type: String,
-                
-                default: "" 
+
+                default: ""
             },
-            email: { 
-                type: String, 
-                default: "" 
+            email: {
+                type: String,
+                default: ""
             },
-            instagram: { 
-                type: String, 
-                default: "" 
+            instagram: {
+                type: String,
+                default: ""
             },
         },
 
         about: {
-            title: { 
-                type: String, 
-                default: "" 
+            title: {
+                type: String,
+                default: ""
             },
-            title_ar: { 
-                type: String, 
-                default: "" 
+            title_ar: {
+                type: String,
+                default: ""
             },
-            description: { 
-                type: String, 
-                default: "" 
+            description: {
+                type: String,
+                default: ""
             },
-            description_ar: { 
-                type: String, 
-                default: "" 
+            description_ar: {
+                type: String,
+                default: ""
             },
         },
 
         orderGuide: {
             images: [{
-                url: { 
-                    type: String, 
-                    required: true 
+                url: {
+                    type: String,
+                    required: true
                 },
-                publicId: { 
-                    type: String, 
-                    required: true 
+                publicId: {
+                    type: String,
+                    required: true
                 },
-                displayOrder: { 
-                    type: Number, 
-                    default: 0 
+                displayOrder: {
+                    type: Number,
+                    default: 0
                 }
             }]
         },
 
         terms: [{
-            title:{
-                type:String,
-                default:""
+            title: {
+                type: String,
+                default: ""
             },
-            title_ar:{
-                type:String,
-                default:""
+            title_ar: {
+                type: String,
+                default: ""
             },
-            content: { type: String,
-                default: "" 
+            content: {
+                type: String,
+                default: ""
             },
-            content_ar: { type: String,
-                default: "" 
+            content_ar: {
+                type: String,
+                default: ""
             },
-    }],
+        }],
 
         updatedBy: {
             type: Schema.Types.ObjectId,
             ref: "User",
         },
+        banner: {
+            url: {
+                type: String,
+                required:true
+            },
+            publicId: {
+                type: String,
+                required:true
+            }
+        }
     },
     { timestamps: true },
 );

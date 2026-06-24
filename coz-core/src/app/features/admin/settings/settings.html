@@ -27,6 +27,9 @@
       <button (click)="setActiveTab('orderGuide')" [class]="getTabClass('orderGuide')">
         {{ 'admin.settings.order_guide' | translate }}
       </button>
+      <button (click)="setActiveTab('banner')" [class]="getTabClass('banner')">
+        {{ 'admin.settings.banner' | translate }}
+      </button>
     </div>
 
     @if (activeTab === 'contact') {
@@ -102,40 +105,65 @@
     }
 
     @if (activeTab === 'orderGuide') {
-  <div class="space-y-4">
-    <p class="text-sm text-gray-500">{{ 'admin.settings.order_guide_images' | translate }}</p>
+      <div class="space-y-4">
+        <p class="text-sm text-gray-500">{{ 'admin.settings.order_guide_images' | translate }}</p>
 
-    <div
-      cdkDropList
-      (cdkDropListDropped)="dropOrderGuideImage($event)"
-      class="grid grid-cols-1 sm:grid-cols-3 gap-4"
-    >
-      @for (img of orderGuide().images; track $index; let i = $index) {
-        <div cdkDrag class="relative group cursor-grab active:cursor-grabbing">
-          <img [src]="img.url" class="w-full h-32 object-cover rounded-lg border border-gray-200" />
-          <button (click)="removeOrderGuideImage($index)"
-            class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-black/80 opacity-0 group-hover:opacity-100 transition">
-            ×
-          </button>
-          <div class="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
-            #{{ $index + 1 }}
-          </div>
+        <div
+          cdkDropList
+          (cdkDropListDropped)="dropOrderGuideImage($event)"
+          class="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        >
+          @for (img of orderGuide().images; track $index; let i = $index) {
+            <div cdkDrag class="relative group cursor-grab active:cursor-grabbing">
+              <img [src]="img.url" class="w-full h-32 object-cover rounded-lg border border-gray-200" />
+              <button (click)="removeOrderGuideImage($index)"
+                class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-black/80 opacity-0 group-hover:opacity-100 transition">
+                ×
+              </button>
+              <div class="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                #{{ $index + 1 }}
+              </div>
+            </div>
+          }
+
+          <label for="orderGuideInput"
+            class="h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:border-gray-500 transition cursor-pointer"
+            [class.opacity-50]="uploading()">
+            @if (uploading()) {
+              <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-400 border-t-gray-900"></div>
+            } @else {
+              <span>+ {{ 'admin.settings.add_image' | translate }}</span>
+            }
+          </label>
+          <input id="orderGuideInput" type="file" accept="image/*" (change)="onOrderGuideImagesSelected($event)" class="hidden" />
         </div>
-      }
+      </div>
+    }
 
-      <label for="orderGuideInput"
-        class="h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:border-gray-500 transition cursor-pointer"
-        [class.opacity-50]="uploading()">
-        @if (uploading()) {
-          <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-400 border-t-gray-900"></div>
-        } @else {
-          <span>+ {{ 'admin.settings.add_image' | translate }}</span>
-        }
-      </label>
-      <input id="orderGuideInput" type="file" accept="image/*" (change)="onOrderGuideImagesSelected($event)" class="hidden" />
-    </div>
-  </div>
-}
+    @if (activeTab === 'banner') {
+      <div class="space-y-4">
+        <p class="text-sm text-gray-500">{{ 'admin.settings.banner_label' | translate }}</p>
+        <div class="relative group">
+          @if (banner().url) {
+            <div class="relative w-full aspect-[21/9] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+              <img [src]="banner().url" alt="Banner" class="w-full h-full object-cover" />
+              <button (click)="removeBannerImage()"
+                class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-black/80 transition">
+                ×
+              </button>
+            </div>
+          } @else {
+            <div class="w-full aspect-[21/9] rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-gray-500 transition cursor-pointer bg-gray-50">
+              <label for="bannerInput" class="w-full h-full flex items-center justify-center cursor-pointer">
+                <span>+ {{ 'admin.settings.add_banner' | translate }}</span>
+              </label>
+            </div>
+          }
+          <input id="bannerInput" type="file" accept="image/*" (change)="onBannerImageSelected($event)" class="hidden" />
+        </div>
+        <p class="text-xs text-gray-400">{{ 'admin.settings.banner_hint' | translate }}</p>
+      </div>
+    }
 
     <div class="mt-8 flex justify-end">
       <button (click)="saveSettings()" [disabled]="saving()"

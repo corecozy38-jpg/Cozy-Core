@@ -292,7 +292,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   getProductImage(product: Product): string {
-    return product.variants?.[0]?.images?.[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image';
+    return product.variants?.[0]?.images?.[0]?.url || '';
   }
 
   loadReviews(page: number): void {

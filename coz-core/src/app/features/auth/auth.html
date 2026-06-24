@@ -1,8 +1,7 @@
 <div class="min-h-screen flex flex-col lg:flex-row bg-gray-50">
-  <!-- Hero Section (Left Side) -->
   <div class="hidden lg:flex lg:w-1/2 relative bg-gray-900 text-white overflow-hidden">
     <div class="absolute inset-0 z-0">
-      <img src="banner.jpg" alt="Background" class="w-full h-full object-cover" />
+      <img [src]="banner()?.url || 'banner.jpg'" alt="Background" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-black/70"></div>
     </div>
     <div class="relative z-20 flex flex-col justify-center items-center text-center p-10 w-full">
@@ -18,7 +17,6 @@
     </div>
   </div>
 
-  <!-- Form Section (Right Side) -->
   <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 sm:p-8 transition-all">
       <!-- ================= LOGIN ================= -->

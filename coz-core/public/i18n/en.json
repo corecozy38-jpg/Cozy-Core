@@ -457,7 +457,7 @@
       "status_cancelled": "Cancelled",
       "status_rejected": "Rejected",
       "status_updated": "Order status updated successfully",
-      "update_failed": "Failed to update order status",
+      "update_failed": "Failed to update",
       "phone": "Phone",
       "address": "Address",
       "items": "items",
@@ -673,5 +673,8 @@
     "description": "The page you're looking for doesn't exist or has been moved.",
     "go_home": "Go Home",
     "browse_products": "Browse Products"
+  },
+  "error":{
+    "FTL":"Failed to load"
   }
 }

@@ -2,6 +2,7 @@ import { sendContactMessage } from "../controllers/contact.controller.js";
 import { getActiveFaqs } from "../controllers/faq.controller.js";
 import {
     getAbout,
+    getBanner,
     getContact,
     getOrderGuide,
     getTerms,
@@ -18,5 +19,7 @@ router.get("/order-guide", getOrderGuide);
 
 
 router.post("/contact-us", sendContactMessage);
+
+router.get("/banner",getBanner);
 
 export default router;

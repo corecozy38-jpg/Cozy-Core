@@ -61,7 +61,7 @@ export class Profile {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load profile');
+        this.error.set(err.error?.message || `${this._translate.instant('error.FTL')} ${this._translate.instant('nav.profile')} `);
         this.loading.set(false);
       }
     });
@@ -97,7 +97,7 @@ export class Profile {
         this.error.set(null);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Update failed');
+        this.error.set(err.error?.message || this._translate.instant('admin.orders.update_failed'));
       }
     });
   }

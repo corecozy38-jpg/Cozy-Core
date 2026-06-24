@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { AdminProductRequest, FeaturedReviewResponse, ReviewsResponse } from '../interfaces/product.interface';
+import { AdminProductRequest, FeaturedReviewResponse, Image, ReviewsResponse } from '../interfaces/product.interface';
 import { Observable } from 'rxjs';
 import { AdminProductResponse, AdminUserListResponse, AdminUserResponse, AdminVariantListResponse, AdminVariantResponse, FaqListResponse, FaqResponse, SiteSettings, SiteSettingsResponse, UploadImageResponse, UploadMultipleImagesResponse } from '../interfaces/admin.interface';
 import { Faq } from '../interfaces/admin.interface';
@@ -187,6 +187,11 @@ export class AdminService {
 
   updateOrderStatus(orderId: string, status: string): Observable<UpdateOrderStatusResponse> {
     return this._http.put<UpdateOrderStatusResponse>(`${this.baseUrl}/admin/settings/orders/${orderId}/status`, { status });
+  }
+
+  // BANNER
+  updateBanner(body:Image):Observable<{message : string, data:Image}>{
+    return this._http.put<{message : string, data:Image}>(`${this.baseUrl}/admin/settings/banner`,body);
   }
 
 }
