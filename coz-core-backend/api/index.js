@@ -1,37 +1,40 @@
 import { configDotenv } from "dotenv";
 configDotenv();
+
 import cookieParser from "cookie-parser";
 import express, { json, urlencoded } from "express";
 import cors from "cors";
-import redisClient from "../src/utils/redisClient.util.js";
-
 import { rateLimit } from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 
+import redisClient from "../src/utils/redisClient.util.js";
 import { ConnectDB } from "../src/config/connectdb.config.js";
+
 import authRoutes from "../src/routes/auth.route.js";
 import productsRoutes from "../src/routes/products.route.js";
-import cartRoutes from "../src/routes/cart.route.js"
-import ordersRoutes from "../src/routes/order.route.js"
-import { errorHandler, notFoundHandler } from "../src/middlewares/notFoundHandler.middleware.js";
-import userRoutes from "../src/routes/user.route.js"
-import reviewsRoutes from "../src/routes/reviews.route.js"
+import cartRoutes from "../src/routes/cart.route.js";
+import ordersRoutes from "../src/routes/order.route.js";
+import userRoutes from "../src/routes/user.route.js";
+import reviewsRoutes from "../src/routes/reviews.route.js";
 import ImageRoutes from "../src/routes/upload.route.js";
-import  productManagmentRoutes from "../src/routes/product-managment.admin.route.js"
-import reviewsManagmentRoutes from "../src/routes/reviews-managment.admin.route.js"
-import systemRoutes from "../src/routes/systemCotent.route.js"
+import productManagmentRoutes from "../src/routes/product-managment.admin.route.js";
+import reviewsManagmentRoutes from "../src/routes/reviews-managment.admin.route.js";
+import systemRoutes from "../src/routes/systemCotent.route.js";
 import featuredReviewsRoutes from "../src/routes/featuredReviews.route.js";
-import adminRoutes from "../src/routes/admin.route.js"
+import adminRoutes from "../src/routes/admin.route.js";
+
+import { errorHandler, notFoundHandler } from "../src/middlewares/notFoundHandler.middleware.js";
 
 const app = express();
+
 app.use(cookieParser());
 
 const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = [
-            'http://localhost:4200',          
-            process.env.CORS_ORIGIN           
-        ].filter(Boolean); 
+            'http://localhost:4200',
+            process.env.CORS_ORIGIN
+        ].filter(Boolean);
 
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
@@ -66,30 +69,35 @@ app.use(rateLimit({
     }
 }));
 
-await ConnectDB();
+const startServer = async () => {
+    await ConnectDB();
 
-app.use("/admin/upload", ImageRoutes);
-app.use("/auth", authRoutes);
-app.use("/products",productsRoutes);
-app.use("/admin/products", productManagmentRoutes);
-app.use("/admin/reviews", reviewsManagmentRoutes);
-app.use("/cart",cartRoutes);
-app.use("/orders",ordersRoutes);
-app.use("/user",userRoutes);
-app.use("/reviews", reviewsRoutes);
-app.use("/public-settings",systemRoutes)
-app.use("/featured-reviews", featuredReviewsRoutes);
-app.use("/admin/settings", adminRoutes);
+    app.use("/admin/upload", ImageRoutes);
+    app.use("/auth", authRoutes);
+    app.use("/products", productsRoutes);
+    app.use("/admin/products", productManagmentRoutes);
+    app.use("/admin/reviews", reviewsManagmentRoutes);
+    app.use("/cart", cartRoutes);
+    app.use("/orders", ordersRoutes);
+    app.use("/user", userRoutes);
+    app.use("/reviews", reviewsRoutes);
+    app.use("/public-settings", systemRoutes);
+    app.use("/featured-reviews", featuredReviewsRoutes);
+    app.use("/admin/settings", adminRoutes);
 
-app.use(notFoundHandler);
-app.use(errorHandler);
+    app.use(notFoundHandler);
+    app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+    if (process.env.NODE_ENV !== 'production') {
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => {
+            console.log(`Server is running locally on http://localhost:${PORT}`);
+        });
+    } else {
+        console.log("Server ready in production mode (Vercel)");
+    }
+};
 
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-}
+startServer();
 
 export default app;
