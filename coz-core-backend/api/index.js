@@ -33,10 +33,14 @@ const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = [
             'http://localhost:4200',
-            process.env.CORS_ORIGIN
-        ].filter(Boolean);
+            
+        ];
 
-        if (!origin || allowedOrigins.includes(origin)) {
+        const isVercelCozyCore = origin && 
+            origin.includes('vercel.app') && 
+            origin.includes('cozy-core');
+
+        if (!origin || allowedOrigins.includes(origin) || isVercelCozyCore) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
