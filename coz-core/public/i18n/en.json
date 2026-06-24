@@ -565,7 +565,12 @@
       "add_term": "Add Term",
       "term_title": "Term Title",
       "term_content": "Term Content",
-      "no_terms": "No terms added yet."
+      "no_terms": "No terms added yet.",
+        "banner": "Banner",
+        "banner_label": "Main Banner Image",
+        "add_banner": "Add Banner",
+        "banner_hint": "Recommended: high-quality image at least 1200×500 pixels",
+        "banner_uploading": "Uploading banner..."
     },
     "faq": {
       "no_faqs": "No FAQs found",
@@ -677,7 +682,7 @@
     "go_home": "Go Home",
     "browse_products": "Browse Products"
   },
-  "error":{
-    "FTL":"Failed to load"
+  "error": {
+    "FTL": "Failed to load"
   }
 }
