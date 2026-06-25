@@ -1,7 +1,11 @@
 <div class="min-h-screen flex flex-col lg:flex-row bg-gray-50">
   <div class="hidden lg:flex lg:w-1/2 relative bg-gray-900 text-white overflow-hidden">
     <div class="absolute inset-0 z-0">
-      <img [src]="banner()?.url || 'banner.jpg'" alt="Background" class="w-full h-full object-cover" />
+      <img
+        [src]="banner()?.url || 'banner.jpg'"
+        alt="Background"
+        class="w-full h-full object-cover"
+      />
       <div class="absolute inset-0 bg-black/70"></div>
     </div>
     <div class="relative z-20 flex flex-col justify-center items-center text-center p-10 w-full">
@@ -20,315 +24,583 @@
   <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 sm:p-8 transition-all">
       @if (mode() === 'login') {
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.login_title' | translate }}</h2>
-        <p class="text-gray-500 text-sm mt-1">{{ 'auth.login_subtitle' | translate }}</p>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.email' | translate
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.login_title' | translate }}</h2>
+          <p class="text-gray-500 text-sm mt-1">{{ 'auth.login_subtitle' | translate }}</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.email' | translate
             }}</label>
-          <input type="email" [(ngModel)]="email" (blur)="emailTouched = true" (input)="emailTouched = true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            placeholder="your@email.com" />
-          @if (emailTouched && (!email || !validateEmail())) {
-          <div class="text-xs text-red-500 mt-1 px-3">
-            {{ (!email ? 'auth.email_required' : 'auth.email_invalid') | translate }}
+            <input
+              type="email"
+              [(ngModel)]="email"
+              (blur)="emailTouched = true"
+              (input)="emailTouched = true"
+              class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
+              placeholder="your@email.com"
+            />
+            @if (emailTouched && (!email || !validateEmail())) {
+              <div class="text-xs text-red-500 mt-1 px-3">
+                {{ (!email ? 'auth.email_required' : 'auth.email_invalid') | translate }}
+              </div>
+            }
           </div>
-          }
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.password' | translate
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.password' | translate
             }}</label>
-          <input type="password" [(ngModel)]="password" (blur)="passwordTouched = true" (input)="passwordTouched = true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            placeholder="••••••••" />
-          @if (passwordTouched && !password) {
-          <div class="text-xs text-red-500 mt-1 px-3">
-            {{ 'auth.password_required' | translate }}
+            <div class="relative">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="password"
+                (blur)="passwordTouched = true"
+                (input)="passwordTouched = true"
+                class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none pr-10"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                (click)="showPassword = !showPassword"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  @if (!showPassword) {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  } @else {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  }
+                </svg>
+              </button>
+            </div>
+            @if (passwordTouched && !password) {
+              <div class="text-xs text-red-500 mt-1 px-3">
+                {{ 'auth.password_required' | translate }}
+              </div>
+            }
           </div>
-          }
-        </div>
-        <button (click)="onLogin()" [disabled]="loading"
-          class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition active:scale-95 mt-2 flex items-center justify-center gap-2">
-          @if (loading) {
-          <span
-            class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          }
-          {{ 'auth.login_btn' | translate }}
-        </button>
-        <div class="text-center text-sm text-gray-500 mt-3">
-          <a (click)="setMode('forgot')" class="text-gray-600 hover:underline cursor-pointer">{{
-            'auth.forgot_password' | translate
+          <button
+            (click)="onLogin()"
+            [disabled]="loading"
+            class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition active:scale-95 mt-2 flex items-center justify-center gap-2"
+          >
+            @if (loading) {
+              <span
+                class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+              ></span>
+            }
+            {{ 'auth.login_btn' | translate }}
+          </button>
+          <div class="text-center text-sm text-gray-500 mt-3">
+            <a (click)="setMode('forgot')" class="text-gray-600 hover:underline cursor-pointer">{{
+              'auth.forgot_password' | translate
             }}</a>
-          <span class="mx-2">|</span>
-          <a (click)="setMode('register')" class="text-gray-600 hover:underline cursor-pointer">{{
-            'auth.create_account' | translate
+            <span class="mx-2">|</span>
+            <a (click)="setMode('register')" class="text-gray-600 hover:underline cursor-pointer">{{
+              'auth.create_account' | translate
             }}</a>
+          </div>
         </div>
-      </div>
 
       } @else if (mode() === 'register') {
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.register_title' | translate }}</h2>
-        <p class="text-gray-500 text-sm mt-1">{{ 'auth.register_subtitle' | translate }}</p>
-      </div>
-      <div class="space-y-4 max-h-[60vh] overflow-y-auto px-1">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.full_name' | translate
-            }}</label>
-          <input type="text" [(ngModel)]="fullName" (blur)="fullNameTouched = true" (input)="fullNameTouched = true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            placeholder="John Doe" />
-          @if (fullNameTouched && !validateFullName()) {
-          <div class="text-xs text-red-500 mt-1 px-3">
-            {{ 'auth.full_name_required' | translate }}
-          </div>
-          }
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.register_title' | translate }}</h2>
+          <p class="text-gray-500 text-sm mt-1">{{ 'auth.register_subtitle' | translate }}</p>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.email' | translate
+        <div class="space-y-4 max-h-[60vh] overflow-y-auto px-1">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.full_name' | translate
             }}</label>
-          <input type="email" [(ngModel)]="email" (blur)="emailTouched = true" (input)="emailTouched = true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            placeholder="your@email.com" />
-          @if (emailTouched && (!email || !validateEmail())) {
-          <div class="text-xs text-red-500 mt-1 px-3">
-            {{ (!email ? 'auth.email_required' : 'auth.email_invalid') | translate }}
-          </div>
-          }
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.password' | translate
-            }}</label>
-          <input type="password" [(ngModel)]="password" (blur)="passwordTouched = true" (input)="passwordTouched = true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            placeholder="••••••••" />
-          @if (passwordTouched) {
-          <div class="text-xs text-red-500 mt-1 px-3 space-y-0.5">
-            @for (err of getPasswordErrors(); track err) {
-            <div>{{ err | translate }}</div>
+            <input
+              type="text"
+              [(ngModel)]="fullName"
+              (blur)="fullNameTouched = true"
+              (input)="fullNameTouched = true"
+              class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
+              placeholder="John Doe"
+            />
+            @if (fullNameTouched && !validateFullName()) {
+              <div class="text-xs text-red-500 mt-1 px-3">
+                {{ 'auth.full_name_required' | translate }}
+              </div>
             }
           </div>
-          }
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.confirm_password' | translate
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.email' | translate
             }}</label>
-          <input type="password" [(ngModel)]="confirmPassword" (blur)="confirmPasswordTouched = true"
-            (input)="confirmPasswordTouched = true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            placeholder="••••••••" />
-          @if (confirmPasswordTouched && !validateConfirmPassword()) {
-          <div class="text-xs text-red-500 mt-1 px-3">
-            {{ 'auth.passwords_not_match' | translate }}
-          </div>
-          }
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.phone' | translate
-            }}</label>
-          <input type="tel" [(ngModel)]="phone" (blur)="phoneTouched = true" (input)="phoneTouched = true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            placeholder="01234567890" />
-          @if (phoneTouched && !validatePhone()) {
-          <div class="text-xs text-red-500 mt-1 px-3">
-            {{ 'auth.phone_invalid' | translate }}
-          </div>
-          }
-        </div>
-        <div class="border-t border-gray-100 pt-4 mt-2">
-          <div class="flex justify-between items-center mb-3">
-            <label class="text-sm font-semibold text-gray-800">{{
-              'auth.addresses' | translate
-              }}</label>
-            <button type="button" (click)="addAddress()"
-              class="flex items-center gap-1 px-3 py-1.5 bg-gray-800 text-white text-xs font-medium rounded-full shadow-sm hover:bg-gray-700 transition-all duration-200 focus:outline-none">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              {{ 'auth.add_address' | translate }}
-            </button>
-          </div>
-
-          @for (addr of addresses; track $index; let idx = $index) {
-          <div
-            class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-4 relative hover:shadow-md transition-shadow">
-            @if (addresses.length > 1) {
-            <button type="button" (click)="removeAddress(idx)"
-              class="absolute top-3 right-3 flex items-center justify-center w-6 h-6 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-all duration-200 focus:outline-none shadow-sm">
-              ✕
-            </button>
+            <input
+              type="email"
+              [(ngModel)]="email"
+              (blur)="emailTouched = true"
+              (input)="emailTouched = true"
+              class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
+              placeholder="your@email.com"
+            />
+            @if (emailTouched && (!email || !validateEmail())) {
+              <div class="text-xs text-red-500 mt-1 px-3">
+                {{ (!email ? 'auth.email_required' : 'auth.email_invalid') | translate }}
+              </div>
             }
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <div class="relative sort-dropdown">
-                  <button (click)="toggleGovernorateDropdown(idx)"
-                    class="flex items-center justify-between gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all w-full">
-                    <span>{{
-                      addresses[idx].governorate || ('governorates.select' | translate)
-                      }}</span>
-                    <svg class="w-4 h-4 text-gray-500 transition-transform"
-                      [class.rotate-180]="governorateDropdownOpenForIndex[idx]" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  @if (governorateDropdownOpenForIndex[idx]) {
-                  <div
-                    class="absolute mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-20 overflow-hidden">
-                    @for (gov of governoratesList; track gov) {
-                    <button (click)="selectGovernorate(gov, idx)"
-                      class="block w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 text-gray-700">
-                      {{ gov }}
-                    </button>
-                    }
-                  </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.password' | translate
+            }}</label>
+            <div class="relative">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="password"
+                (blur)="passwordTouched = true"
+                (input)="passwordTouched = true"
+                class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none pr-10"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                (click)="showPassword = !showPassword"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  @if (!showPassword) {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  } @else {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
                   }
+                </svg>
+              </button>
+            </div>
+            @if (passwordTouched) {
+              <div class="text-xs text-red-500 mt-1 px-3 space-y-0.5">
+                @for (err of getPasswordErrors(); track err) {
+                  <div>{{ err | translate }}</div>
+                }
+              </div>
+            }
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.confirm_password' | translate
+            }}</label>
+            <div class="relative">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                [(ngModel)]="confirmPassword"
+                (blur)="confirmPasswordTouched = true"
+                (input)="confirmPasswordTouched = true"
+                class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none pr-10"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                (click)="showConfirmPassword = !showConfirmPassword"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  @if (!showConfirmPassword) {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  } @else {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  }
+                </svg>
+              </button>
+            </div>
+            @if (confirmPasswordTouched && !validateConfirmPassword()) {
+              <div class="text-xs text-red-500 mt-1 px-3">
+                {{ 'auth.passwords_not_match' | translate }}
+              </div>
+            }
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.phone' | translate
+            }}</label>
+            <input
+              type="tel"
+              [(ngModel)]="phone"
+              (blur)="phoneTouched = true"
+              (input)="phoneTouched = true"
+              class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none"
+              placeholder="01234567890"
+            />
+            @if (phoneTouched && !validatePhone()) {
+              <div class="text-xs text-red-500 mt-1 px-3">
+                {{ 'auth.phone_invalid' | translate }}
+              </div>
+            }
+          </div>
+          <div class="border-t border-gray-100 pt-4 mt-2">
+            <div class="flex justify-between items-center mb-3">
+              <label class="text-sm font-semibold text-gray-800">{{
+                'auth.addresses' | translate
+              }}</label>
+              <button
+                type="button"
+                (click)="addAddress()"
+                class="flex items-center gap-1 px-3 py-1.5 bg-gray-800 text-white text-xs font-medium rounded-full shadow-sm hover:bg-gray-700 transition-all duration-200 focus:outline-none"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                {{ 'auth.add_address' | translate }}
+              </button>
+            </div>
+
+            @for (addr of addresses; track $index; let idx = $index) {
+              <div
+                class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-4 relative hover:shadow-md transition-shadow"
+              >
+                @if (addresses.length > 1) {
+                  <button
+                    type="button"
+                    (click)="removeAddress(idx)"
+                    class="absolute top-3 right-3 flex items-center justify-center w-6 h-6 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-all duration-200 focus:outline-none shadow-sm"
+                  >
+                    ✕
+                  </button>
+                }
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <div class="relative sort-dropdown">
+                      <button
+                        (click)="toggleGovernorateDropdown(idx)"
+                        class="flex items-center justify-between gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all w-full"
+                      >
+                        <span>{{
+                          addresses[idx].governorate || ('governorates.select' | translate)
+                        }}</span>
+                        <svg
+                          class="w-4 h-4 text-gray-500 transition-transform"
+                          [class.rotate-180]="governorateDropdownOpenForIndex[idx]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      @if (governorateDropdownOpenForIndex[idx]) {
+                        <div
+                          class="absolute mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-20 overflow-hidden"
+                        >
+                          @for (gov of governoratesList; track gov) {
+                            <button
+                              (click)="selectGovernorate(gov, idx)"
+                              class="block w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 text-gray-700"
+                            >
+                              {{ gov }}
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <input
+                    type="text"
+                    [(ngModel)]="addr.city"
+                    placeholder="{{ 'auth.city' | translate }}"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  />
+                  <input
+                    type="text"
+                    [(ngModel)]="addr.street"
+                    placeholder="{{ 'auth.street' | translate }}"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm col-span-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  />
+                  <input
+                    type="text"
+                    [(ngModel)]="addr.apartment"
+                    placeholder="{{ 'auth.apartment' | translate }}"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  />
+                  <input
+                    type="text"
+                    [(ngModel)]="addr.postalCode"
+                    placeholder="{{ 'auth.postal_code' | translate }}"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  />
                 </div>
               </div>
+            }
+          </div>
+          <button
+            (click)="onRegister()"
+            [disabled]="loading"
+            class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition flex items-center justify-center gap-2"
+          >
+            @if (loading) {
+              <span
+                class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+              ></span>
+            }
+            {{ 'auth.register_btn' | translate }}
+          </button>
+          <p class="text-center text-sm text-gray-500">
+            <a (click)="setMode('login')" class="text-gray-600 hover:underline cursor-pointer">{{
+              'auth.back_to_login' | translate
+            }}</a>
+          </p>
+        </div>
 
-              <input type="text" [(ngModel)]="addr.city" placeholder="{{ 'auth.city' | translate }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400" />
-              <input type="text" [(ngModel)]="addr.street" placeholder="{{ 'auth.street' | translate }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm col-span-2 focus:outline-none focus:ring-2 focus:ring-gray-400" />
-              <input type="text" [(ngModel)]="addr.apartment" placeholder="{{ 'auth.apartment' | translate }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400" />
-              <input type="text" [(ngModel)]="addr.postalCode" placeholder="{{ 'auth.postal_code' | translate }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400" />
+      } @else if (mode() === 'forgot') {
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.forgot_title' | translate }}</h2>
+          <p class="text-gray-500 text-sm">{{ 'auth.forgot_subtitle' | translate }}</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.email' | translate
+            }}</label>
+            <input
+              type="email"
+              [(ngModel)]="email"
+              class="w-full px-4 py-2 border border-gray-300 rounded-full"
+              placeholder="your@email.com"
+            />
+          </div>
+          <button
+            (click)="onForgotPassword()"
+            [disabled]="loading"
+            class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition flex items-center justify-center gap-2"
+          >
+            @if (loading) {
+              <span
+                class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+              ></span>
+            }
+            {{ 'auth.send_otp' | translate }}
+          </button>
+          <p class="text-center text-sm">
+            <a (click)="setMode('login')" class="text-gray-600 hover:underline cursor-pointer">{{
+              'auth.back_to_login' | translate
+            }}</a>
+          </p>
+        </div>
+
+      } @else if (mode() === 'verify-otp') {
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.verify_title' | translate }}</h2>
+          <p class="text-gray-500 text-sm">{{ 'auth.verify_subtitle' | translate }}</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.otp_code' | translate
+            }}</label>
+            <input
+              type="text"
+              [(ngModel)]="otp"
+              class="w-full px-4 py-2 border border-gray-300 rounded-full"
+              placeholder="123456"
+              [disabled]="otpExpired"
+            />
+          </div>
+          @if (otpTimerSeconds > 0 && !otpExpired) {
+            <div class="text-center text-sm text-gray-500">
+              ⏱️ {{ 'auth.otp_time_left' | translate }}: {{ getFormattedOtpTime() }}
+            </div>
+          }
+          @if (otpExpired) {
+            <div class="text-center text-sm text-red-500">
+              {{ 'auth.otp_expired_message' | translate }}
+            </div>
+          }
+          <button
+            (click)="onVerifyOTP()"
+            [disabled]="loading || otpExpired"
+            class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition flex items-center justify-center gap-2"
+          >
+            @if (loading) {
+              <span
+                class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+              ></span>
+            }
+            {{ 'auth.verify_btn' | translate }}
+          </button>
+          <p class="text-center text-sm">
+            <a (click)="setMode('forgot')" class="text-gray-600 hover:underline cursor-pointer">
+              {{ 'auth.resend_otp' | translate }}
+            </a>
+          </p>
+        </div>
+
+      } @else if (mode() === 'reset-password') {
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.reset_title' | translate }}</h2>
+          <p class="text-gray-500 text-sm">{{ 'auth.reset_subtitle' | translate }}</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.new_password' | translate
+            }}</label>
+            <div class="relative">
+              <input
+                [type]="showNewPassword ? 'text' : 'password'"
+                [(ngModel)]="password"
+                class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none pr-10"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                (click)="showNewPassword = !showNewPassword"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  @if (!showNewPassword) {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  } @else {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  }
+                </svg>
+              </button>
             </div>
           </div>
-          }
-        </div>
-        <button (click)="onRegister()" [disabled]="loading"
-          class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition flex items-center justify-center gap-2">
-          @if (loading) {
-          <span
-            class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          }
-          {{ 'auth.register_btn' | translate }}
-        </button>
-        <p class="text-center text-sm text-gray-500">
-          <a (click)="setMode('login')" class="text-gray-600 hover:underline cursor-pointer">{{
-            'auth.back_to_login' | translate
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{
+              'auth.confirm_new_password' | translate
+            }}</label>
+            <div class="relative">
+              <input
+                [type]="showResetConfirmPassword ? 'text' : 'password'"
+                [(ngModel)]="confirmPassword"
+                class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none pr-10"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                (click)="showResetConfirmPassword = !showResetConfirmPassword"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  @if (!showResetConfirmPassword) {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  } @else {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  }
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button
+            (click)="onResetPassword()"
+            [disabled]="loading"
+            class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition flex items-center justify-center gap-2"
+          >
+            @if (loading) {
+              <span
+                class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+              ></span>
+            }
+            {{ 'auth.reset_btn' | translate }}
+          </button>
+          <p class="text-center text-sm">
+            <a (click)="setMode('login')" class="text-gray-600 hover:underline cursor-pointer">{{
+              'auth.back_to_login' | translate
             }}</a>
-        </p>
-      </div>
-      }
-
-      @else if (mode() === 'forgot') {
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.forgot_title' | translate }}</h2>
-        <p class="text-gray-500 text-sm">{{ 'auth.forgot_subtitle' | translate }}</p>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.email' | translate
-            }}</label>
-          <input type="email" [(ngModel)]="email" class="w-full px-4 py-2 border border-gray-300 rounded-full"
-            placeholder="your@email.com" />
+          </p>
         </div>
-        <button (click)="onForgotPassword()" [disabled]="loading"
-          class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition">
-          {{ 'auth.send_otp' | translate }}
-        </button>
-        <p class="text-center text-sm">
-          <a (click)="setMode('login')" class="text-gray-600 hover:underline cursor-pointer">{{
-            'auth.back_to_login' | translate
-            }}</a>
-        </p>
-      </div>
-      }
-
-      @else if (mode() === 'verify-otp') {
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.verify_title' | translate }}</h2>
-        <p class="text-gray-500 text-sm">{{ 'auth.verify_subtitle' | translate }}</p>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.otp_code' | translate
-            }}</label>
-          <input type="text" [(ngModel)]="otp" class="w-full px-4 py-2 border border-gray-300 rounded-full"
-            placeholder="123456" [disabled]="otpExpired" />
-        </div>
-        @if (otpTimerSeconds > 0 && !otpExpired) {
-        <div class="text-center text-sm text-gray-500">
-          ⏱️ {{ 'auth.otp_time_left' | translate }}: {{ getFormattedOtpTime() }}
-        </div>
-        }
-        @if (otpExpired) {
-        <div class="text-center text-sm text-red-500">
-          {{ 'auth.otp_expired_message' | translate }}
-        </div>
-        }
-        <button (click)="onVerifyOTP()" [disabled]="loading || otpExpired"
-          class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition flex items-center justify-center gap-2">
-          @if (loading) {
-          <span
-            class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          }
-          {{ 'auth.verify_btn' | translate }}
-        </button>
-        <p class="text-center text-sm">
-          <a (click)="setMode('forgot')" class="text-gray-600 hover:underline cursor-pointer">
-            {{ 'auth.resend_otp' | translate }}
-          </a>
-        </p>
-      </div>
-      }
-
-      @else if (mode() === 'reset-password') {
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">{{ 'auth.reset_title' | translate }}</h2>
-        <p class="text-gray-500 text-sm">{{ 'auth.reset_subtitle' | translate }}</p>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.new_password' | translate
-            }}</label>
-          <input type="password" [(ngModel)]="password" class="w-full px-4 py-2 border border-gray-300 rounded-full"
-            placeholder="••••••••" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{
-            'auth.confirm_new_password' | translate
-            }}</label>
-          <input type="password" [(ngModel)]="confirmPassword"
-            class="w-full px-4 py-2 border border-gray-300 rounded-full" placeholder="••••••••" />
-        </div>
-        <button (click)="onResetPassword()" [disabled]="loading"
-          class="w-full bg-gray-900 text-white py-2.5 rounded-full font-semibold hover:bg-gray-800 transition flex items-center justify-center gap-2">
-          @if (loading) {
-          <span
-            class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          }
-          {{ 'auth.reset_btn' | translate }}
-        </button>
-
-        <p class="text-center text-sm">
-          <a (click)="setMode('login')" class="text-gray-600 hover:underline cursor-pointer">{{
-            'auth.back_to_login' | translate
-            }}</a>
-        </p>
-      </div>
       }
 
       @if (errorMessage()) {
-      <div class="mt-4 p-2 bg-red-50 text-red-600 text-sm rounded-full text-center">
-        {{ errorMessage() | translate }}
-      </div>
+        <div class="mt-4 p-2 bg-red-50 text-red-600 text-sm rounded-full text-center">
+          {{ errorMessage() | translate }}
+        </div>
       }
     </div>
   </div>

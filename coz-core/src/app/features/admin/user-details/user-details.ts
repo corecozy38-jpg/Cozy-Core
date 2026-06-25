@@ -36,8 +36,6 @@ export class UserDetails {
     this._adminService.getUserById(userId).subscribe({
       next: (res) => {
         this.user.set(res.data);
-        console.log(res.data);
-
         this.loading.set(false);
       },
       error: (err) => {

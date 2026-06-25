@@ -202,7 +202,6 @@ removeFeature(index: number): void {
         this._toast.success(`${uploadedImages.length} image(s) uploaded successfully`);
       }
     } catch (error) {
-      console.error('Upload error:', error);
       this._toast.error('Failed to upload images');
       this.isUploading = false;
     } finally {

@@ -73,7 +73,6 @@ export class Home implements OnInit, OnDestroy {
         this.isLoadingBanner.set(false);
       },
       error: (err) => {
-        console.error('Failed to load banner:', err);
         this.isLoadingBanner.set(false);
       }
     });
@@ -94,7 +93,7 @@ export class Home implements OnInit, OnDestroy {
         this.isLoadingProducts.set(false);
       },
       error: (err) => {
-        console.error('Failed to load products:', err);
+
         this.error = true;
         this.isLoadingProducts.set(false);
       }
@@ -115,7 +114,7 @@ export class Home implements OnInit, OnDestroy {
         this.isLoadingFaq.set(false);
       },
       error: (err) => {
-        console.error('Failed to load faqs:', err);
+
         this.error = true;
         this.isLoadingFaq.set(false);
       }
@@ -135,7 +134,6 @@ export class Home implements OnInit, OnDestroy {
         this.isLoadingTestimonials.set(false);
       },
       error: (err) => {
-        console.error('Failed to load testimonials:', err);
         this.error = true;
         this.isLoadingTestimonials.set(false);
       }

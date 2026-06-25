@@ -51,9 +51,14 @@ export class Auth implements OnInit {
   otpTimerInterval: any = null;
   otpExpired = false;
 
-  // FOR ADDRESS
   governorateDropdownOpenForIndex: boolean[] = [];
   selectedGovernorateForIndex: string[] = [];
+
+  showPassword = false;
+  showConfirmPassword = false;
+  showNewPassword = false;
+  showResetPassword = false;
+  showResetConfirmPassword = false;
 
   constructor(
     private _languageService: LanguageService,
@@ -61,7 +66,7 @@ export class Auth implements OnInit {
     private _authService: AuthService,
     private _refreshTokenService: RefreshTokenService,
     private translate: TranslateService,
-    private _siteSettingService :SiteSettingsService
+    private _siteSettingService: SiteSettingsService
   ) { }
 
   ngOnInit() {
@@ -75,7 +80,7 @@ export class Auth implements OnInit {
     this.initGovernorateTrackers();
   }
 
-    loadBanner() {
+  loadBanner() {
     this.isLoadingBanner.set(true);
     this._siteSettingService.getBanner().subscribe({
       next: (res) => {
@@ -83,7 +88,6 @@ export class Auth implements OnInit {
         this.isLoadingBanner.set(false);
       },
       error: (err) => {
-        console.error('Failed to load banner:', err);
         this.isLoadingBanner.set(false);
       }
     });
@@ -142,6 +146,7 @@ export class Auth implements OnInit {
     this.governorateDropdownOpenForIndex.push(false);
     this.selectedGovernorateForIndex.push('');
   }
+
   removeAddress(index: number) {
     if (this.addresses.length > 1) {
       this.addresses.splice(index, 1);
@@ -150,7 +155,6 @@ export class Auth implements OnInit {
     }
   }
 
-  // Validation functions
   validateFullName(): boolean {
     return this.fullName.trim().length > 0;
   }
@@ -235,7 +239,6 @@ export class Auth implements OnInit {
     return true;
   }
 
-  // OTP Timer Functions
   startOtpTimer(seconds: number = 300) {
     this.stopOtpTimer();
     this.otpTimerSeconds = seconds;
@@ -309,7 +312,6 @@ export class Auth implements OnInit {
       },
       error: (err) => {
         this.errorMessage.set(err.error?.message || 'auth.register_failed');
-        console.log(err);
         this.loading = false;
       }
     });
@@ -395,8 +397,6 @@ export class Auth implements OnInit {
       }
     });
   }
-
-
 
   toggleGovernorateDropdown(index: number) {
     this.governorateDropdownOpenForIndex[index] = !this.governorateDropdownOpenForIndex[index];

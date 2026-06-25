@@ -52,7 +52,6 @@ export class Settings {
     this._siteSettingsService.getTerms().subscribe({
       next: (res) => {
         this.terms.set((res.data) || []);
-        console.log(res.data);
       },
       error: () => { }
     });
@@ -166,7 +165,6 @@ export class Settings {
         input.value = '';
       },
       error: (err) => {
-        console.error('Upload error:', err);
         this._toast.error(err.error?.message || 'Upload failed');
         this.uploadingBanner.set(false);
         input.value = '';
@@ -179,7 +177,6 @@ export class Settings {
   }
 
   addTerm(): void {
-    console.log('addTerm called');
     const current = this.terms();
     this.terms.set([...current, { title: '', content: '' }]);
   }
@@ -222,7 +219,6 @@ export class Settings {
         input.value = '';
       },
       error: (err) => {
-        console.error('Upload error:', err);
         this._toast.error(err.error?.message || 'Upload failed');
         this.uploading.set(false);
         input.value = '';

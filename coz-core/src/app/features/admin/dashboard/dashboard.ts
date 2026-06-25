@@ -52,7 +52,6 @@ export class Dashboard implements OnInit, AfterViewInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Dashboard error:', err);
         this.error.set(true);
         this.loading.set(false);
       },

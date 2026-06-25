@@ -116,7 +116,6 @@ export class Products implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error(err);
         this.error = true;
         this.loading = false;
       }
@@ -169,5 +168,5 @@ export class Products implements OnInit {
   this.currentPage = 1;
   this.loadProducts();
   }
-  
+
 }

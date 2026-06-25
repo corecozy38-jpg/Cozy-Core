@@ -63,7 +63,7 @@ export class Reviews {
       next: (res) => {
         this.featuredReviews.set(res.data);
       },
-      error: (err) => console.error('Failed to load featured reviews')
+      error: (err) => {}
     });
   }
   filterByStatus(status: string) {
