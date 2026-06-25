@@ -33,5 +33,5 @@ export class ProductService {
     return this._http.get<{ data: Product, message: string }>(`${this.baseUrl}/products/${slug}`);
   }
 
-
+  
 }

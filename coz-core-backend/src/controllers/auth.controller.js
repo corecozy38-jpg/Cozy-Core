@@ -3,6 +3,11 @@ import User from "../models/user.model.js";
 import { registerValidator, loginValidator, changePasswordValidator , forgotPasswordValidator , verifyOTPValidator , resetPasswordValidator } from "../validators/auth.validator.js";
 import { registerUserService, loginUserService, changePasswordService , forgotPasswordService , verifyOTPService , resetPasswordService } from "../services/auth.service.js";
 import { sendVerificationEmail } from "../utils/email.util.js";
+import Lock from "../models/lock.model.js";
+import Cart from "../models/cart.model.js";
+import Order from '../models/order.model.js';
+import RefreshToken from '../models/refreshToken.model.js';
+
 
 const register = asyncHandler(async (req, res) => {
     const { error } = registerValidator(req.body);
@@ -108,6 +113,93 @@ const verifyEmail = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
 });
 
+
+const deleteAccount = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { password } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    const now = new Date();
+    const lock = await Lock.findOneAndUpdate(
+        { 
+            name: 'admin_delete_lock',
+            $or: [
+                { lockedAt: null },
+                { lockedAt: { $lt: new Date(now.getTime() - 60000) } }
+            ]
+        },
+        { 
+            $set: { 
+                lockedAt: now, 
+                lockedBy: userId,
+                expiresAt: new Date(now.getTime() + 60000)
+            } 
+        },
+        { new: true, upsert: true }
+    );
+
+    if (lock && lock.lockedBy?.toString() !== userId && lock.lockedAt && lock.lockedAt > new Date(now.getTime() - 60000)) {
+        return res.status(409).json({ 
+            message: 'Another admin deletion is in progress. Please try again later.' 
+        });
+    }
+
+    try {
+        if (user.role === 'admin') {
+            const otherAdmin = await User.findOne({
+                role: 'admin',
+                _id: { $ne: userId }
+            });
+
+            if (!otherAdmin) {
+                return res.status(400).json({
+                    message: 'Cannot delete the only admin account. Please assign another admin first.'
+                });
+            }
+        }
+
+        await Promise.all([
+            Cart.deleteMany({ user: userId }),
+            Order.deleteMany({ user: userId }),
+            RefreshToken.deleteMany({ user: userId }),
+            Review.updateMany(
+            { user: userId },
+            { 
+                $set: { 
+                    user: null, 
+                    guestName: "Deleted User", 
+                    guestEmail: null 
+                } 
+            }
+        )
+        ]);
+
+        await User.findByIdAndDelete(userId);
+
+        res.clearCookie('refreshToken');
+
+        res.status(200).json({ 
+            message: 'Account deleted successfully'
+        });
+
+    } finally {
+        await Lock.findOneAndUpdate(
+            { name: 'admin_delete_lock', lockedBy: userId },
+            { $set: { lockedAt: null, lockedBy: null, expiresAt: null } }
+        );
+    }
+});
+
+
 export {
     register,
     login,
@@ -115,5 +207,6 @@ export {
     forgotPassword,
     verifyOTP,
     resetPassword,
-    verifyEmail
+    verifyEmail,
+    deleteAccount
 }

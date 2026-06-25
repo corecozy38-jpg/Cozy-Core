@@ -10,17 +10,10 @@ export const routes: Routes = [
   { path: 'products', loadComponent: () => import('./features/products/products').then(m => m.Products) },
   { path: 'collections/:collectionName', loadComponent: () => import('./features/products/products').then(m => m.Products) },
   { path: 'search', loadComponent: () => import('./features/products/products').then(m => m.Products) },
-
   {
-    path :'auth',
-    canActivate:[authGuard],
+    path: 'auth',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/auth/auth').then(m => m.Auth),
-    children: [
-      { path: 'login', loadComponent: () => import('./features/auth/auth').then(m => m.Auth) },
-      { path: 'register', loadComponent: () => import('./features/auth/auth').then(m => m.Auth) },
-      { path: 'reset-password', loadComponent: () => import('./features/auth/auth').then(m => m.Auth) },
-      {path:'', redirectTo:'auth',pathMatch:'full'}
-    ]
   },
   { path: 'product-details/:slug', loadComponent: () => import('./features/product-details/product-details').then(m => m.ProductDetails) },
   { path: 'cart', loadComponent: () => import('./features/cart/cart').then(m => m.Cart) },
@@ -64,5 +57,5 @@ export const routes: Routes = [
   { path: 'terms-conditions', loadComponent: () => import('./features/terms-and-condtions/terms-and-condtions').then(m => m.TermsAndCondtions) },
   { path: 'order-guide', loadComponent: () => import('./features/order-guide/order-guide').then(m => m.OrderGuide) },
 
-  { path: '**', component : Error404 },
+  { path: '**', component: Error404 },
 ];

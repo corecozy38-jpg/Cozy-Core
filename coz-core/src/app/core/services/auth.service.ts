@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   verifyOtp(header: verfiyOTPBody): Observable<verifyOTPResponse> {
-    return this.http.post<verifyOTPResponse>(`${this.baseUrl}/auth/verify-otp`, {otp: header.otp}, { headers: { Authorization: `Bearer ${header.token}` } });
+    return this.http.post<verifyOTPResponse>(`${this.baseUrl}/auth/verify-otp`, { otp: header.otp }, { headers: { Authorization: `Bearer ${header.token}` } });
   }
 
   verifyEmail(token: string): Observable<{ message: string }> {
@@ -114,5 +114,12 @@ export class AuthService {
       .pipe(
         tap(response => this.tokenService.setAccessToken(response.accessToken))
       );
+  }
+
+  deleteAccount(payload: { password: string }): Observable<{message :string}> {
+    return this.http.delete<{message :string}>(`${this.baseUrl}/auth/delete-account`, {
+      body: payload, 
+      withCredentials: true
+    });
   }
 }

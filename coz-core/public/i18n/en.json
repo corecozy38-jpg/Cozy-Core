@@ -286,7 +286,10 @@
       "orders": "My Orders",
       "addresses": "Addresses",
       "logout": "Logout"
-    }
+    },
+    "delete_account": "Delete Account",
+    "delete_account_warning": "Once you delete your account, all your data will be permanently removed and cannot be recovered.",
+    "delete_account_confirm": "To confirm deletion, please enter your password."
   },
   "profile_": {
     "title": "My Profile",
@@ -566,11 +569,11 @@
       "term_title": "Term Title",
       "term_content": "Term Content",
       "no_terms": "No terms added yet.",
-        "banner": "Banner",
-        "banner_label": "Main Banner Image",
-        "add_banner": "Add Banner",
-        "banner_hint": "Recommended: high-quality image at least 1200×500 pixels",
-        "banner_uploading": "Uploading banner..."
+      "banner": "Banner",
+      "banner_label": "Main Banner Image",
+      "add_banner": "Add Banner",
+      "banner_hint": "Recommended: high-quality image at least 1200×500 pixels",
+      "banner_uploading": "Uploading banner..."
     },
     "faq": {
       "no_faqs": "No FAQs found",

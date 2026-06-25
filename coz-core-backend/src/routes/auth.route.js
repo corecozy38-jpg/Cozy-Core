@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, changePassword, forgotPassword, verifyOTP, resetPassword, verifyEmail } from '../controllers/auth.controller.js';
+import { register, login, changePassword, forgotPassword, verifyOTP, resetPassword, verifyEmail, deleteAccount } from '../controllers/auth.controller.js';
 import { optionalProtect, Protect } from '../middlewares/auth.middleware.js';
 import { logout, refreshAccessToken } from "../controllers/refreshToken.controller.js";
 
@@ -15,6 +15,8 @@ router.post('/reset-password', resetPassword);
 router.post("/logout", logout);
 router.post("/refresh-token", refreshAccessToken);
 router.get('/verify-email', verifyEmail);
+
+router.delete('/delete-account', Protect, deleteAccount);
 
 export default router;
 

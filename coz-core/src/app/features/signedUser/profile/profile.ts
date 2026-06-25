@@ -32,6 +32,12 @@ export class Profile {
   };
   changingPassword = false;
   passwordError = '';
+
+  showDeleteModal = false;
+  deletePassword = '';
+  deleteError = '';
+  isDeleting = false;
+
   isAdmin: boolean = false;
 
   constructor(
@@ -53,15 +59,12 @@ export class Profile {
     this._userService.getUserProfile().subscribe({
       next: (res) => {
         this.user.set(res.data);
-        if (this.user()?.role === 'admin') {
-          this.isAdmin = true;
-        } else {
-          this.isAdmin = false;
-        }
+        this.isAdmin = this.user()?.role === 'admin';
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || `${this._translate.instant('error.FTL')} ${this._translate.instant('nav.profile')} `);
+        this.error.set(err.error?.message || 
+          `${this._translate.instant('error.FTL')} ${this._translate.instant('nav.profile')} `);
         this.loading.set(false);
       }
     });
@@ -141,13 +144,49 @@ export class Profile {
     }).subscribe({
       next: () => {
         this._toast.success(this._translate.instant('auth.password_changed'));
-
         this.closePasswordModal();
         this.changingPassword = false;
       },
       error: (err) => {
         this.passwordError = err.error?.message || this._translate.instant('auth.change_password_failed');
         this.changingPassword = false;
+      }
+    });
+  }
+
+  openDeleteModal() {
+    this.showDeleteModal = true;
+    this.deletePassword = '';
+    this.deleteError = '';
+    this.isDeleting = false;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.deletePassword = '';
+    this.deleteError = '';
+    this.isDeleting = false;
+  }
+
+  confirmDeleteAccount() {
+    if (!this.deletePassword || this.deletePassword.length < 6) {
+      this.deleteError = 'Please enter your password to confirm deletion';
+      return;
+    }
+
+    this.isDeleting = true;
+    this.deleteError = '';
+
+    this._authService.deleteAccount({ password: this.deletePassword }).subscribe({
+      next: () => {
+        this._toast.success(this._translate.instant('profile.account_deleted'));
+        this.closeDeleteModal();
+        this._tokenService.clearAccessToken();
+        this._router.navigate(['/home']);
+      },
+      error: (err) => {
+        this.deleteError = err.error?.message || 'Failed to delete account';
+        this.isDeleting = false;
       }
     });
   }

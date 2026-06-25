@@ -25,9 +25,9 @@ export class Filter{
   filterOptions = {
     collections: ['SUMMER', 'WINTER'],
     availability: ['in_stock', 'out_of_stock'],
-    productTypes: ['T-SHIRTS', 'SWEATPANTS', 'COMPRESSIONS', 'JERSEY', 'SHORTS', 'TANK TOPS'],
+    productTypes: ['T-SHIRTS', 'SWEATPANTS'],
     colors: ['GREEN CAMO', 'BLACK CAMO', 'BURGUNDY', 'BLACK', 'NAVY', 'CHARCOAL', 'WHITE', 'HEATHER GREY'],
-    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+    sizes: ['M', 'L', 'XL', 'XXL']
   };
 
   emitFilters() {

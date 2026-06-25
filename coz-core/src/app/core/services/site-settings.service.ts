@@ -42,4 +42,10 @@ export class SiteSettingsService {
   getBanner():Observable<{message : string , data:Image}>{
     return this._http.get<{message : string , data:Image}>(`${this.baseUrl}/public-settings/banner`);
   }
+
+  getAvailableCollections(): Observable<{  data: string[]; message: string }> {
+    return this._http.get<{ data: string[]; message: string }>(
+      `${this.baseUrl}/public-settings/collections`
+    );
+  }
 }

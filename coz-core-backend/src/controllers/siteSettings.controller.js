@@ -22,6 +22,7 @@ import Order from "../models/order.model.js";
 import User from "../models/user.model.js";
 import Product from "../models/product.model.js";
 import Review from "../models/review.model.js";
+import { collectionTypes } from "../utils/constants.util.js";
 
 const getAbout = asyncHandler(async (req, res) => {
     const data = await getAboutService();
@@ -204,6 +205,21 @@ const getBanner = asyncHandler(async (req, res) => {
     });
 });
 
+const getAvailableCollections = asyncHandler(async (req, res) => {
+    const collectionChecks = collectionTypes.map(type => 
+        Product.exists({ collection: type })
+    );
+
+    const results = await Promise.all(collectionChecks);
+    const availableCollections = collectionTypes.filter((_, index) => results[index]);
+
+    res.status(200).json({
+        data: availableCollections,
+        message: 'Available collections retrieved successfully'
+    });
+});
+
+
 export {
     getAbout,
     getContact,
@@ -216,5 +232,6 @@ export {
     deleteOrderGuideImage,
     getDashboardData,
     updateBanner,
-    getBanner
+    getBanner,
+    getAvailableCollections
 }
