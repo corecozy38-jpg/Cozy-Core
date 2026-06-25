@@ -46,6 +46,8 @@ export class Navbar implements OnInit, OnDestroy {
       children: [
         { label: 'nav.summer_collection', path: '/collections/summer' },
         { label: 'nav.winter_collection', path: '/collections/winter' },
+        { label: 'nav.spring_collection', path: '/collections/spring' },
+        { label: 'nav.fall_collection', path: '/collections/fall' },
         { label: 'nav.all_products', path: '/products' }
       ]
     }
@@ -69,34 +71,10 @@ export class Navbar implements OnInit, OnDestroy {
   ngOnInit() {
     this.navLinks = JSON.parse(JSON.stringify(this.staticNavLinks));
 
-    this._siteSettingsService.getAvailableCollections().subscribe({
-      next: (res) => {
-        const collections = res.data || [];
-        const collectionsIndex = this.navLinks.findIndex(link => link.label === 'nav.collections');
+    this.loadCollections();
 
-        if (collections.length > 0) {
-          const collectionChildren = collections.map((collection: string) => ({
-            label: `nav.${collection.toLowerCase()}_collection`,
-            path: `/collections/${collection.toLowerCase()}`
-          }));
-          collectionChildren.push({ label: 'nav.all_products', path: '/products' });
-
-          if (collectionsIndex !== -1) {
-            this.navLinks[collectionsIndex].children = collectionChildren;
-          }
-        } else {
-          if (collectionsIndex !== -1) {
-            this.navLinks.splice(collectionsIndex, 1);
-          }
-          const allProductsExists = this.navLinks.some(link => link.label === 'nav.all_products');
-          if (!allProductsExists) {
-            this.navLinks.push({ label: 'nav.all_products', path: '/products' });
-          }
-        }
-      },
-      error: () => {
-        console.warn('Failed to load collections, using default links.');
-      }
+    this._siteSettingsService.attributesUpdated$.subscribe(() => {
+      this.loadCollections();
     });
 
     this.cartSubscription = this._cartService.cartCount$.subscribe(count => {
@@ -122,6 +100,37 @@ export class Navbar implements OnInit, OnDestroy {
     this.cartSubscription?.unsubscribe();
     this.authSubscription?.unsubscribe();
     this.routerSubscription?.unsubscribe();
+  }
+
+  private loadCollections(): void {
+    this._siteSettingsService.getAvailableCollections().subscribe({
+      next: (res) => {
+        const collections = res.data || [];
+        const collectionsIndex = this.navLinks.findIndex(link => link.label === 'nav.collections');
+        if (collections.length > 0) {
+          const collectionChildren = collections.map((collection: string) => ({
+            label: `nav.${collection.toLowerCase()}_collection`,
+            path: `/collections/${collection.toLowerCase()}`
+          }));
+          collectionChildren.push({ label: 'nav.all_products', path: '/products' });
+
+          if (collectionsIndex !== -1) {
+            this.navLinks[collectionsIndex].children = collectionChildren;
+          }
+        } else {
+          if (collectionsIndex !== -1) {
+            this.navLinks.splice(collectionsIndex, 1);
+          }
+          const allProductsExists = this.navLinks.some(link => link.label === 'nav.all_products');
+          if (!allProductsExists) {
+            this.navLinks.push({ label: 'nav.all_products', path: '/products' });
+          }
+        }
+      },
+      error: () => {
+        console.warn('Failed to load collections, using default links.');
+      }
+    });
   }
 
   checkLoginStatus() {

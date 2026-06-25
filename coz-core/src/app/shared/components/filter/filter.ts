@@ -1,7 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { SiteSettingsService } from '../../../core/services/site-settings.service';
+import { LanguageService } from '../../../core/services/language.service';
+import { AttributeItem, ColorItem } from '../../../core/interfaces/settings';
 
 @Component({
   selector: 'app-filter',
@@ -10,7 +13,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   templateUrl: './filter.html',
   styleUrls: ['./filter.css']
 })
-export class Filter{
+export class Filter implements OnInit {
   @Input() hideCollectionFilter = false;
   @Output() filtersChange = new EventEmitter<any>();
 
@@ -22,13 +25,58 @@ export class Filter{
   minPrice: number | null = null;
   maxPrice: number | null = null;
 
-  filterOptions = {
-    collections: ['SUMMER', 'WINTER'],
-    availability: ['in_stock', 'out_of_stock'],
-    productTypes: ['T-SHIRTS', 'SWEATPANTS'],
-    colors: ['GREEN CAMO', 'BLACK CAMO', 'BURGUNDY', 'BLACK', 'NAVY', 'CHARCOAL', 'WHITE', 'HEATHER GREY'],
-    sizes: ['M', 'L', 'XL', 'XXL']
-  };
+  productTypes: AttributeItem[] = [];
+  collectionTypes: AttributeItem[] = [];
+  colors: ColorItem[] = [];
+  sizes: string[] = [];
+
+  availabilityOptions = ['in_stock', 'out_of_stock'];
+
+  loading = true;
+  currentLang = 'en';
+
+  constructor(
+    private _siteSettingsService: SiteSettingsService,
+    private _languageService: LanguageService,
+    private _translate: TranslateService
+  ) {}
+
+  ngOnInit() {
+    this.currentLang = this._languageService.getCurrentLang();
+    this._languageService.currentLang$.subscribe(lang => {
+      this.currentLang = lang;
+    });
+
+    this.loadAttributes();
+  }
+
+  loadAttributes() {
+    this.loading = true;
+    this._siteSettingsService.getAttributes().subscribe({
+      next: (res) => {
+        if (res.success !== false) {
+          const data = res.data;
+          this.productTypes = data.productTypes || [];
+          this.collectionTypes = data.collectionTypes || [];
+          this.colors = data.colors || [];
+          this.sizes = data.sizes || [];
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.productTypes = [];
+        this.collectionTypes = [];
+        this.colors = [];
+        this.sizes = [];
+      }
+    });
+  }
+
+  getTranslatedName(item: AttributeItem | ColorItem): string {
+    if (!item) return '';
+    return this.currentLang === 'ar' ? item.name_ar || item.name : item.name;
+  }
 
   emitFilters() {
     this.filtersChange.emit({
@@ -53,7 +101,7 @@ export class Filter{
     return array.includes(value);
   }
 
-  public clearFilters() {
+  clearFilters() {
     this.selectedCollections = [];
     this.selectedAvailability = [];
     this.selectedProductTypes = [];
@@ -62,5 +110,9 @@ export class Filter{
     this.minPrice = null;
     this.maxPrice = null;
     this.emitFilters();
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 }

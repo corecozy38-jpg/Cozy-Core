@@ -388,6 +388,9 @@
       "low_stock": "Low Stock Products"
     },
     "products": {
+      "select_product_type": "Select product type",
+      "select_collection": "Select collection",
+      "select_size": "Select size",
       "title": "Products",
       "add_new": "Add New Product",
       "image": "Image",
@@ -539,9 +542,11 @@
       "user": "User",
       "admin": "Admin",
       "title": "Users Managment",
+      "deleted_success":"User deleted successfully",
       "phone": "Phone Number",
       "addresses_count": "Addresses Count",
-      "addresses": "Addresses"
+      "addresses": "Addresses",
+      "change_role_confirmation":"Are you sure you want to change this user's role?"
     },
     "settings": {
       "hero": "Hero Section",
@@ -578,7 +583,17 @@
       "banner_label": "Main Banner Image",
       "add_banner": "Add Banner",
       "banner_hint": "Recommended: high-quality image at least 1200×500 pixels",
-      "banner_uploading": "Uploading banner..."
+      "banner_size":"Maz size is 10MB",
+      "banner_uploading": "Uploading banner...",
+      "attributes": "Attributes",
+      "product_types": "Product Types",
+      "collection_types": "Collection Types",
+      "colors": "Colors",
+      "sizes": "Sizes",
+      "add": "Add",
+      "name_en": "Name (EN)",
+      "name_ar": "Name (AR)",
+      "no_items": "No items added"
     },
     "faq": {
       "no_faqs": "No FAQs found",
@@ -625,7 +640,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "back": "Back",
-    "yes_clear": "Yes, clear",
+    "yes_clear": "Yes",
     "close": "Close",
     "loading": "Loading...",
     "error": "Error occurred",

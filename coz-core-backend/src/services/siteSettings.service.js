@@ -146,6 +146,7 @@ const getBannerService = async () => {
 };
 
 export {
+    getSiteSettingsService,
     getAboutService,
     getContactService,
     getOrderGuideService,

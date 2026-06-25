@@ -1,5 +1,4 @@
 import { Schema, model } from "mongoose";
-import { productCategories, collectionTypes } from "../utils/constants.util.js";
 import slugify from "slugify";
 
 const productSchema = new Schema({
@@ -13,14 +12,12 @@ const productSchema = new Schema({
         unique: true 
     },
     features: [String],
-    productType:
-    {
+    productType: {
         type: String,
-        required: true,
-        enum: productCategories
+        required: true
     },
     sizeFit: {  
-        fitType: { type: String , required:true },   
+        fitType: { type: String, required: true },   
         modelHeight: { type: Number }, 
         wearingSize: { type: String }   
     },
@@ -35,8 +32,7 @@ const productSchema = new Schema({
                 publicId: { type: String, trim: true },
             },
         }
-    }
-    ,
+    },
     rating: {
         type: Number,
         default: 0,
@@ -46,18 +42,16 @@ const productSchema = new Schema({
     reviewsCount: { type: Number, default: 0 }, 
     collection: {
         type: String,
-        required: true,
-        enum: collectionTypes
+        required: true
     },
-    price :{
+    price: {
         type: Number,
         required: true
     },
-    compareAtPrice:{
+    compareAtPrice: {
         type: Number,
         default: null
     },
-
     name_ar: { 
         type: String, 
         default: null 
@@ -87,9 +81,8 @@ const productSchema = new Schema({
             publicId: String 
         }
     }
-},{
+}, {
     timestamps: true
 });
-
 
 export default model("Product", productSchema);

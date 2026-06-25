@@ -4,10 +4,11 @@ import Review from "../models/review.model.js";
 import {
     translateProductToArabic,
     translateEnToAr,
-    translateArrayEnToAr   
+    translateArrayEnToAr
 } from "../utils/geminiTranslation.util.js";
 import { v2 as cloudinary } from "cloudinary";
 import slugify from 'slugify';
+import { getSiteSettingsService } from "./siteSettings.service.js";
 
 const generateUniqueSlug = async (name) => {
     let baseSlug = slugify(name, { lower: true, strict: true });
@@ -27,7 +28,37 @@ const generateSku = (productName, colorName, size, index = 0) => {
     return sku;
 };
 
+const validateProductAttributes = async (productData, variantsData) => {
+    const settings = await getSiteSettingsService();
+
+    const validProductTypes = settings.productTypes.map(t => t.name);
+    if (!validProductTypes.includes(productData.productType)) {
+        throw new Error(`Invalid product type: ${productData.productType}`);
+    }
+
+    const validCollections = settings.collectionTypes.map(c => c.name);
+    if (!validCollections.includes(productData.collection)) {
+        throw new Error(`Invalid collection: ${productData.collection}`);
+    }
+
+    const validColors = settings.colors.map(c => c.name);
+    const validSizes = settings.sizes;
+
+    for (const variant of variantsData) {
+        if (!validColors.includes(variant.colorName)) {
+            throw new Error(`Invalid color: ${variant.colorName}`);
+        }
+        for (const sizeObj of variant.sizes) {
+            if (!validSizes.includes(sizeObj.size)) {
+                throw new Error(`Invalid size: ${sizeObj.size}`);
+            }
+        }
+    }
+};
+
 const createProductService = async (productData) => {
+    await validateProductAttributes(productData, productData.variants);
+
     const slug = await generateUniqueSlug(productData.name);
 
     const textsToTranslate = {
@@ -53,7 +84,7 @@ const createProductService = async (productData) => {
             wearingSize: productData.sizeFit.wearingSize || null,
         };
     }
-    
+
     let sizeGuid_ar = null;
     if (productData.sizeGuid && productData.sizeGuid.description) {
         const desc_ar = translations.sizeGuideDesc_ar || productData.sizeGuid.description;
@@ -85,7 +116,7 @@ const createProductService = async (productData) => {
         for (let i = 0; i < productData.variants.length; i++) {
             const variantData = productData.variants[i];
             const colorName_ar = colorNames_ar[i] || variantData.colorName;
-            
+
             const processedSizes = variantData.sizes.map((sizeObj, idx) => {
                 let sku = sizeObj.sku;
                 if (!sku || sku.trim() === '') {
@@ -120,6 +151,15 @@ const createProductService = async (productData) => {
 const updateProductService = async (slug, updateData) => {
     const product = await Product.findOne({ slug });
     if (!product) throw new Error("Product not found");
+
+    if (updateData.productType || updateData.collection || updateData.variants) {
+        const tempProductData = {
+            productType: updateData.productType || product.productType,
+            collection: updateData.collection || product.collection,
+        };
+        const tempVariantsData = updateData.variants || product.variants;
+        await validateProductAttributes(tempProductData, tempVariantsData);
+    }
 
     const textsToTranslate = {};
     let shouldTranslate = false;
@@ -280,4 +320,8 @@ const deleteProductService = async (slug) => {
     };
 };
 
-export { createProductService, updateProductService, deleteProductService };
+export {
+    createProductService,
+    updateProductService,
+    deleteProductService
+};

@@ -86,7 +86,7 @@
                   [class.bg-red-50]="errors['productType']"
                 >
                   <span class="{{ !product.productType ? 'text-gray-400' : 'text-gray-800' }}">
-                    {{ product.productType || 'Select product type' }}
+                    {{ product.productType || ('admin.products.select_product_type' | translate) }}
                   </span>
                   <svg
                     class="w-5 h-5 text-gray-500 transition-transform duration-200"
@@ -107,15 +107,15 @@
                   <div
                     class="absolute z-50 mt-2 w-full bg-white rounded-xl shadow-xl border border-gray-200 py-2 max-h-60 overflow-y-auto animate-slideDown"
                   >
-                    @for (type of productTypes; track type) {
+                    @for (item of productTypesOptions; track item.name) {
                       <button
                         type="button"
-                        (click)="selectProductType(type)"
+                        (click)="selectProductType(item.name)"
                         class="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors duration-150 {{
-                          product.productType === type ? 'bg-gray-100 font-medium' : ''
+                          product.productType === item.name ? 'bg-gray-100 font-medium' : ''
                         }}"
                       >
-                        {{ type }}
+                        {{ getTranslatedName(item) }}
                       </button>
                     }
                   </div>
@@ -142,7 +142,7 @@
                   [class.bg-red-50]="errors['collection']"
                 >
                   <span class="{{ !product.collection ? 'text-gray-400' : 'text-gray-800' }}">
-                    {{ product.collection || 'Select collection' }}
+                    {{ product.collection || ('admin.products.select_collection' | translate) }}
                   </span>
                   <svg
                     class="w-5 h-5 text-gray-500 transition-transform duration-200"
@@ -163,15 +163,15 @@
                   <div
                     class="absolute z-50 mt-2 w-full bg-white rounded-xl shadow-xl border border-gray-200 py-2 max-h-60 overflow-y-auto animate-slideDown"
                   >
-                    @for (col of collections; track col) {
+                    @for (item of collectionTypesOptions; track item.name) {
                       <button
                         type="button"
-                        (click)="selectCollection(col)"
+                        (click)="selectCollection(item.name)"
                         class="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors duration-150 {{
-                          product.collection === col ? 'bg-gray-100 font-medium' : ''
+                          product.collection === item.name ? 'bg-gray-100 font-medium' : ''
                         }}"
                       >
-                        {{ col }}
+                        {{ getTranslatedName(item) }}
                       </button>
                     }
                   </div>
@@ -354,21 +354,19 @@
           </h2>
         </div>
         <div class="p-6 space-y-6">
-          <!-- Description -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1.5">
               {{ 'admin.products.size_guide_description' | translate }}
             </label>
             <textarea
               [(ngModel)]="sizeGuideDescription"
-                name="sizeGuideDescription"
+              name="sizeGuideDescription"
               rows="3"
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm resize-y"
               placeholder="Describe the size guide..."
             ></textarea>
           </div>
 
-          <!-- Image -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1.5">
               {{ 'admin.products.size_guide_image' | translate }}
@@ -381,7 +379,7 @@
                 (change)="uploadSizeGuideImage($event)"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 [disabled]="uploadingSizeGuide"
-                accept="image/*" 
+                accept="image/*"
               />
               <div class="flex flex-col items-center justify-center">
                 <svg
@@ -507,7 +505,7 @@
                   <input
                     type="text"
                     [(ngModel)]="variant.colorName"
-                    name="colorName-{{vi}}"
+                    name="colorName-{{ vi }}"
                     class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
                     placeholder="e.g. Black"
                   />
@@ -523,8 +521,8 @@
                       <input
                         type="color"
                         [(ngModel)]="variant.colorCode"
-                        name="colorCode-{{vi}}"
-                        [ngModelOptions]="{standalone: true}"
+                        name="colorCode-{{ vi }}"
+                        [ngModelOptions]="{ standalone: true }"
                         class="absolute inset-0 w-full h-full cursor-pointer"
                         style="border: none; padding: 0"
                       />
@@ -532,7 +530,7 @@
                     <input
                       type="text"
                       [(ngModel)]="variant.colorCode"
-                      name="colorCode-{{vi}}"
+                      name="colorCode-{{ vi }}"
                       class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
                       placeholder="#000000"
                     />
@@ -625,7 +623,7 @@
                           class="flex items-center justify-between w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-white hover:border-gray-400 focus:ring-2 focus:ring-gray-400 transition-all duration-200 text-sm font-medium"
                         >
                           <span class="{{ !size.size ? 'text-gray-400' : 'text-gray-700' }}">
-                            {{ size.size || 'Size' }}
+                            {{ size.size || ('admin.products.select_size' | translate) }}
                           </span>
                           <svg
                             class="w-4 h-4 text-gray-500 transition-transform duration-200"
@@ -663,8 +661,7 @@
                       <input
                         type="number"
                         [(ngModel)]="size.stock"
-                          name="stock-{{vi}}-{{si}}"
-
+                        name="stock-{{ vi }}-{{ si }}"
                         placeholder="Stock"
                         class="w-20 px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-white text-sm"
                         required
@@ -674,7 +671,7 @@
                         type="text"
                         [(ngModel)]="size.sku"
                         placeholder="SKU"
-                          name="sku-{{vi}}-{{si}}"
+                        name="sku-{{ vi }}-{{ si }}"
                         class="flex-1 min-w-[80px] px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-white text-sm"
                       />
                       <button

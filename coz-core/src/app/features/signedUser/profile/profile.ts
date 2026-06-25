@@ -63,7 +63,7 @@ export class Profile {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 
+        this.error.set(err.error?.message ||
           `${this._translate.instant('error.FTL')} ${this._translate.instant('nav.profile')} `);
         this.loading.set(false);
       }
@@ -179,7 +179,7 @@ export class Profile {
 
     this._authService.deleteAccount({ password: this.deletePassword }).subscribe({
       next: () => {
-        this._toast.success(this._translate.instant('profile.account_deleted'));
+        this._toast.success(this._translate.instant('profile.deleted_success'));
         this.closeDeleteModal();
         this._tokenService.clearAccessToken();
         this._router.navigate(['/home']);

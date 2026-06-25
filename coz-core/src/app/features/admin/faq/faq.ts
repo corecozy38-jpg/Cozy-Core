@@ -23,7 +23,7 @@ export class Faq {
     question: '',
     answer: '',
     category: 'general',
-    isActive: true,   
+    isActive: false,
   };
   saving = false;
 
@@ -57,7 +57,12 @@ export class Faq {
   openAddModal() {
     this.isEditing = false;
     this.editingId = null;
-    this.formData = { question: '', answer: '', category: 'general', isActive: true };
+    this.formData = {
+      question: '',
+      answer: '',
+      category: 'general',
+      isActive: false,
+    };
     this.showModal = true;
   }
 
@@ -68,7 +73,7 @@ export class Faq {
       question: faq.question,
       answer: faq.answer,
       category: faq.category || 'general',
-      isActive: faq.isActive !== undefined ? faq.isActive : true, 
+      isActive: faq.isActive !== undefined ? faq.isActive : false,
     };
     this.showModal = true;
   }
@@ -126,7 +131,7 @@ export class Faq {
 
     this._adminService.deleteFaq(id).subscribe({
       next: () => {
-        this._toast.success('admin.faq.deleted_success');
+        this._toast.success('admin.faq.delete_success');
         this.loadFaqs();
       },
       error: (err) => {

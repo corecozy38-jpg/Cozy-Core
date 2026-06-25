@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://cozy-core-backend.vercel.app'
+  //apiUrl: 'https://cozy-core-backend.vercel.app'
+  apiUrl: 'http://localhost:5000'
 };

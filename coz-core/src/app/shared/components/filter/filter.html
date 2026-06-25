@@ -1,131 +1,145 @@
 <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-  <div class="flex justify-between items-center mb-4">
-    <h3 class="font-bold text-lg">{{ 'products.filters' | translate }}</h3>
-  </div>
 
-  @if (!hideCollectionFilter) {
+  @if (loading) {
+    <div class="flex justify-center py-8">
+      <div
+        class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-gray-800"
+      ></div>
+    </div>
+  }
+
+  @if (!loading) {
+    <!-- Collections -->
+    @if (!hideCollectionFilter && collectionTypes.length > 0) {
+      <div class="border-b border-gray-100 py-3">
+        <h4 class="font-medium text-gray-800 mb-2">{{ 'products.collection' | translate }}</h4>
+        <div class="space-y-1">
+          @for (item of collectionTypes; track item.name) {
+            <label class="flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                [checked]="isSelected(selectedCollections, item.name)"
+                (change)="toggleSelection(selectedCollections, item.name)"
+              />
+              {{ getTranslatedName(item) }}
+            </label>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Availability -->
     <div class="border-b border-gray-100 py-3">
-      <h4 class="font-medium text-gray-800 mb-2">{{ 'products.collection' | translate }}</h4>
+      <h4 class="font-medium text-gray-800 mb-2">{{ 'products.availability' | translate }}</h4>
       <div class="space-y-1">
-        @for (opt of filterOptions.collections; track opt) {
+        @for (opt of availabilityOptions; track opt) {
           <label class="flex items-center gap-2 text-sm text-gray-600">
             <input
               type="checkbox"
-              [checked]="isSelected(selectedCollections, opt)"
-              (change)="toggleSelection(selectedCollections, opt)"
+              [checked]="isSelected(selectedAvailability, opt)"
+              (change)="toggleSelection(selectedAvailability, opt)"
             />
-            {{ opt }}
+            {{ 'products.' + opt | translate }}
           </label>
         }
       </div>
     </div>
+
+    <!-- Product Types -->
+    @if (productTypes.length > 0) {
+      <div class="border-b border-gray-100 py-3">
+        <h4 class="font-medium text-gray-800 mb-2">{{ 'products.product_type' | translate }}</h4>
+        <div class="space-y-1">
+          @for (item of productTypes; track item.name) {
+            <label class="flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                [checked]="isSelected(selectedProductTypes, item.name)"
+                (change)="toggleSelection(selectedProductTypes, item.name)"
+              />
+              {{ getTranslatedName(item) }}
+            </label>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Colors -->
+    @if (colors.length > 0) {
+      <div class="border-b border-gray-100 py-3">
+        <h4 class="font-medium text-gray-800 mb-2">{{ 'products.color' | translate }}</h4>
+        <div class="flex flex-wrap gap-2">
+          @for (item of colors; track item.name) {
+            <button
+              (click)="toggleSelection(selectedColors, item.name)"
+              class="px-2 py-1 text-xs rounded-full border transition"
+              [class.bg-gray-800]="isSelected(selectedColors, item.name)"
+              [class.text-white]="isSelected(selectedColors, item.name)"
+              [class.border-gray-300]="!isSelected(selectedColors, item.name)"
+            >
+              {{ getTranslatedName(item) }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Sizes -->
+    @if (sizes.length > 0) {
+      <div class="border-b border-gray-100 py-3">
+        <h4 class="font-medium text-gray-800 mb-2">{{ 'products.size' | translate }}</h4>
+        <div class="flex flex-wrap gap-2">
+          @for (size of sizes; track size) {
+            <button
+              (click)="toggleSelection(selectedSizes, size)"
+              class="w-9 h-9 rounded-full border text-sm transition"
+              [class.bg-gray-800]="isSelected(selectedSizes, size)"
+              [class.text-white]="isSelected(selectedSizes, size)"
+              [class.border-gray-300]="!isSelected(selectedSizes, size)"
+            >
+              {{ size }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Price Range -->
+    <div class="py-3">
+      <h4 class="font-medium text-gray-800 mb-3">{{ 'products.price_range' | translate }}</h4>
+      <div class="flex gap-3">
+        <div class="relative flex-1">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm">
+            {{ 'product.currency' | translate }}
+          </span>
+          <input
+            type="number"
+            [(ngModel)]="minPrice"
+            (ngModelChange)="emitFilters()"
+            placeholder="{{ 'products.min_price' | translate }}"
+            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
+        </div>
+        <div class="relative flex-1">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm">
+            {{ 'product.currency' | translate }}
+          </span>
+          <input
+            type="number"
+            [(ngModel)]="maxPrice"
+            (ngModelChange)="emitFilters()"
+            placeholder="{{ 'products.max_price' | translate }}"
+            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
+        </div>
+      </div>
+    </div>
+
+    <button
+      (click)="clearFilters()"
+      class="mt-3 w-full bg-gray-800 text-white py-2 rounded-full text-sm font-medium hover:bg-gray-700 transition"
+    >
+      {{ 'products.clear_all' | translate }}
+    </button>
   }
-
-  <!-- Availability -->
-  <div class="border-b border-gray-100 py-3">
-    <h4 class="font-medium text-gray-800 mb-2">{{ 'products.availability' | translate }}</h4>
-    <div class="space-y-1">
-      @for (opt of filterOptions.availability; track opt) {
-        <label class="flex items-center gap-2 text-sm text-gray-600">
-          <input
-            type="checkbox"
-            [checked]="isSelected(selectedAvailability, opt)"
-            (change)="toggleSelection(selectedAvailability, opt)"
-          />
-          {{ 'products.' + opt | translate }}
-        </label>
-      }
-    </div>
-  </div>
-
-  <!-- Product Type -->
-  <div class="border-b border-gray-100 py-3">
-    <h4 class="font-medium text-gray-800 mb-2">{{ 'products.product_type' | translate }}</h4>
-    <div class="space-y-1">
-      @for (opt of filterOptions.productTypes; track opt) {
-        <label class="flex items-center gap-2 text-sm text-gray-600">
-          <input
-            type="checkbox"
-            [checked]="isSelected(selectedProductTypes, opt)"
-            (change)="toggleSelection(selectedProductTypes, opt)"
-          />
-          {{ opt }}
-        </label>
-      }
-    </div>
-  </div>
-
-  <!-- Color -->
-  <div class="border-b border-gray-100 py-3">
-    <h4 class="font-medium text-gray-800 mb-2">{{ 'products.color' | translate }}</h4>
-    <div class="flex flex-wrap gap-2">
-      @for (opt of filterOptions.colors; track opt) {
-        <button
-          (click)="toggleSelection(selectedColors, opt)"
-          class="px-2 py-1 text-xs rounded-full border transition"
-          [class.bg-gray-800]="isSelected(selectedColors, opt)"
-          [class.text-white]="isSelected(selectedColors, opt)"
-          [class.border-gray-300]="!isSelected(selectedColors, opt)"
-        >
-          {{ opt }}
-        </button>
-      }
-    </div>
-  </div>
-
-  <!-- Size -->
-  <div class="border-b border-gray-100 py-3">
-    <h4 class="font-medium text-gray-800 mb-2">{{ 'products.size' | translate }}</h4>
-    <div class="flex flex-wrap gap-2">
-      @for (opt of filterOptions.sizes; track opt) {
-        <button
-          (click)="toggleSelection(selectedSizes, opt)"
-          class="w-9 h-9 rounded-full border text-sm transition"
-          [class.bg-gray-800]="isSelected(selectedSizes, opt)"
-          [class.text-white]="isSelected(selectedSizes, opt)"
-          [class.border-gray-300]="!isSelected(selectedSizes, opt)"
-        >
-          {{ opt }}
-        </button>
-      }
-    </div>
-  </div>
-
-  <!-- Price Range -->
-  <div class="py-3">
-    <h4 class="font-medium text-gray-800 mb-3">{{ 'products.price_range' | translate }}</h4>
-    <div class="flex gap-3">
-      <div class="relative flex-1">
-        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm"
-          >{{'product.currency' | translate}}</span
-        >
-        <input
-          type="number"
-          [(ngModel)]="minPrice"
-          (ngModelChange)="emitFilters()"
-          placeholder="{{ 'products.min_price' | translate }}"
-          class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
-        />
-      </div>
-      <div class="relative flex-1">
-        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm"
-          >LE</span
-        >
-        <input
-          type="number"
-          [(ngModel)]="maxPrice"
-          (ngModelChange)="emitFilters()"
-          placeholder="{{ 'products.max_price' | translate }}"
-          class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
-        />
-      </div>
-    </div>
-  </div>
-
-  <button
-    (click)="clearFilters()"
-    class="mt-3 w-full bg-gray-800 text-white py-2 rounded-full text-sm font-medium hover:bg-gray-700 transition"
-  >
-    {{ 'products.clear_all' | translate }}
-  </button>
 </div>

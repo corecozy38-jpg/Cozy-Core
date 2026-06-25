@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { AdminProductResponse, AdminUserListResponse, AdminUserResponse, AdminVariantListResponse, AdminVariantResponse, FaqListResponse, FaqResponse, SiteSettings, SiteSettingsResponse, UploadImageResponse, UploadMultipleImagesResponse } from '../interfaces/admin.interface';
 import { Faq } from '../interfaces/admin.interface';
 import { Products } from '../../features/products/products';
-import { AboutInfo, AboutResponse, AdminReviewListResponse, AdminReviewStatusResponse, ContactInfo, ContactInfoResponse, DashboardData, OrderGuide, OrderGuideResponse, TermsInfo, TermsInfoResponse } from '../interfaces/settings';
+import { AboutInfo, AboutResponse, AdminReviewListResponse, AdminReviewStatusResponse, AttributesResponse, ContactInfo, ContactInfoResponse, DashboardData, OrderGuide, OrderGuideResponse, ProductAttributes, TermsInfo, TermsInfoResponse } from '../interfaces/settings';
 import { AdminOrdersListResponse, UpdateOrderStatusResponse } from '../interfaces/order.interface';
 
 @Injectable({
@@ -101,7 +101,7 @@ export class AdminService {
     return this._http.get<AdminUserResponse>(`${this.baseUrl}/user/admin/${userId}`);
   }
 
-  updateUserRole(userId: string, role: 'user' | 'admin'): Observable<AdminUserResponse> {
+  updateUserRole(userId: string, role: string): Observable<AdminUserResponse> {
     return this._http.put<AdminUserResponse>(
       `${this.baseUrl}/user/admin/${userId}/role`,
       { role }
@@ -192,6 +192,10 @@ export class AdminService {
   // BANNER
   updateBanner(body:Image):Observable<{message : string, data:Image}>{
     return this._http.put<{message : string, data:Image}>(`${this.baseUrl}/admin/settings/banner`,body);
+  }
+
+  updateAttributes(data: Partial<ProductAttributes>): Observable<AttributesResponse> {
+    return this._http.put<AttributesResponse>(`${this.baseUrl}/admin/settings/attributes`, data);
   }
 
 }

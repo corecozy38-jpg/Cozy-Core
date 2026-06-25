@@ -19,7 +19,8 @@ import {
     updateTerms,
     deleteOrderGuideImage,
     getDashboardData,
-    updateBanner
+    updateBanner,
+    updateAttributes
 } from "../controllers/siteSettings.controller.js"
 import { Router} from "express"
 import { isAdmin, Protect } from "../middlewares/auth.middleware.js";
@@ -40,7 +41,7 @@ router.get("/faqs", getAllFaqs);
 router.get("/faqs/active", getActiveFaqs); 
 router.post("/faq", createFaq);
 router.put("/faq/:faqId", updateFaq);
-router.delete("/faqs/:faqId", deleteFaq);
+router.delete("/faq/:faqId", deleteFaq);
 
 
 // SYSTEM CONTENT
@@ -60,4 +61,6 @@ router.put("/orders/:orderId/status", updateOrderStatus);
 //BANNER
 router.put("/banner", updateBanner);
 
+
+router.put('/attributes', updateAttributes);
 export default router;

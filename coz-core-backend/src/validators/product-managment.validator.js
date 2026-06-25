@@ -1,6 +1,4 @@
 import Joi from 'joi';
-import { productCategories, collectionTypes, ProductSizes } from '../utils/constants.util.js';
-
 
 const imageSchema = Joi.object({
     url: Joi.string().uri().required(),
@@ -8,7 +6,7 @@ const imageSchema = Joi.object({
 });
 
 const sizeSchema = Joi.object({
-    size: Joi.string().valid(...ProductSizes).required(),
+    size: Joi.string().required(),
     stock: Joi.number().integer().min(0).required(),
     sku: Joi.string().optional()
 });
@@ -34,32 +32,27 @@ const sizeGuidSchema = Joi.object({
     }).optional().allow(null)
 });
 
-
 export const createProductValidator = (data) => {
     const schema = Joi.object({
         name: Joi.string().required(),
-        productType: Joi.string().valid(...productCategories).required(),
-        collection: Joi.string().valid(...collectionTypes).required(),
+        productType: Joi.string().required(),
+        collection: Joi.string().required(),
         price: Joi.number().positive().required(),
         compareAtPrice: Joi.number().positive().optional().allow(null),
         features: Joi.array().items(Joi.string()).min(1).required(),
-
         sizeFit: sizeFitSchema.required(),
-
         sizeGuid: sizeGuidSchema.optional(),
-
         variants: Joi.array().items(variantSchema).min(1).required()
     });
 
     return schema.validate(data, { abortEarly: false });
 };
 
-
 export const updateProductValidator = (data) => {
     const schema = Joi.object({
         name: Joi.string().optional(),
-        productType: Joi.string().valid(...productCategories).optional(),
-        collection: Joi.string().valid(...collectionTypes).optional(),
+        productType: Joi.string().optional(),
+        collection: Joi.string().optional(),
         price: Joi.number().positive().optional(),
         compareAtPrice: Joi.number().positive().optional().allow(null),
         features: Joi.array().items(Joi.string()).optional(),
@@ -83,12 +76,12 @@ export const updateProductValidator = (data) => {
                 publicId: Joi.string().required()
             })).optional(),
             sizes: Joi.array().items(Joi.object({
-                size: Joi.string().valid(...ProductSizes).required(),
+                size: Joi.string().required(),
                 stock: Joi.number().integer().min(0).required(),
                 sku: Joi.string().optional()
             })).optional()
         })).optional()
     }).min(1);
     
-    return schema.validate(data, { abortEarly: false});
+    return schema.validate(data, { abortEarly: false });
 };

@@ -35,7 +35,7 @@ const createFaqService = async (faqData, createdBy) => {
         answer: faqData.answer,
         answer_ar: answer_ar || faqData.answer,
         category: faqData.category || 'general',
-        isActive: faqData.isActive !== undefined ? faqData.isActive : true, 
+        isActive: faqData.isActive !== undefined ? faqData.isActive : false,
         createdBy
     });
 

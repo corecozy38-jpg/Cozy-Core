@@ -1,13 +1,12 @@
 import { Schema, model } from "mongoose";
-import { ProductSizes } from "../utils/constants.util.js";
 
 const variantSchema = new Schema({
-    product :{
+    product: {
         type: Schema.Types.ObjectId,
         ref: 'Product',
         required: true
     },
-    colorName :{
+    colorName: {
         type: String,
         required: true
     },
@@ -15,7 +14,7 @@ const variantSchema = new Schema({
         type: String, 
         default: null 
     },
-    colorCode :{
+    colorCode: {
         type: String,
         default: null
     },
@@ -24,8 +23,7 @@ const variantSchema = new Schema({
         {
             size: { 
                 type: String, 
-                required: true , 
-                enum :ProductSizes 
+                required: true
             },
             stock: { 
                 type: Number, 
@@ -34,7 +32,7 @@ const variantSchema = new Schema({
             },
             sku: { 
                 type: String, 
-                unique: true  , 
+                unique: true, 
                 sparse: true 
             },
         }
@@ -42,6 +40,5 @@ const variantSchema = new Schema({
 }, {
     timestamps: true
 });
-
 
 export default model('Variant', variantSchema);

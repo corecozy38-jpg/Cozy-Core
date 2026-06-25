@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
-import {  getFilteredProductsService, getProductBySlugService } from '../services/product.service.js';
-import { productCategories, collectionTypes, ProductSizes } from '../utils/constants.util.js';
-
+import { getFilteredProductsService, getProductBySlugService } from '../services/product.service.js';
+import SiteSettings from '../models/siteSettings.model.js';
+import { getSiteSettingsService } from "../services/siteSettings.service.js";
 const toArray = (value) => {
     if (!value) return [];
     if (Array.isArray(value)) return value;
@@ -30,6 +30,11 @@ const getAllProducts = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'Invalid maxPrice' });
     }
 
+    const settings = await getSiteSettingsService();
+    const productTypesList = settings.productTypes.map(t => t.name);
+    const collectionTypesList = settings.collectionTypes.map(c => c.name);
+    const sizesList = settings.sizes;
+
     const filterAndValidate = (values, validList, originalValues) => {
         const valid = values.filter(v => validList.includes(v));
         if (originalValues.length > 0 && valid.length === 0) {
@@ -38,26 +43,25 @@ const getAllProducts = asyncHandler(async (req, res) => {
         return { empty: false, valid };
     };
 
-    const ptResult = filterAndValidate(productType, productCategories, productType);
+    const ptResult = filterAndValidate(productType, productTypesList, productType);
     if (ptResult.empty) {
         return sendEmptyResponse(res, page, limit);
     }
     productType = ptResult.valid;
 
-    const colResult = filterAndValidate(collection, collectionTypes, collection);
+    const colResult = filterAndValidate(collection, collectionTypesList, collection);
     if (colResult.empty) {
         return sendEmptyResponse(res, page, limit);
     }
     collection = colResult.valid;
 
-    const szResult = filterAndValidate(sizes, ProductSizes, sizes);
+    const szResult = filterAndValidate(sizes, sizesList, sizes);
     if (szResult.empty) {
         return sendEmptyResponse(res, page, limit);
     }
     sizes = szResult.valid;
 
     const lowStockThreshold = parseInt(req.query.lowStockThreshold) || 5;
-
 
     const availResult = filterAndValidate(availability, ['in_stock', 'out_of_stock', 'low_stock'], availability);
     if (availResult.empty) {
@@ -111,10 +115,8 @@ const getProductBySlug = asyncHandler(async (req, res) => {
     if (!product) {
         return res.status(404).json({ message: 'Product not found' });
     }
-    res.status(200).json({ message : 'Product retrieved successfully', data: product });
+    res.status(200).json({ message: 'Product retrieved successfully', data: product });
 });
-
-
 
 export { 
     getAllProducts, 

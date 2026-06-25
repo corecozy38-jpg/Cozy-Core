@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import {  AboutResponse,  ContactForm,  ContactInfoResponse, OrderGuideResponse, TermsInfoResponse } from '../interfaces/settings';
+import { BehaviorSubject, Observable } from 'rxjs';
+import {  AboutResponse,  AttributesResponse,  ContactForm,  ContactInfoResponse, OrderGuideResponse, TermsInfoResponse } from '../interfaces/settings';
 import { FaqListResponse } from '../interfaces/admin.interface';
 import { Image } from '../interfaces/product.interface';
 
@@ -11,8 +11,15 @@ import { Image } from '../interfaces/product.interface';
 })
 export class SiteSettingsService {
   private baseUrl = environment.apiUrl;
+  private attributesUpdatedSource = new BehaviorSubject<boolean>(false);
+  attributesUpdated$ = this.attributesUpdatedSource.asObservable();
+
 
   constructor(private _http: HttpClient) {}
+
+  notifyAttributesUpdated() {
+    this.attributesUpdatedSource.next(true);
+  }
 
   getAbout():Observable<AboutResponse>{
     return this._http.get<AboutResponse>(`${this.baseUrl}/public-settings/about`);
@@ -47,5 +54,9 @@ export class SiteSettingsService {
     return this._http.get<{ data: string[]; message: string }>(
       `${this.baseUrl}/public-settings/collections`
     );
+  }
+
+  getAttributes(): Observable<AttributesResponse> {
+    return this._http.get<AttributesResponse>(`${this.baseUrl}/public-settings/attributes`);
   }
 }

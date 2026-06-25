@@ -207,3 +207,29 @@ export interface DashboardData {
   topProducts: TopProductItem[];
   recentReviews: Review[];
 }
+
+export interface AttributeItem {
+  name: string;
+  name_ar?: string;
+}
+
+
+export interface ColorItem {
+  name: string;
+  name_ar?: string;
+  code: string;
+}
+
+
+export interface ProductAttributes {
+  productTypes: AttributeItem[];
+  collectionTypes: AttributeItem[];
+  colors: ColorItem[];
+  sizes: string[];
+}
+
+export interface AttributesResponse {
+  success?: boolean;
+  message: string;
+  data: ProductAttributes;
+}

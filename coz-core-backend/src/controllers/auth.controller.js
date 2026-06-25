@@ -7,7 +7,7 @@ import Lock from "../models/lock.model.js";
 import Cart from "../models/cart.model.js";
 import Order from '../models/order.model.js';
 import RefreshToken from '../models/refreshToken.model.js';
-
+import Review from "../models/review.model.js";
 
 const register = asyncHandler(async (req, res) => {
     const { error } = registerValidator(req.body);
@@ -134,27 +134,40 @@ const deleteAccount = asyncHandler(async (req, res) => {
     }
 
     const now = new Date();
-    const lock = await Lock.findOneAndUpdate(
-        { 
-            name: 'admin_delete_lock',
+    const lockName = 'admin_delete_lock';
+
+    let lock = await Lock.findOne({ name: lockName });
+    if (!lock) {
+        lock = new Lock({
+            name: lockName,
+            lockedAt: null,
+            lockedBy: null,
+            expiresAt: null
+        });
+        await lock.save();
+    }
+
+    const updatedLock = await Lock.findOneAndUpdate(
+        {
+            name: lockName,
             $or: [
                 { lockedAt: null },
                 { lockedAt: { $lt: new Date(now.getTime() - 60000) } }
             ]
         },
-        { 
-            $set: { 
-                lockedAt: now, 
+        {
+            $set: {
+                lockedAt: now,
                 lockedBy: userId,
                 expiresAt: new Date(now.getTime() + 60000)
-            } 
+            }
         },
-        { new: true, upsert: true }
+        { new: true }
     );
 
-    if (lock && lock.lockedBy?.toString() !== userId && lock.lockedAt && lock.lockedAt > new Date(now.getTime() - 60000)) {
-        return res.status(409).json({ 
-            message: 'Another admin deletion is in progress. Please try again later.' 
+    if (!updatedLock) {
+        return res.status(409).json({
+            message: 'Another admin deletion is in progress. Please try again later.'
         });
     }
 
@@ -177,33 +190,31 @@ const deleteAccount = asyncHandler(async (req, res) => {
             Order.deleteMany({ user: userId }),
             RefreshToken.deleteMany({ user: userId }),
             Review.updateMany(
-            { user: userId },
-            { 
-                $set: { 
-                    user: null, 
-                    guestName: "Deleted User", 
-                    guestEmail: null 
-                } 
-            }
-        )
+                { user: userId },
+                {
+                    $set: {
+                        user: null,
+                        guestName: "Deleted User",
+                        guestEmail: null
+                    }
+                }
+            )
         ]);
 
         await User.findByIdAndDelete(userId);
-
         res.clearCookie('refreshToken');
 
-        res.status(200).json({ 
+        res.status(200).json({
             message: 'Account deleted successfully'
         });
 
     } finally {
         await Lock.findOneAndUpdate(
-            { name: 'admin_delete_lock', lockedBy: userId },
+            { name: lockName, lockedBy: userId },
             { $set: { lockedAt: null, lockedBy: null, expiresAt: null } }
         );
     }
 });
-
 
 export {
     register,

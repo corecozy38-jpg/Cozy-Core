@@ -80,7 +80,7 @@ export class Users {
     this.loadUsers();
   }
 
-  async updateRole(userId: string, newRole: 'user' | 'admin') {
+  async updateRole(userId: string, newRole: string) {
     const confirmed = await this._confirmDialog.open({
       title: this._translate.instant('common.confirm'),
       message: this._translate.instant('admin.users.change_role_confirmation'),
@@ -91,10 +91,13 @@ export class Users {
 
     this._adminService.updateUserRole(userId, newRole).subscribe({
       next: () => {
+        console.log(newRole);
+
         this._toast.success('admin.users.role_updated');
         this.loadUsers();
       },
       error: (err) => {
+        console.log(newRole);
         this._toast.error(err.error?.message || 'admin.users.role_update_failed');
       }
     });

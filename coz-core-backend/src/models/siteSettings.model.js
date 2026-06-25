@@ -80,13 +80,39 @@ const siteSettingsSchema = new Schema(
         banner: {
             url: {
                 type: String,
-                required:true
+                default:''
             },
             publicId: {
                 type: String,
-                required:true
+                default:''
             }
-        }
+        },
+        productTypes: {
+            type: [{
+                name: { type: String, required: true },
+                name_ar: { type: String, default: null }
+            }],
+            default: []
+        },
+        collectionTypes: {
+            type: [{
+                name: { type: String, required: true },
+                name_ar: { type: String, default: null }
+            }],
+            default: []
+        },
+        colors: {
+            type: [{
+                name: { type: String, required: true },
+                name_ar: { type: String, default: null },
+                code: { type: String, default: null }
+            }],
+            default: []
+        },
+        sizes: {
+            type: [String],
+            default: []
+        },
     },
     { timestamps: true },
 );

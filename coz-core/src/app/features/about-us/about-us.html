@@ -46,7 +46,7 @@
           </div>
           <div>
             <p class="text-sm  font-medium text-gray-400">{{ 'contact.email' | translate }}</p>
-            <a href="mailto:{{ contact.email }}" class="text-white hover:text-gray-200 font-semibold">{{ contact.email }}</a>
+            <a href="mailto:{{ contact.email }}" class="text-white hover:text-gray-200 font-semibold" >{{ contact.email }}</a>
           </div>
         </div>
 
@@ -59,7 +59,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-400">{{ 'contact.instagram' | translate }}</p>
-            <a href="https://instagram.com/{{ contact.instagram }}" target="_blank"
+            <a href="{{ contact.instagram }}" target="_blank"
               class="text-white hover:text-gray-200 font-semibold">@{{ contact.instagram }}</a>
           </div>
         </div>
@@ -105,7 +105,7 @@
         </div>
 
         <button type="submit" [disabled]="submitting"
-          class="w-full py-3 bg-gray-900 text-white rounded-xl 
+          class="w-full py-3 bg-gray-900 text-white rounded-xl
           font-semibold hover:bg-gray-800 transition disabled:opacity-50">
           @if (submitting) {
           <span

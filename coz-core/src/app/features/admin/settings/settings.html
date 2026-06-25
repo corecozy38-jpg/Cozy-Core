@@ -2,178 +2,308 @@
   <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ 'admin.settings.title' | translate }}</h1>
 
   @if (loading()) {
-    <div class="flex justify-center py-12">
-      <div class="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-gray-900"></div>
-    </div>
+  <div class="flex justify-center py-12">
+    <div class="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-gray-900"></div>
+  </div>
   }
 
   @if (error()) {
-    <div class="bg-red-50 text-red-600 p-4 rounded-xl text-center mb-6">
-      {{ error() | translate }}
-    </div>
+  <div class="bg-red-50 text-red-600 p-4 rounded-xl text-center mb-6">
+    {{ error() | translate }}
+  </div>
   }
 
   @if (!loading()) {
-    <div class="flex flex-wrap gap-3 mb-8 border-b border-gray-200 pb-4">
-      <button (click)="setActiveTab('contact')" [class]="getTabClass('contact')">
-        {{ 'admin.settings.contact' | translate }}
-      </button>
-      <button (click)="setActiveTab('about')" [class]="getTabClass('about')">
-        {{ 'admin.settings.about' | translate }}
-      </button>
-      <button (click)="setActiveTab('terms')" [class]="getTabClass('terms')">
-        {{ 'admin.settings.terms' | translate }}
-      </button>
-      <button (click)="setActiveTab('orderGuide')" [class]="getTabClass('orderGuide')">
-        {{ 'admin.settings.order_guide' | translate }}
-      </button>
-      <button (click)="setActiveTab('banner')" [class]="getTabClass('banner')">
-        {{ 'admin.settings.banner' | translate }}
+  <div class="flex flex-wrap gap-3 mb-8 border-b border-gray-200 pb-4">
+    <button (click)="setActiveTab('contact')" [class]="getTabClass('contact')">
+      {{ 'admin.settings.contact' | translate }}
+    </button>
+    <button (click)="setActiveTab('about')" [class]="getTabClass('about')">
+      {{ 'admin.settings.about' | translate }}
+    </button>
+    <button (click)="setActiveTab('terms')" [class]="getTabClass('terms')">
+      {{ 'admin.settings.terms' | translate }}
+    </button>
+    <button (click)="setActiveTab('orderGuide')" [class]="getTabClass('orderGuide')">
+      {{ 'admin.settings.order_guide' | translate }}
+    </button>
+    <button (click)="setActiveTab('banner')" [class]="getTabClass('banner')">
+      {{ 'admin.settings.banner' | translate }}
+    </button>
+    <button (click)="setActiveTab('attributes')" [class]="getTabClass('attributes')">
+      {{ 'admin.settings.attributes' | translate }}
+    </button>
+  </div>
+
+  @if (activeTab === 'contact') {
+  <div class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{
+        'admin.settings.phone' | translate
+        }}</label>
+      <input type="text" [(ngModel)]="contact().phone"
+        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{
+        'admin.settings.email' | translate
+        }}</label>
+      <input type="email" [(ngModel)]="contact().email"
+        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{
+        'admin.settings.instagram' | translate
+        }}</label>
+      <input type="text" [(ngModel)]="contact().instagram"
+        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
+    </div>
+  </div>
+  }
+
+  @if (activeTab === 'about') {
+  <div class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{
+        'admin.settings.about_title' | translate
+        }}</label>
+      <input type="text" [(ngModel)]="about().title"
+        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{
+        'admin.settings.about_description' | translate
+        }}</label>
+      <textarea rows="4" [(ngModel)]="about().description"
+        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"></textarea>
+    </div>
+  </div>
+  }
+
+  @if (activeTab === 'terms') {
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <p class="text-sm text-gray-500">{{ 'admin.settings.terms_items' | translate }}</p>
+      <button (click)="addTerm()"
+        class="px-4 py-2 bg-gray-900 text-white rounded-full text-sm hover:bg-gray-800 transition">
+        + {{ 'admin.settings.add_term' | translate }}
       </button>
     </div>
 
-    @if (activeTab === 'contact') {
-      <div class="space-y-4">
+    @for (item of terms(); track $index; let i = $index) {
+    <div class="border border-gray-200 rounded-xl p-4 relative">
+      <button (click)="removeTerm(i)"
+        class="absolute top-2 ltr:right-2 rtl:left-2 text-gray-400 hover:text-red-500 transition">
+        ×
+      </button>
+      <div class="space-y-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.settings.phone' | translate }}</label>
-          <input type="text" [(ngModel)]="contact().phone"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{
+            'admin.settings.term_title' | translate
+            }}</label>
+          <input type="text" [(ngModel)]="item.title"
+            class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition bg-gray-50 hover:bg-white text-sm" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.settings.email' | translate }}</label>
-          <input type="email" [(ngModel)]="contact().email"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.settings.instagram' | translate }}</label>
-          <input type="text" [(ngModel)]="contact().instagram"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
-        </div>
-      </div>
-    }
-
-    @if (activeTab === 'about') {
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.settings.about_title' | translate }}</label>
-          <input type="text" [(ngModel)]="about().title"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.settings.about_description' | translate }}</label>
-          <textarea rows="4" [(ngModel)]="about().description"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"></textarea>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{
+            'admin.settings.term_content' | translate
+            }}</label>
+          <textarea rows="2" [(ngModel)]="item.content"
+            class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition bg-gray-50 hover:bg-white text-sm"></textarea>
         </div>
       </div>
+    </div>
+    } @empty {
+    <div class="text-center py-8 text-gray-400 text-sm">
+      {{ 'admin.settings.no_terms' | translate }}
+    </div>
     }
+  </div>
+  }
 
-    @if (activeTab === 'terms') {
-      <div class="space-y-4">
-        <div class="flex justify-between items-center">
-          <p class="text-sm text-gray-500">{{ 'admin.settings.terms_items' | translate }}</p>
-          <button (click)="addTerm()"
-            class="px-4 py-2 bg-gray-900 text-white rounded-full text-sm hover:bg-gray-800 transition">
-            + {{ 'admin.settings.add_term' | translate }}
+  @if (activeTab === 'orderGuide') {
+  <div class="space-y-4">
+    <p class="text-sm text-gray-500">{{ 'admin.settings.order_guide_images' | translate }}</p>
+
+    <div cdkDropList (cdkDropListDropped)="dropOrderGuideImage($event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      @for (img of orderGuide().images; track $index; let i = $index) {
+      <div cdkDrag class="relative group cursor-grab active:cursor-grabbing">
+        <img [src]="img.url" class="w-full h-32 object-cover rounded-lg border border-gray-200" />
+        <button (click)="removeOrderGuideImage($index)"
+          class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-black/80 opacity-0 group-hover:opacity-100 transition">
+          ×
+        </button>
+        <div class="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+          #{{ $index + 1 }}
+        </div>
+      </div>
+      }
+
+      <label for="orderGuideInput"
+        class="h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:border-gray-500 transition cursor-pointer"
+        [class.opacity-50]="uploading()">
+        @if (uploading()) {
+        <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-400 border-t-gray-900"></div>
+        } @else {
+        <span>+ {{ 'admin.settings.add_image' | translate }}</span>
+        }
+      </label>
+      <input id="orderGuideInput" type="file" accept="image/*" (change)="onOrderGuideImagesSelected($event)"
+        class="hidden" />
+    </div>
+  </div>
+  }
+
+  @if (activeTab === 'banner') {
+  <div class="space-y-4">
+    <p class="text-sm text-gray-500">{{ 'admin.settings.banner_label' | translate }}</p>
+    <div class="relative group">
+      @if (uploadingBanner()) {
+      <div
+        class="relative w-full aspect-[21/9] rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center">
+        <div class="flex flex-col items-center gap-3">
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-gray-900"></div>
+          <span class="text-sm text-gray-500">{{
+            'admin.settings.banner_uploading' | translate
+            }}</span>
+        </div>
+      </div>
+      } @else if (banner().url) {
+      <div class="relative w-full aspect-[21/9] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+        <img [src]="banner().url" alt="Banner" class="w-full h-full object-cover" />
+        <button (click)="removeBannerImage()"
+          class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-black/80 transition">
+          ×
+        </button>
+      </div>
+      } @else {
+      <div
+        class="w-full aspect-[21/9] rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-gray-500 transition cursor-pointer bg-gray-50">
+        <label for="bannerInput" class="w-full h-full flex items-center justify-center cursor-pointer">
+          <span>+ {{ 'admin.settings.add_banner' | translate }}</span>
+        </label>
+      </div>
+      }
+      <input id="bannerInput" type="file" accept="image/*" (change)="onBannerImageSelected($event)" class="hidden" />
+    </div>
+    <p class="text-xs text-gray-400">{{ 'admin.settings.banner_hint' | translate }}</p>
+    <p class="text-xs text-gray-400">{{`admin.settings.banner_size` | translate}}</p>
+  </div>
+  }
+
+  @if (activeTab === 'attributes') {
+  <div class="space-y-6">
+    <!-- Product Types -->
+    <div class="border-b border-gray-200 pb-4">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-gray-800">
+          {{ 'admin.settings.product_types' | translate }}
+        </h4>
+        <button (click)="addProductType()"
+          class="px-3 py-1 bg-gray-800 text-white text-xs rounded-full hover:bg-gray-700 transition">
+          + {{ 'admin.settings.add' | translate }}
+        </button>
+      </div>
+      @for (item of productTypes(); track $index; let i = $index) {
+      <div class="flex gap-2 mb-2 items-center">
+        <input type="text" [(ngModel)]="item.name" placeholder="{{ 'admin.settings.name_en' | translate }}"
+          class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:outline-none" />
+
+        <button (click)="removeProductType(i)" class=" bg-red-500 text-white px-2 rounded-2xl  font-light ">
+          ×
+        </button>
+      </div>
+      } @empty {
+      <p class="text-sm text-gray-400">{{ 'admin.settings.no_items' | translate }}</p>
+      }
+    </div>
+
+    <!-- Collection Types -->
+    <div class="border-b border-gray-200 pb-4">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-gray-800">
+          {{ 'admin.settings.collection_types' | translate }}
+        </h4>
+        <button (click)="addCollectionType()"
+          class="px-3 py-1 bg-gray-800 text-white text-xs rounded-full hover:bg-gray-700 transition">
+          + {{ 'admin.settings.add' | translate }}
+        </button>
+      </div>
+      @for (item of collectionTypes(); track $index; let i = $index) {
+      <div class="flex gap-2 mb-2 items-center">
+        <input type="text" [(ngModel)]="item.name" placeholder="{{ 'admin.settings.name_en' | translate }}"
+          class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:outline-none" />
+
+        <button (click)="removeCollectionType(i)" class="bg-red-500 text-white px-2 rounded-2xl  font-light ">
+          ×
+        </button>
+      </div>
+      } @empty {
+      <p class="text-sm text-gray-400">{{ 'admin.settings.no_items' | translate }}</p>
+      }
+    </div>
+
+    <!-- Colors -->
+    <div class="border-b border-gray-200 pb-4">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-gray-800">{{ 'admin.settings.colors' | translate }}</h4>
+        <button (click)="addColor()"
+          class="px-3 py-1 bg-gray-800 text-white text-xs rounded-full hover:bg-gray-700 transition">
+          + {{ 'admin.settings.add' | translate }}
+        </button>
+      </div>
+      @for (item of colors(); track $index; let i = $index) {
+      <div class="flex gap-2 mb-2 items-center">
+        <input type="text" [(ngModel)]="item.name" placeholder="{{ 'admin.settings.name_en' | translate }}"
+          class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:outline-none" />
+
+        <input type="color" [(ngModel)]="item.code"
+          class="w-10 h-10 p-1 border border-gray-300 rounded-lg cursor-pointer" />
+        <button (click)="removeColor(i)" class=" bg-red-500 text-white px-2 rounded-2xl  font-light ">
+          ×
+        </button>
+      </div>
+      } @empty {
+      <p class="text-sm text-gray-400">{{ 'admin.settings.no_items' | translate }}</p>
+      }
+    </div>
+
+    <!-- Sizes -->
+    <div>
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-gray-800">{{ 'admin.settings.sizes' | translate }}</h4>
+        <button (click)="addSize()"
+          class="px-3 py-1 bg-gray-800 text-white text-xs rounded-full hover:bg-gray-700 transition">
+          + {{ 'admin.settings.add' | translate }}
+        </button>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        @for (size of sizes(); track $index; let i = $index) {
+        <div class="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1">
+          <input type="text" [(ngModel)]="sizes()[i]"
+            class="w-12 text-center bg-transparent text-sm focus:outline-none border-b border-transparent focus:border-gray-400" />
+          <button (click)="removeSize(i)" class=" bg-red-500 text-white px-2 rounded-2xl  font-light ">
+            ×
           </button>
         </div>
-
-        @for (item of terms(); track $index; let i = $index) {
-          <div class="border border-gray-200 rounded-xl p-4 relative">
-            <button (click)="removeTerm(i)"
-              class="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition">
-              ×
-            </button>
-            <div class="space-y-3">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.settings.term_title' | translate }}</label>
-                <input type="text" [(ngModel)]="item.title"
-                  class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition bg-gray-50 hover:bg-white text-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.settings.term_content' | translate }}</label>
-                <textarea rows="2" [(ngModel)]="item.content"
-                  class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-gray-400 focus:border-gray-400 transition bg-gray-50 hover:bg-white text-sm"></textarea>
-              </div>
-            </div>
-          </div>
-        } @empty {
-          <div class="text-center py-8 text-gray-400 text-sm">
-            {{ 'admin.settings.no_terms' | translate }}
-          </div>
         }
       </div>
-    }
-
-    @if (activeTab === 'orderGuide') {
-      <div class="space-y-4">
-        <p class="text-sm text-gray-500">{{ 'admin.settings.order_guide_images' | translate }}</p>
-
-        <div
-          cdkDropList
-          (cdkDropListDropped)="dropOrderGuideImage($event)"
-          class="grid grid-cols-1 sm:grid-cols-3 gap-4"
-        >
-          @for (img of orderGuide().images; track $index; let i = $index) {
-            <div cdkDrag class="relative group cursor-grab active:cursor-grabbing">
-              <img [src]="img.url" class="w-full h-32 object-cover rounded-lg border border-gray-200" />
-              <button (click)="removeOrderGuideImage($index)"
-                class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-black/80 opacity-0 group-hover:opacity-100 transition">
-                ×
-              </button>
-              <div class="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
-                #{{ $index + 1 }}
-              </div>
-            </div>
-          }
-
-          <label for="orderGuideInput"
-            class="h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:border-gray-500 transition cursor-pointer"
-            [class.opacity-50]="uploading()">
-            @if (uploading()) {
-              <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-400 border-t-gray-900"></div>
-            } @else {
-              <span>+ {{ 'admin.settings.add_image' | translate }}</span>
-            }
-          </label>
-          <input id="orderGuideInput" type="file" accept="image/*" (change)="onOrderGuideImagesSelected($event)" class="hidden" />
-        </div>
-      </div>
-    }
-
-    @if (activeTab === 'banner') {
-      <div class="space-y-4">
-        <p class="text-sm text-gray-500">{{ 'admin.settings.banner_label' | translate }}</p>
-        <div class="relative group">
-          @if (banner().url) {
-            <div class="relative w-full aspect-[21/9] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-              <img [src]="banner().url" alt="Banner" class="w-full h-full object-cover" />
-              <button (click)="removeBannerImage()"
-                class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-black/80 transition">
-                ×
-              </button>
-            </div>
-          } @else {
-            <div class="w-full aspect-[21/9] rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-gray-500 transition cursor-pointer bg-gray-50">
-              <label for="bannerInput" class="w-full h-full flex items-center justify-center cursor-pointer">
-                <span>+ {{ 'admin.settings.add_banner' | translate }}</span>
-              </label>
-            </div>
-          }
-          <input id="bannerInput" type="file" accept="image/*" (change)="onBannerImageSelected($event)" class="hidden" />
-        </div>
-        <p class="text-xs text-gray-400">{{ 'admin.settings.banner_hint' | translate }}</p>
-      </div>
-    }
-
-    <div class="mt-8 flex justify-end">
-      <button (click)="saveSettings()" [disabled]="saving()"
-        class="px-8 py-2.5 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition disabled:opacity-50">
-        @if (saving()) {
-          <span class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-        } @else {
-          {{ 'common.save' | translate }}
-        }
-      </button>
+      @if (sizes().length === 0) {
+      <p class="text-sm text-gray-400">{{ 'admin.settings.no_items' | translate }}</p>
+      }
     </div>
+  </div>
+  }
+
+  <div class="mt-8 flex justify-end">
+    <button (click)="saveSettings()" [disabled]="saving()"
+      class="px-8 py-2.5 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition disabled:opacity-50">
+      @if (saving()) {
+      <span class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+      } @else {
+      {{ 'common.save' | translate }}
+      }
+    </button>
+  </div>
   }
 </div>

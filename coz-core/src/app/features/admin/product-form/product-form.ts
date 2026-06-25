@@ -15,7 +15,9 @@ import {
 } from '../../../core/interfaces/product.interface';
 import { AdminProductResponse } from '../../../core/interfaces/admin.interface';
 import { ProductService } from '../../../core/services/product.service';
-import { Products } from '../../products/products';
+import { SiteSettingsService } from '../../../core/services/site-settings.service';
+import { LanguageService } from '../../../core/services/language.service';
+import { AttributeItem } from '../../../core/interfaces/settings';
 
 type SizeFormData = Omit<Size, 'sku'> & { sku?: string };
 
@@ -33,8 +35,8 @@ type ProductFormData = Omit<Product, '_id' | 'slug' | 'rating' | 'reviewsCount' 
 export class ProductFormComponent implements OnInit {
   product: ProductFormData = {
     name: '',
-    productType: 'T-SHIRTS',
-    collection: 'SUMMER',
+    productType: '',
+    collection: '',
     features: [],
     price: 0,
     compareAtPrice: null,
@@ -49,14 +51,13 @@ export class ProductFormComponent implements OnInit {
   saving = signal(false);
   error = signal<string | null>(null);
 
-  productTypes = ['T-SHIRTS', 'JERSEY', 'SWEATPANTS', 'SHORTS', 'TANK TOPS', 'COMPRESSIONS'];
-  collections = ['SUMMER', 'WINTER'];
-  sizesOptions = ['S', 'M', 'L', 'XL', 'XXL'];
+  productTypesOptions: AttributeItem[] = [];
+  collectionTypesOptions: AttributeItem[] = [];
+  sizesOptions: string[] = [];
 
   newFeature = '';
   isUploading = false;
   uploadingSizeGuide = false;
-
 
   errors: { [key: string]: string | null } = {
     name: null,
@@ -68,6 +69,10 @@ export class ProductFormComponent implements OnInit {
     variants: null,
   };
 
+  productTypeDropdownOpen = false;
+  collectionDropdownOpen = false;
+  sizeDropdownOpen: { [key: string]: boolean } = {};
+
   constructor(
     private _adminService: AdminService,
     private _route: ActivatedRoute,
@@ -75,16 +80,37 @@ export class ProductFormComponent implements OnInit {
     private _toast: ToastService,
     private _productService: ProductService,
     private _translate: TranslateService,
+    private _siteSettingsService: SiteSettingsService,
+    private _languageService: LanguageService,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
+    this.loadAttributes();
     this._route.params.subscribe(params => {
       const slug = params['slug'];
       if (slug) {
         this.isEditMode = true;
         this.productSlug = slug;
         this.loadProduct(slug);
+      }
+    });
+  }
+
+  loadAttributes() {
+    this._siteSettingsService.getAttributes().subscribe({
+      next: (res) => {
+        if (res.success !== false) {
+          const data = res.data;
+          this.productTypesOptions = data.productTypes || [];
+          this.collectionTypesOptions = data.collectionTypes || [];
+          this.sizesOptions = data.sizes || [];
+        }
+      },
+      error: () => {
+        this.productTypesOptions = [];
+        this.collectionTypesOptions = [];
+        this.sizesOptions = [];
       }
     });
   }
@@ -115,9 +141,8 @@ export class ProductFormComponent implements OnInit {
           })) || []
         };
         this.loading.set(false);
-      this.errors['features'] = this.product.features.length > 0 ? null : this._translate.instant('admin.products.errors.features_required');
-      this.loading.set(false);
-      this.cdr.detectChanges();
+        this.errors['features'] = this.product.features.length > 0 ? null : this._translate.instant('admin.products.errors.features_required');
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to load product');
@@ -126,27 +151,32 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
+  getTranslatedName(item: AttributeItem): string {
+    if (!item) return '';
+    return this._languageService.getCurrentLang() === 'ar' ? item.name_ar || item.name : item.name;
+  }
+
   addFeature(): void {
-  const trimmed = this.newFeature.trim();
-  if (trimmed) {
-    this.product.features.push(trimmed);
-    this.newFeature = '';
-    this.errors['features'] = null;
-    if (this.error() === this._translate.instant('admin.products.errors.form_invalid')) {
+    const trimmed = this.newFeature.trim();
+    if (trimmed) {
+      this.product.features.push(trimmed);
+      this.newFeature = '';
+      this.errors['features'] = null;
+      if (this.error() === this._translate.instant('admin.products.errors.form_invalid')) {
+        this.error.set(null);
+      }
+      this.cdr.detectChanges();
+    }
+  }
+
+  removeFeature(index: number): void {
+    this.product.features.splice(index, 1);
+    this.errors['features'] = this.product.features.length > 0 ? null : this._translate.instant('admin.products.errors.features_required');
+    if (this.product.features.length > 0 && this.error() === this._translate.instant('admin.products.errors.form_invalid')) {
       this.error.set(null);
     }
     this.cdr.detectChanges();
   }
-}
-
-removeFeature(index: number): void {
-  this.product.features.splice(index, 1);
-  this.errors['features'] = this.product.features.length > 0 ? null : this._translate.instant('admin.products.errors.features_required');
-  if (this.product.features.length > 0 && this.error() === this._translate.instant('admin.products.errors.form_invalid')) {
-    this.error.set(null);
-  }
-  this.cdr.detectChanges();
-}
 
   addVariant(): void {
     this.product.variants.push({
@@ -175,13 +205,11 @@ removeFeature(index: number): void {
     }
 
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
-
     this._uploadMultipleVariantImages(variantIndex, filesToUpload);
   }
 
   private async _uploadMultipleVariantImages(variantIndex: number, files: File[]): Promise<void> {
     this.isUploading = true;
-
     try {
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData();
@@ -194,10 +222,8 @@ removeFeature(index: number): void {
       });
 
       const uploadedImages = await Promise.all(uploadPromises);
-
       this.product.variants[variantIndex].images.push(...uploadedImages);
       this.isUploading = false;
-
       if (uploadedImages.length > 0) {
         this._toast.success(`${uploadedImages.length} image(s) uploaded successfully`);
       }
@@ -209,6 +235,7 @@ removeFeature(index: number): void {
       if (input) input.value = '';
     }
   }
+
   removeVariantImage(variantIndex: number, imageIndex: number): void {
     this.product.variants[variantIndex].images.splice(imageIndex, 1);
   }
@@ -224,7 +251,6 @@ removeFeature(index: number): void {
   removeSize(variantIndex: number, sizeIndex: number): void {
     this.product.variants[variantIndex].sizes.splice(sizeIndex, 1);
   }
-
 
   validateField(field: string): void {
     switch (field) {
@@ -263,8 +289,6 @@ removeFeature(index: number): void {
     return Object.values(this.errors).every(e => e === null);
   }
 
-
-
   async uploadSizeGuideImage(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -289,6 +313,7 @@ removeFeature(index: number): void {
       this.uploadingSizeGuide = false;
     }
   }
+
   saveProduct(): void {
     if (!this.validateAll()) {
       this.error.set(this._translate.instant('admin.products.errors.form_invalid'));
@@ -347,11 +372,6 @@ removeFeature(index: number): void {
     return 'In Stock';
   }
 
-
-  //  DROP LISTS SELECTOR
-  productTypeDropdownOpen = false;
-  selectedProductType = '';
-
   toggleProductTypeDropdown() {
     this.productTypeDropdownOpen = !this.productTypeDropdownOpen;
   }
@@ -361,9 +381,6 @@ removeFeature(index: number): void {
     this.productTypeDropdownOpen = false;
   }
 
-  collectionDropdownOpen = false;
-  selectedCollection = '';
-
   toggleCollectionDropdown() {
     this.collectionDropdownOpen = !this.collectionDropdownOpen;
   }
@@ -372,9 +389,6 @@ removeFeature(index: number): void {
     this.product.collection = col;
     this.collectionDropdownOpen = false;
   }
-
-  sizeDropdownOpen: { [key: string]: boolean } = {};
-
 
   toggleSizeDropdown(variantIndex: number, sizeIndex: number): void {
     const key = `${variantIndex}-${sizeIndex}`;
@@ -403,7 +417,6 @@ removeFeature(index: number): void {
     }
   }
 
-  // TO MAKE SURE SIZEGUIDE NOT NULL
   get sizeGuideDescription(): string {
     return this.product.sizeGuid?.description || '';
   }

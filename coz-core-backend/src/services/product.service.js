@@ -213,7 +213,6 @@ const getProductBySlugService = async (slug, lang = "en") => {
         ({ price, compareAtPrice, ...rest }) => rest,
     );
 
-
     const isNew =
         new Date() - new Date(product.createdAt) < 30 * 24 * 60 * 60 * 1000;
     const isOnSale =
@@ -222,7 +221,6 @@ const getProductBySlugService = async (slug, lang = "en") => {
         v.sizes.some((size) => size.stock > 0),
     );
     const isSoldOut = !hasStock;
-
 
     return {
         ...product,

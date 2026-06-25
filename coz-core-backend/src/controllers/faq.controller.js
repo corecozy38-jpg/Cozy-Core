@@ -34,7 +34,7 @@ const getActiveFaqs = asyncHandler(async (req, res) => {
 });
 
 const createFaq = asyncHandler(async (req, res) => {
-    let { question, answer, category, displayOrder } = req.body;
+    let { question, answer, category, displayOrder, isActive } = req.body;
     const createdBy = req.user._id;
 
     if (!question || !answer) {
@@ -42,9 +42,9 @@ const createFaq = asyncHandler(async (req, res) => {
             message: "Question and answer (in English) are required"
         });
     }
-    category= category.toLowerCase();
+    category = category.toLowerCase();
     const faq = await createFaqService(
-        { question, answer, category, displayOrder },
+        { question, answer, category, displayOrder, isActive },
         createdBy
     );
 

@@ -23,10 +23,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/signedUser/user-layout/user-layout').then(m => m.UserLayout),
     canActivate: [profileGuard],
     children: [
-      { path: 'profile', loadComponent: () => import('./features/signedUser/profile/profile').then(m => m.Profile) },
-      { path: 'orders', loadComponent: () => import('./features/signedUser/orders/orders').then(m => m.Orders) },
-      { path: 'addresses', loadComponent: () => import('./features/signedUser/user-addresses/user-addresses').then(m => m.UserAddresses) },
-      { path: 'order/:id', loadComponent: () => import('./features/signedUser/order-details/order-details').then(m => m.OrderDetails) },
+      { path: 'profile',
+        loadComponent: () => import('./features/signedUser/profile/profile').then(m => m.Profile) },
+      { path: 'orders',
+        loadComponent: () => import('./features/signedUser/orders/orders').then(m => m.Orders) },
+      { path: 'addresses',
+        loadComponent: () => import('./features/signedUser/user-addresses/user-addresses').then(m => m.UserAddresses) },
+      { path: 'order/:id',
+        loadComponent: () => import('./features/signedUser/order-details/order-details').then(m => m.OrderDetails) },
       { path: '', redirectTo: 'profile', pathMatch: 'full' },
     ]
   },

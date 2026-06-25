@@ -4,7 +4,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AboutInfo, ContactInfo, OrderGuide, OrderGuideImage, TermItem } from '../../../core/interfaces/settings';
+import { AboutInfo, AttributeItem, ColorItem, ContactInfo, OrderGuide, OrderGuideImage, TermItem } from '../../../core/interfaces/settings';
 import { SiteSettingsService } from '../../../core/services/site-settings.service';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Image } from '../../../core/interfaces/product.interface';
@@ -21,6 +21,11 @@ export class Settings {
   terms = signal<TermItem[]>([]);
   orderGuide = signal<OrderGuide>({ images: [] });
   banner = signal<Image>({ url: '', publicId: '' });
+
+  productTypes = signal<AttributeItem[]>([]);
+  collectionTypes = signal<AttributeItem[]>([]);
+  colors = signal<ColorItem[]>([]);
+  sizes = signal<string[]>([]);
 
   loading = signal(true);
   saving = signal(false);
@@ -63,6 +68,15 @@ export class Settings {
       next: (res) => { this.banner.set(res.data); },
       error: () => { }
     });
+    this._siteSettingsService.getAttributes().subscribe({
+      next: (res) => {
+        this.productTypes.set(res.data.productTypes || []);
+        this.collectionTypes.set(res.data.collectionTypes || []);
+        this.colors.set(res.data.colors || []);
+        this.sizes.set(res.data.sizes || []);
+      },
+      error: () => { }
+    });
     setTimeout(() => this.loading.set(false), 500);
   }
 
@@ -86,8 +100,14 @@ export class Settings {
           email: this.contact().email,
           instagram: this.contact().instagram
         }).subscribe({
-          next: () => { this._toast.success('admin.settings.save_success'); this.saving.set(false); },
-          error: (err) => { this.error.set(err.error?.message || 'admin.settings.save_failed'); this.saving.set(false); }
+          next: () => {
+            this._toast.success('admin.settings.save_success');
+            this.saving.set(false);
+          },
+          error: (err) => {
+            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.saving.set(false);
+          }
         });
         break;
 
@@ -96,8 +116,14 @@ export class Settings {
           title: this.about().title,
           description: this.about().description
         }).subscribe({
-          next: () => { this._toast.success('admin.settings.save_success'); this.saving.set(false); },
-          error: (err) => { this.error.set(err.error?.message || 'admin.settings.save_failed'); this.saving.set(false); }
+          next: () => {
+            this._toast.success('admin.settings.save_success');
+            this.saving.set(false);
+          },
+          error: (err) => {
+            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.saving.set(false);
+          }
         });
         break;
 
@@ -105,8 +131,14 @@ export class Settings {
         this._adminService.updateTermsAndConditions({
           terms: this.terms()
         }).subscribe({
-          next: () => { this._toast.success('admin.settings.save_success'); this.saving.set(false); },
-          error: (err) => { this.error.set(err.error?.message || 'admin.settings.save_failed'); this.saving.set(false); }
+          next: () => {
+            this._toast.success('admin.settings.save_success');
+            this.saving.set(false);
+          },
+          error: (err) => {
+            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.saving.set(false);
+          }
         });
         break;
 
@@ -119,8 +151,14 @@ export class Settings {
         this._adminService.updateOrderGuide({
           images: cleanedImages
         }).subscribe({
-          next: () => { this._toast.success('admin.settings.save_success'); this.saving.set(false); },
-          error: (err) => { this.error.set(err.error?.message || 'admin.settings.save_failed'); this.saving.set(false); }
+          next: () => {
+            this._toast.success('admin.settings.save_success');
+            this.saving.set(false);
+          },
+          error: (err) => {
+            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.saving.set(false);
+          }
         });
         break;
 
@@ -129,8 +167,33 @@ export class Settings {
           url: this.banner().url,
           publicId: this.banner().publicId
         }).subscribe({
-          next: () => { this._toast.success('admin.settings.save_success'); this.saving.set(false); },
-          error: (err) => { this.error.set(err.error?.message || 'admin.settings.save_failed'); this.saving.set(false); }
+          next: () => {
+            this._toast.success('admin.settings.save_success');
+            this.saving.set(false);
+          },
+          error: (err) => {
+            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.saving.set(false);
+          }
+        });
+        break;
+
+      case 'attributes':
+        this._adminService.updateAttributes({
+          productTypes: this.productTypes(),
+          collectionTypes: this.collectionTypes(),
+          colors: this.colors(),
+          sizes: this.sizes()
+        }).subscribe({
+          next: () => {
+            this._toast.success('admin.settings.save_success');
+            this.saving.set(false);
+            this._siteSettingsService.notifyAttributesUpdated();
+          },
+          error: (err) => {
+            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.saving.set(false);
+          }
         });
         break;
 
@@ -139,38 +202,76 @@ export class Settings {
     }
   }
 
-  onBannerImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-
-    const file = input.files[0];
-    const formData = new FormData();
-    formData.append('image', file);
-
-    this.uploadingBanner.set(true);
-    this._adminService.uploadImage(formData).subscribe({
-      next: (res) => {
-        const imageData = res.data || res;
-        const newImage = {
-          url: imageData.url || '',
-          publicId: imageData.publicId || ''
-        };
-        if (newImage.url && newImage.publicId) {
-          this.banner.set(newImage);
-          this._toast.success('Banner image uploaded successfully');
-        } else {
-          this._toast.error('Invalid response from server');
-        }
-        this.uploadingBanner.set(false);
-        input.value = '';
-      },
-      error: (err) => {
-        this._toast.error(err.error?.message || 'Upload failed');
-        this.uploadingBanner.set(false);
-        input.value = '';
-      }
-    });
+  addProductType() {
+    this.productTypes.update(items => [...items, { name: '', name_ar: '' }]);
   }
+
+  removeProductType(index: number) {
+    this.productTypes.update(items => items.filter((_, i) => i !== index));
+  }
+
+  addCollectionType() {
+    this.collectionTypes.update(items => [...items, { name: '', name_ar: '' }]);
+  }
+
+  removeCollectionType(index: number) {
+    this.collectionTypes.update(items => items.filter((_, i) => i !== index));
+  }
+
+  addColor() {
+    this.colors.update(items => [...items, { name: '', name_ar: '', code: '#000000' }]);
+  }
+
+  removeColor(index: number) {
+    this.colors.update(items => items.filter((_, i) => i !== index));
+  }
+
+  addSize() {
+    this.sizes.update(items => [...items, '']);
+  }
+
+  removeSize(index: number) {
+    this.sizes.update(items => items.filter((_, i) => i !== index));
+  }
+
+  onBannerImageSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+
+  const file = input.files[0];
+  const formData = new FormData();
+  formData.append('image', file);
+
+  this.uploadingBanner.set(true);
+  this._adminService.uploadImage(formData).subscribe({
+    next: (res) => {
+      const imageData = res.data || res;
+      const newImage = { url: imageData.url || '', publicId: imageData.publicId || '' };
+      if (newImage.url && newImage.publicId) {
+        this._adminService.updateBanner(newImage).subscribe({
+          next: () => {
+            this.banner.set(newImage);
+            this._toast.success('Banner updated successfully');
+            this.uploadingBanner.set(false);
+          },
+          error: (err) => {
+            this._toast.error(err.error?.message || 'Failed to save banner');
+            this.uploadingBanner.set(false);
+          }
+        });
+      } else {
+        this._toast.error('Invalid response from server');
+        this.uploadingBanner.set(false);
+      }
+      input.value = '';
+    },
+    error: (err) => {
+      this._toast.error(err.error?.message || 'Upload failed');
+      this.uploadingBanner.set(false);
+      input.value = '';
+    }
+  });
+}
 
   removeBannerImage(): void {
     this.banner.set({ url: '', publicId: '' });
