@@ -8,7 +8,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   // If user loged in can't access to auth pages
   const token = tokenService.getAccessToken();
   if (token) {
-    router.navigate(['/home']);
+    router.navigate(['/']);
     return false;
   }
   return true;
