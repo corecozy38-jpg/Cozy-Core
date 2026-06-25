@@ -3,7 +3,7 @@ import { configDotenv } from "dotenv";
 configDotenv();
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: "smtp.gmail.com",
     port: 465,
     secure: true,
     auth: {
@@ -14,56 +14,64 @@ const transporter = nodemailer.createTransport({
 
 const sendVerificationEmail = async (email, verificationToken) => {
     const verificationLink = `${process.env.CORS_ORIGIN}auth/verify-email?token=${verificationToken}`;
-    const subject = 'Verify your email address';
+    const subject = "Verify your email address";
+    const merchantEmail = process.env.MERCHANT_EMAIL;
+
     const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Verify Email</title>
-            <style>
-                body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-                .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                .header { background-color: #1a1a1a; color: white; padding: 20px; text-align: center; }
-                .content { padding: 30px; text-align: center; }
-                a{ text-decoration: none; }
-                .button { display: inline-block; background-color: #000000; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
-                .footer { background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #777; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>Welcome to CoZ Core!</h1>
-                </div>
-                <div class="content">
-                    <p>Please verify your email address to activate your account.</p>
-                    <a href="${verificationLink}" class="button">Verify Email</a>
-                    <p>This link expires in <strong>24 hours</strong>.</p>
-                    <p>If you did not create an account, you can ignore this email.</p>
-                </div>
-                <div class="footer">
-                    <p>&copy; 2025 CoZ Core. All rights reserved.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-    `;
-    
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email</title>
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table align="center" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <tr>
+            <td style="background-color: #1a1a1a; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin:0; font-size:24px;">Welcome to CoZ Core!</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 30px; text-align: center;">
+                <p style="font-size:16px; color:#333; margin-bottom: 20px;">Please verify your email address to activate your account.</p>
+                <a href="${verificationLink}" style="display: inline-block; background-color: #000000; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size:16px; margin: 10px 0;">Verify Email</a>
+                <p style="font-size:14px; color:#666; margin-top: 20px;">This link expires in <strong>24 hours</strong>.</p>
+                <p style="font-size:14px; color:#999; margin-top: 20px;">If you did not create an account, you can ignore this email.</p>
+                <p style="font-size:12px; color:#999; margin-top: 30px; border-top:1px solid #eee; padding-top:20px;">
+                    To ensure you receive our emails, please add 
+                    <a href="mailto:${merchantEmail}" style="color:#000; text-decoration:underline;">
+                        ${merchantEmail}
+                    </a>
+                    to your address book.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #777;">
+                <p style="margin:0;">&copy; 2025 CoZ Core. All rights reserved.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+`;
+
     try {
         await transporter.sendMail({
-            from: process.env.MERCHANT_EMAIL,
+            from: merchantEmail,
             to: email,
             subject,
             html,
+            text: `Please verify your email by visiting this link: ${verificationLink}`,
         });
+        console.log(`Verification email sent to ${email}`);
     } catch (error) {
-        console.error('Email failed:', error.message);
-        if (error.code === 'EAUTH') {
-            console.error('SMTP credentials expired. Please update EMAIL_PASSWORD.');
+        console.error("Email failed:", error.message);
+        if (error.code === "EAUTH") {
+            console.error("SMTP credentials expired. Please update EMAIL_PASSWORD.");
         }
-        throw new Error('Failed to send email. Please contact support.');
+        throw new Error("Failed to send email. Please contact support.");
     }
 };
 
@@ -109,12 +117,17 @@ const sendOTPEmail = async (to, otp) => {
             html,
         });
     } catch (error) {
-        console.error('OTP Email failed:', error.message);
-        throw new Error('Failed to send OTP email. Please try again later.');
+        console.error("OTP Email failed:", error.message);
+        throw new Error("Failed to send OTP email. Please try again later.");
     }
 };
 
-const sendOrderEmailToMerchant = async (order, cartItems, customerEmail, customerName) => {
+const sendOrderEmailToMerchant = async (
+    order,
+    cartItems,
+    customerEmail,
+    customerName,
+) => {
     const itemsHtml = cartItems
         .map(
             (item) => `
@@ -171,8 +184,8 @@ const sendOrderEmailToMerchant = async (order, cartItems, customerEmail, custome
             html,
         });
     } catch (error) {
-        console.error('Order email failed:', error.message);
-        throw new Error('Failed to send order confirmation email.');
+        console.error("Order email failed:", error.message);
+        throw new Error("Failed to send order confirmation email.");
     }
 };
 
@@ -199,7 +212,7 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
                 <div class="content">
                     <p><strong>Name:</strong> ${name}</p>
                     <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-                    <p><strong>Subject:</strong> ${subject || 'No subject'}</p>
+                    <p><strong>Subject:</strong> ${subject || "No subject"}</p>
                     <hr/>
                     <p><strong>Message:</strong></p>
                     <p style="white-space: pre-wrap;">${message}</p>
@@ -216,13 +229,13 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
         await transporter.sendMail({
             from: process.env.MERCHANT_EMAIL,
             to: process.env.MERCHANT_EMAIL,
-            subject: `Contact: ${subject || 'New message from ' + name}`,
+            subject: `Contact: ${subject || "New message from " + name}`,
             html,
             replyTo: email,
         });
     } catch (error) {
-        console.error('Contact email failed:', error.message);
-        throw new Error('Failed to send contact message. Please try again later.');
+        console.error("Contact email failed:", error.message);
+        throw new Error("Failed to send contact message. Please try again later.");
     }
 };
 
@@ -230,5 +243,5 @@ export {
     sendOTPEmail,
     sendOrderEmailToMerchant,
     sendVerificationEmail,
-    sendContactEmail
+    sendContactEmail,
 };

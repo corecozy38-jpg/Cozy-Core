@@ -11,12 +11,10 @@ import RefreshToken from '../models/refreshToken.model.js';
 
 const register = asyncHandler(async (req, res) => {
     const { error } = registerValidator(req.body);
+    console.log("yessssssssssssssss")
     if (error) return res.status(400).json({ message: error.details[0].message });
-
     const guestId = req.guestId || null;  
-
     const { user, priceChangedItems } = await registerUserService(req.body, guestId);
-
     res.status(201).json({
         user,
         priceChangedItems,

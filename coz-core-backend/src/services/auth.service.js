@@ -41,9 +41,9 @@ const registerUserService = async (userData, guestId = null) => {
     if (guestId) query.guestId = guestId;
     if (user.email) query.guestEmail = user.email;
     await Order.updateMany(query, { $set: { user: user._id } });
-
+    
     await sendVerificationEmail(user.email, verificationToken);
-
+    
     const accessToken = user.generateToken();
     const refreshToken = user.generateRefreshToken();
     const expiresAt = new Date();
