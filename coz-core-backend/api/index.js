@@ -1,10 +1,9 @@
 import { configDotenv } from "dotenv";
 configDotenv();
-
 import cookieParser from "cookie-parser";
 import express, { json, urlencoded } from "express";
 import cors from "cors";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit,ipKeyGenerator } from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 
 import redisClient from "../src/utils/redisClient.util.js";
@@ -62,7 +61,7 @@ const store = new RedisStore({
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,
-    keyGenerator: (req) => req.ip,
+    keyGenerator: (req) => ipKeyGenerator(req.ip),
     store: store,
     standardHeaders: true,
     legacyHeaders: false,

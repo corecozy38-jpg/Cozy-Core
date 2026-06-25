@@ -13,7 +13,7 @@ import crypto from 'crypto';
 
 const registerUserService = async (userData, guestId = null) => {
     const existingUser = await User.findOne({ email: userData.email });
-    if (existingUser) throw new Error('Email already exists');
+    if (existingUser) throw new Error('User already exists');
 
     const { confirmPassword, ...cleanUserData } = userData;
 
@@ -72,13 +72,31 @@ const registerUserService = async (userData, guestId = null) => {
 
 const loginUserService = async (loginData, guestId = null) => {
     const user = await User.findOne({ email: loginData.email });
-    console.log(loginData)
     if (!user || !(await user.comparePassword(loginData.password))) {
         throw new Error('Invalid email or password');
     }
-    
+
     if (!user.isEmailVerified) {
-        throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
+        const now = new Date();
+        const cooldownMinutes = 5;
+        const cooldownMs = cooldownMinutes * 60 * 1000;
+
+        if (!user.verificationTokenExpires || user.verificationTokenExpires < now) {
+            const lastSent = user.lastVerificationEmailSent || new Date(0);
+            if (now - lastSent > cooldownMs) {
+                const newToken = crypto.randomBytes(32).toString('hex');
+                user.verificationToken = newToken;
+                user.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                user.lastVerificationEmailSent = now;
+                await user.save();
+                await sendVerificationEmail(user.email, newToken);
+                throw new Error('Your verification link has expired. A new link has been sent to your email. Please verify before logging in.');
+            } else {
+                throw new Error('A verification email was recently sent. Please check your inbox (or spam folder) and verify your email before logging in.');
+            }
+        }
+
+        throw new Error('Please verify your email first. Check your inbox (or spam folder) for the verification link.');
     }
 
     let priceChangedItems = [];
@@ -91,12 +109,12 @@ const loginUserService = async (loginData, guestId = null) => {
     const refreshToken = user.generateRefreshToken();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
-    await RefreshToken.create(
-        { token: refreshToken, 
-            user: user._id, 
-            expiresAt, 
-            revoked: false 
-        });
+    await RefreshToken.create({
+        token: refreshToken,
+        user: user._id,
+        expiresAt,
+        revoked: false
+    });
 
     return {
         user: {
