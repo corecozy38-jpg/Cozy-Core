@@ -64,7 +64,6 @@ export class Navbar implements OnInit, OnDestroy {
     private _tokenService: RefreshTokenService,
     private _router: Router,
     private _cartService: CartService,
-    private _userService: UserService,
   ) {}
 
   ngOnInit() {
@@ -98,11 +97,6 @@ export class Navbar implements OnInit, OnDestroy {
       error: () => {
         console.warn('Failed to load collections, using default links.');
       }
-    });
-
-    this._userService.getUserRole().subscribe({
-      next: (role) => { this.isAdmin = role === 'admin'; },
-      error: () => { this.isAdmin = false; }
     });
 
     this.cartSubscription = this._cartService.cartCount$.subscribe(count => {

@@ -51,6 +51,7 @@ export class AuthService {
       this.guestService.clearGuestId();
       localStorage.removeItem('user');
       this.isLoggedInSubject.next(false);
+      this.router.navigate(['/']);
     }
   }
 
@@ -73,11 +74,8 @@ export class AuthService {
           this.tokenService.clearAccessToken();
           this.guestService.clearGuestId();
           localStorage.removeItem('user');
-
           localStorage.setItem('logout', Date.now().toString());
-
           this.isLoggedInSubject.next(false);
-
           this.router.navigate(['/auth']);
         })
       );

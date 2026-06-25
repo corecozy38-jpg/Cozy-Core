@@ -56,6 +56,5 @@ export const routes: Routes = [
   { path: 'about-us', loadComponent: () => import('./features/about-us/about-us').then(m => m.AboutUs) },
   { path: 'terms-conditions', loadComponent: () => import('./features/terms-and-condtions/terms-and-condtions').then(m => m.TermsAndCondtions) },
   { path: 'order-guide', loadComponent: () => import('./features/order-guide/order-guide').then(m => m.OrderGuide) },
-
   { path: '**', component: Error404 },
 ];
