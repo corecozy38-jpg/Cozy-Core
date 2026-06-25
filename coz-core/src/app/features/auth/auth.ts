@@ -87,7 +87,7 @@ export class Auth implements OnInit {
         this.banner.set(res.data);
         this.isLoadingBanner.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.isLoadingBanner.set(false);
       }
     });
@@ -279,7 +279,36 @@ export class Auth implements OnInit {
         this._router.navigate(['/']);
       },
       error: (err) => {
-        this.errorMessage.set(err.error?.message || 'auth.login_failed');
+        const message = err.error?.message || 'auth.login_failed';
+
+        if (message.toLowerCase().includes('verify your email')) {
+          this.errorMessage.set('auth.verify_email_first');
+        } else if (message.toLowerCase().includes('expired. a new link has been sent')) {
+          this.errorMessage.set('auth.verification_link_expired_sent_new');
+        } else if (message.toLowerCase().includes('recently sent')) {
+          this.errorMessage.set('auth.verification_email_recently_sent');
+        } else {
+          this.errorMessage.set(message);
+        }
+
+        this.loading = false;
+      }
+    });
+  }
+
+  resendVerification() {
+    if (!this.email) {
+      this.errorMessage.set('auth.email_required');
+      return;
+    }
+    this.loading = true;
+    this._authService.resendVerification({ email: this.email }).subscribe({
+      next: () => {
+        this.errorMessage.set('auth.verification_email_sent');
+        this.loading = false;
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.message || 'auth.resend_failed');
         this.loading = false;
       }
     });

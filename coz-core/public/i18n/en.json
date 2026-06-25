@@ -160,7 +160,12 @@
     "change_password_btn": "Change Password",
     "password_changed_success": "Password changed successfully",
     "change_password_failed": "Failed to change password",
-    "phone_placeholder": "e.g., 01234567890"
+    "phone_placeholder": "e.g., 01000000000",
+    "verify_email_first": "Please verify your email first. Check your inbox (or spam folder) for the verification link.",
+    "verification_link_expired_sent_new": "Your verification link has expired. A new link has been sent to your email. Please verify before logging in.",
+    "verification_email_recently_sent": "A verification email was recently sent. Please check your inbox (or spam folder) and verify your email before logging in.",
+    "resend_verification": "Resend verification link",
+    "resend_failed": "Failed to resend verification link, please try again"
   },
   "products": {
     "filters": "Filters",

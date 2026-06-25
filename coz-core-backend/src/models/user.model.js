@@ -60,6 +60,10 @@ const userSchema = new Schema(
         verificationTokenExpires: {
             type: Date,
             default: null
+        },
+        lastVerificationEmailSent: {
+            type: Date,
+            default: null
         }
     },
     {

@@ -120,4 +120,9 @@ export class AuthService {
       withCredentials: true
     });
   }
+
+
+  resendVerification(payload: { email: string }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/auth/resend-verification`, payload);
+  }
 }

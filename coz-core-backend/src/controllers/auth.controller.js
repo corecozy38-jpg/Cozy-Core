@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model.js";
 import { registerValidator, loginValidator, changePasswordValidator , forgotPasswordValidator , verifyOTPValidator , resetPasswordValidator } from "../validators/auth.validator.js";
-import { registerUserService, loginUserService, changePasswordService , forgotPasswordService , verifyOTPService , resetPasswordService } from "../services/auth.service.js";
+import { registerUserService, loginUserService,resendVerificationService, changePasswordService , forgotPasswordService , verifyOTPService , resetPasswordService } from "../services/auth.service.js";
 import { sendVerificationEmail } from "../utils/email.util.js";
 import Lock from "../models/lock.model.js";
 import Cart from "../models/cart.model.js";
@@ -113,6 +113,13 @@ const verifyEmail = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
 });
 
+const resendVerification = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const result = await resendVerificationService(email);
+    res.status(200).json(result);
+});
 
 const deleteAccount = asyncHandler(async (req, res) => {
     const userId = req.user._id;
@@ -208,5 +215,6 @@ export {
     verifyOTP,
     resetPassword,
     verifyEmail,
-    deleteAccount
+    deleteAccount,
+    resendVerification
 }

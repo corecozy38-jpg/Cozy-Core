@@ -245,11 +245,36 @@ const resetPasswordService = async (token, password, confirmPassword) => {
     return { message: 'Password reset successfully' };
 };
 
+
+const resendVerificationService = async (email) => {
+    const user = await User.findOne({ email });
+    if (!user) throw new Error('User not found');
+    if (user.isEmailVerified) throw new Error('Email already verified');
+
+    const now = new Date();
+    const cooldownMs = 5 * 60 * 1000;
+    const lastSent = user.lastVerificationEmailSent || new Date(0);
+
+    if (now - lastSent < cooldownMs) {
+        throw new Error('A verification email was recently sent. Please wait a few minutes.');
+    }
+
+    const newToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = newToken;
+    user.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    user.lastVerificationEmailSent = now;
+    await user.save();
+
+    await sendVerificationEmail(user.email, newToken);
+    return { message: 'Verification email resent successfully' };
+};
+
 export {
     registerUserService,
     loginUserService,
     changePasswordService,
     forgotPasswordService,
     verifyOTPService,
-    resetPasswordService
+    resetPasswordService,
+    resendVerificationService
 }
