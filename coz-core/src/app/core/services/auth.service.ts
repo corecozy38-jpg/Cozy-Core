@@ -61,7 +61,7 @@ export class AuthService {
           this.tokenService.setAccessToken(response.accessToken);
           localStorage.removeItem('logout');
           this.isLoggedInSubject.next(true);
-          this.router.navigate(['/']);
+          this.router.navigate(['/home']);
         })
       );
   }
