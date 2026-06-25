@@ -51,7 +51,7 @@ export class AuthService {
       this.guestService.clearGuestId();
       localStorage.removeItem('user');
       this.isLoggedInSubject.next(false);
-      this.router.navigate(['/login']);
+      this.router.navigate(['/auth']);
     }
   }
 
@@ -78,7 +78,7 @@ export class AuthService {
 
           this.isLoggedInSubject.next(false);
 
-          this.router.navigate(['/login']);
+          this.router.navigate(['/auth']);
         })
       );
   }
@@ -118,7 +118,7 @@ export class AuthService {
 
   deleteAccount(payload: { password: string }): Observable<{message :string}> {
     return this.http.delete<{message :string}>(`${this.baseUrl}/auth/delete-account`, {
-      body: payload, 
+      body: payload,
       withCredentials: true
     });
   }

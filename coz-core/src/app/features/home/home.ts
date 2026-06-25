@@ -54,7 +54,7 @@ export class Home implements OnInit, OnDestroy {
     this._langService.currentLang$.subscribe(lang => {
       this.currentLang = lang;
     });
-    
+
     this.loadBanner();
     this.loadTopProducts();
     this.loadActiveFaqs();
@@ -152,8 +152,8 @@ export class Home implements OnInit, OnDestroy {
     const colors = prod.variants.map(variant => ({
       name: variant.colorName,
       code: variant.colorCode || '#cccccc',
-      image: variant.images?.[0]?.url || 'https://via.placeholder.com/400x500',
-      hoverImage: variant.images?.[1]?.url || variant.images?.[0]?.url || 'https://via.placeholder.com/400x500'
+      image: variant.images?.[0]?.url || '',
+      hoverImage: variant.images?.[1]?.url || variant.images?.[0]?.url || ''
     }));
 
     return {

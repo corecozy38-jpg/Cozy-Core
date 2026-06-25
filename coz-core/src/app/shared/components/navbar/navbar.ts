@@ -42,7 +42,7 @@ export class Navbar implements OnInit, OnDestroy {
     { label: 'nav.home', path: '/home' },
     {
       label: 'nav.collections',
-      path: '#',
+      path: '',
       children: [
         { label: 'nav.summer_collection', path: '/collections/summer' },
         { label: 'nav.winter_collection', path: '/collections/winter' },
