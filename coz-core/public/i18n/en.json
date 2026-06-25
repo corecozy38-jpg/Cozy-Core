@@ -4,6 +4,8 @@
     "collections": "Collections",
     "summer_collection": "Summer Collection",
     "winter_collection": "Winter Collection",
+    "spring_collection":"Spring Collection",
+    "fall_collection":"Fall Collection",
     "all_products": "All Products",
     "search_placeholder": "Search products...",
     "sign_in": "Sign In",
