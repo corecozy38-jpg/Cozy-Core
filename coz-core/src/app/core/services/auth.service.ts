@@ -57,8 +57,13 @@ export class AuthService {
       this.tokenService.clearAccessToken();
       localStorage.removeItem('user');
       this.isLoggedInSubject.next(false);
-
-          this._toast.warning('You have been logged out from another tab.');
+      try {
+this._translate.get('auth.session_expired').subscribe(msg => {
+        this._toast.warning(msg);
+      });
+      } catch (error) {
+          console.log("this is the error", error)
+      }
 
 
       this.router.navigate(['/']);

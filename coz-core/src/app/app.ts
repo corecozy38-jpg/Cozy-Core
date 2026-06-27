@@ -7,6 +7,7 @@ import { Toast } from './shared/components/toast/toast';
 import { ConfirmDialog } from './shared/components/confirm-dialog/confirm-dialog';
 import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -16,11 +17,15 @@ import { AuthService } from './core/services/auth.service';
 })
 export class App implements OnInit{
   protected readonly title = signal('coz-core');
-  constructor(private _route:Router){
+  constructor(private _route:Router, private _authService:AuthService, private translate:TranslateService){
 
   }
 
   ngOnInit() {
+    this.translate.use('en').subscribe({
+      next:()=>console.log("Translation loaded"),
+      error:(err)=>console.log("translation failed",err)
+    })
 
     this._route.events.pipe(
       filter(event => event instanceof NavigationEnd)
