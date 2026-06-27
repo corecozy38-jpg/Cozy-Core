@@ -34,7 +34,5 @@ export class App implements OnInit{
         window.scrollTo(0, 0);
       }
     )
-
   }
-
 }

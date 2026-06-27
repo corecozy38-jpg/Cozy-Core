@@ -2,7 +2,7 @@ import { computed, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, map, startWith } from 'rxjs';
-
+import enTranslations from "../../../../public/i18n/en.json"
 @Injectable({
   providedIn: 'root',
 })
@@ -12,13 +12,14 @@ export class LanguageService {
   lagSignal:any;
 
   constructor(private translate: TranslateService) {
+    this.translate.setTranslation('en',enTranslations);
     const savedLang = localStorage.getItem('lang') || 'en';
     this.setLanguage(savedLang);
     this.lagSignal = toSignal(this.translate.onLangChange.pipe(
-    startWith({ lang: this.translate.getCurrentLang }),
+    startWith({ lang: this.translate.getCurrentLang() }),
     map(e => e.lang)
   ),
-    { initialValue: this.translate.getCurrentLang }
+    { initialValue: this.translate.getCurrentLang() }
   )
   }
     t(key:string){
