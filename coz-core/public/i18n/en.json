@@ -173,7 +173,8 @@
     "verification_email_recently_sent": "A verification email was recently sent. Please check your inbox (or spam folder) and verify your email before logging in.",
     "resend_verification": "Resend verification link",
     "resend_failed": "Failed to resend verification link, please try again",
-    "password_changed": "Password changed successfully"
+    "password_changed": "Password changed successfully",
+    "session_expired":"You have been logged out from another tab."
   },
   "products": {
     "filters": "Filters",

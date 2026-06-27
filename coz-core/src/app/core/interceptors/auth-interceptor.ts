@@ -6,15 +6,18 @@ import { AuthService } from '../services/auth.service';
 import { RefreshTokenService } from '../services/refresh-token.service';
 import { ToastService } from '../services/toast.service';
 import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 
 let isRefreshing = false;
 let refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+let refreshFailed = false; 
 
 export const authInterceptor: HttpInterceptorFn = 
 (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
   const injector = inject(Injector);
   const tokenService = inject(RefreshTokenService);
   const authService = inject(AuthService);
+  const router = inject(Router);
   
   const token = tokenService.getAccessToken();
 
@@ -34,7 +37,7 @@ export const authInterceptor: HttpInterceptorFn =
         const retryAfter = error.headers.get('Retry-After') || '60';
         const seconds = parseInt(retryAfter, 10);
         
-        const message = translate.instant('errors.too_many_requests', { seconds });
+        const message = translate.instant('error.too_many_requests', { seconds });
         toast.error(message);
         
         const enhancedError = { ...error, retryAfter: seconds };
@@ -42,7 +45,13 @@ export const authInterceptor: HttpInterceptorFn =
       }
       
       if (error.status === 401 && !clonedReq.url.includes('/refresh-token')) {
-        return handle401Error(clonedReq, next, tokenService, authService);
+        if (refreshFailed) {
+          tokenService.clearAccessToken();
+          authService.logout().subscribe();
+          router.navigate(['/auth']);
+          return throwError(() => error);
+        }
+        return handle401Error(clonedReq, next, tokenService, authService, router);
       }
       
       return throwError(() => error);
@@ -54,16 +63,19 @@ function handle401Error(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
   tokenService: RefreshTokenService,
-  authService: AuthService
+  authService: AuthService,
+  router: Router
 ): Observable<HttpEvent<unknown>> {
   if (!isRefreshing) {
     isRefreshing = true;
     refreshTokenSubject.next(null);
+    refreshFailed = false; 
 
     return authService.refreshToken().pipe(
       switchMap((response: { accessToken: string }) => {
         const newToken = response.accessToken;
         refreshTokenSubject.next(newToken);
+        refreshFailed = false;
         const retryReq = req.clone({
           setHeaders: { Authorization: `Bearer ${newToken}` }
         });
@@ -73,8 +85,10 @@ function handle401Error(
         isRefreshing = false;
       }),
       catchError((refreshError) => {
+        refreshFailed = true;
         tokenService.clearAccessToken();
         authService.logout().subscribe();
+        router.navigate(['/auth']);
         return throwError(() => refreshError);
       })
     );

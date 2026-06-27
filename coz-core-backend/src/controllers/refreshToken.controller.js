@@ -49,6 +49,7 @@ const logout = asyncHandler(async (req, res) => {
 
 const refreshAccessToken  = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
+    console.log("now i refresh token")
     if(!refreshToken){
         return res.status(401).json({ message: "Refresh token not provided" });
     }
@@ -61,6 +62,7 @@ const refreshAccessToken  = asyncHandler(async (req, res) => {
         return res.status(401).json({ message: "User not found" });
 
     const newAccessToken = user.generateToken();
+    console.log("refresh token success")
     res.status(200).json({ accessToken: newAccessToken });
 })
 export {

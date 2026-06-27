@@ -17,6 +17,8 @@ import {
 } from '../interfaces/user.interface';
 import { RefreshTokenService } from './refresh-token.service';
 import { CartService } from '../../core/services/cart.service';
+import { ToastService } from './toast.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -31,7 +33,9 @@ export class AuthService {
     private guestService: GustService,
     private router: Router,
     private _cartService: CartService,
-    private _guestService: GustService
+    private _guestService: GustService,
+    private _toast: ToastService,
+    private _translate: TranslateService
   ) {
     // FOR IF I LOGOUT FROM ANY TAB IN BROWSER EVERY OTHER TAB WILL BE LOGGED OUT
     window.addEventListener('storage', (event: StorageEvent) => {
@@ -53,6 +57,7 @@ export class AuthService {
       this.tokenService.clearAccessToken();
       localStorage.removeItem('user');
       this.isLoggedInSubject.next(false);
+      this._toast.warning(this._translate.instant('auth.session_expired'));
       this.router.navigate(['/']);
     }
   }
@@ -75,7 +80,7 @@ export class AuthService {
     const guestId = this.guestService.getGuestId();
 
     return this.http
-      .post<{ message: string; guestId?: string, cart:any }>(
+      .post<{ message: string; guestId?: string, cart: any }>(
         `${this.baseUrl}/auth/logout`,
         { guestId },
         { withCredentials: true },
