@@ -125,7 +125,6 @@ export class Home implements OnInit, OnDestroy {
     this._reviewsService.getFeaturedReviews().subscribe({
       next: (res) => {
         if (res && res.data) {
-          console.log(res.data)
           const featuredReviews = res.data.map((Freview: FeaturedReview) => ({
             ...Freview,
           }));

@@ -57,7 +57,11 @@ export class AuthService {
       this.tokenService.clearAccessToken();
       localStorage.removeItem('user');
       this.isLoggedInSubject.next(false);
-      this._toast.warning(this._translate.instant('auth.session_expired'));
+
+      this._translate.get('auth.session_expired').subscribe(msg => {
+        this._toast.warning(msg);
+      });
+
       this.router.navigate(['/']);
     }
   }

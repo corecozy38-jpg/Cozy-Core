@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withViewTransitions } from '@angular/router';
+import { provideRouter,  withViewTransitions } from '@angular/router';
 import { routes } from './app.routes';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -12,7 +12,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withViewTransitions({ skipInitialTransition: true })),
-    provideHttpClient(withInterceptors([authInterceptor, guestInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor,guestInterceptor])),
     provideAnimationsAsync(),
     provideTranslateService({
       fallbackLang: 'en',

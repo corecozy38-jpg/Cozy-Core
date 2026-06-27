@@ -16,12 +16,12 @@ import { AuthService } from './core/services/auth.service';
 })
 export class App implements OnInit{
   protected readonly title = signal('coz-core');
-  constructor(private _route:Router, private _authService:AuthService){
-    
+  constructor(private _route:Router){
+
   }
 
   ngOnInit() {
-    
+
     this._route.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(
