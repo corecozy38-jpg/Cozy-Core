@@ -14,6 +14,10 @@ export class GustService {
     return guestId;
   }
 
+  setGuestId(id: string): void {
+        localStorage.setItem(this.GUEST_ID_KEY, id);
+    }
+
   clearGuestId() {
     localStorage.removeItem(this.GUEST_ID_KEY);
   }

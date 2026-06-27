@@ -197,15 +197,24 @@ export class Profile {
   }
 
   async logout() {
-    const confirmed = await this._confirmDialogService.open({
-      title: this._translate.instant('profile_.logout'),
-      message: this._translate.instant('profile_.logout_confirmation'),
-      confirmText: this._translate.instant('profile_.logout_confirm'),
-      cancelText: this._translate.instant('profile_.logout_cancel')
-    });
+  const confirmed = await this._confirmDialogService.open({
+    title: this._translate.instant('profile_.logout'),
+    message: this._translate.instant('profile_.logout_confirmation'),
+    confirmText: this._translate.instant('profile_.logout_confirm'),
+    cancelText: this._translate.instant('profile_.logout_cancel')
+  });
 
-    if (!confirmed) return;
-    this._tokenService.clearAccessToken();
-    this._router.navigate(['/auth']);
-  }
+  if (!confirmed) return;
+
+  this._authService.logout().subscribe({
+    next: () => {
+      this._router.navigate(['/auth']);
+    },
+    error: (err) => {
+      console.error('Logout failed:', err);
+      this._toast.error(this._translate.instant('auth.logout_failed'));
+      this._tokenService.clearAccessToken();
+    }
+  });
+}
 }

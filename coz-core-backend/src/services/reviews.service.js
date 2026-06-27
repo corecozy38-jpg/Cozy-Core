@@ -1,6 +1,7 @@
 import Review from "../models/review.model.js";
 import Product from "../models/product.model.js";
-
+import  FeaturedReview from "../models/featuredReview.model.js";
+import { v2 as cloudinary } from "cloudinary";
 const recalcProductRating = async (productId) => {
     const result = await Review.aggregate([
         { $match: { product: productId, status: "approved" } },
@@ -39,6 +40,7 @@ const getProductReviewsService = async (productId, page, limit) => {
         content: review.content,
         createdAt: review.createdAt,
         reviewerName: review.user?.fullName || review.guestName || "Anonymous",
+        images:review.images
     }));
 
     return {
@@ -144,6 +146,7 @@ const getAllReviewsTAdminService = async (page, limit, status, isFeatured) => {
         createdAt: review.createdAt,
         reviewerName: review.user?.fullName || review.guestName || "Anonymous",
         product: review.product,
+        images: review.images
     }));
 
     return {
@@ -176,6 +179,24 @@ const updateReviewStatusService = async (reviewId, status) => {
 const deleteReviewService = async (reviewId) => {
     const review = await Review.findById(reviewId);
     if (!review) throw new Error("Review not found");
+
+    await FeaturedReview.deleteOne({ review: reviewId });
+
+    const publicIds = [];
+    if (review.images && review.images.length) {
+        for (const img of review.images) {
+            if (img.publicId) publicIds.push(img.publicId);
+        }
+    }
+    if (publicIds.length) {
+        const deletePromises = publicIds.map((publicId) =>
+            cloudinary.uploader.destroy(publicId).catch((err) => {
+                console.error(`Failed to delete review image ${publicId}:`, err.message);
+                return null;
+            })
+        );
+        await Promise.all(deletePromises);
+    }
 
     const wasApproved = review.status === "approved";
     await review.deleteOne();

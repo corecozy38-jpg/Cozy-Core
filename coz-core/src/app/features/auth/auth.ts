@@ -67,6 +67,7 @@ export class Auth implements OnInit {
     private _refreshTokenService: RefreshTokenService,
     private translate: TranslateService,
     private _siteSettingService: SiteSettingsService
+    
   ) { }
 
   ngOnInit() {

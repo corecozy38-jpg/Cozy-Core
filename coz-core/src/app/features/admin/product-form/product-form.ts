@@ -11,13 +11,14 @@ import {
   Variant,
   Image,
   Size,
-  AdminProductRequest
+  AdminProductRequest,
 } from '../../../core/interfaces/product.interface';
 import { AdminProductResponse } from '../../../core/interfaces/admin.interface';
 import { ProductService } from '../../../core/services/product.service';
 import { SiteSettingsService } from '../../../core/services/site-settings.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { AttributeItem } from '../../../core/interfaces/settings';
+import { GenericDropList } from '../../../shared/components/generic-drop-list/generic-drop-list';
 
 type SizeFormData = Omit<Size, 'sku'> & { sku?: string };
 
@@ -28,9 +29,9 @@ type ProductFormData = Omit<Product, '_id' | 'slug' | 'rating' | 'reviewsCount' 
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe, GenericDropList],
   templateUrl: './product-form.html',
-  styleUrls: ['./product-form.css']
+  styleUrls: ['./product-form.css'],
 })
 export class ProductFormComponent implements OnInit {
   product: ProductFormData = {
@@ -42,7 +43,7 @@ export class ProductFormComponent implements OnInit {
     compareAtPrice: null,
     sizeFit: { fitType: '', modelHeight: null, wearingSize: '' },
     sizeGuid: { description: '', image: null },
-    variants: []
+    variants: [],
   };
 
   isEditMode = false;
@@ -54,6 +55,10 @@ export class ProductFormComponent implements OnInit {
   productTypesOptions: AttributeItem[] = [];
   collectionTypesOptions: AttributeItem[] = [];
   sizesOptions: string[] = [];
+
+  availableColors: string[] = [];
+  selectedColors: string[] = [];
+  colorDropdownOpen: boolean[] = [];
 
   newFeature = '';
   isUploading = false;
@@ -69,10 +74,6 @@ export class ProductFormComponent implements OnInit {
     variants: null,
   };
 
-  productTypeDropdownOpen = false;
-  collectionDropdownOpen = false;
-  sizeDropdownOpen: { [key: string]: boolean } = {};
-
   constructor(
     private _adminService: AdminService,
     private _route: ActivatedRoute,
@@ -82,12 +83,12 @@ export class ProductFormComponent implements OnInit {
     private _translate: TranslateService,
     private _siteSettingsService: SiteSettingsService,
     private _languageService: LanguageService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.loadAttributes();
-    this._route.params.subscribe(params => {
+    this._route.params.subscribe((params) => {
       const slug = params['slug'];
       if (slug) {
         this.isEditMode = true;
@@ -105,14 +106,23 @@ export class ProductFormComponent implements OnInit {
           this.productTypesOptions = data.productTypes || [];
           this.collectionTypesOptions = data.collectionTypes || [];
           this.sizesOptions = data.sizes || [];
+          this.availableColors = data.colors ? data.colors.map((c: any) => c.name) : [];
+          this.updateSelectedColors();
         }
       },
       error: () => {
         this.productTypesOptions = [];
         this.collectionTypesOptions = [];
         this.sizesOptions = [];
-      }
+        this.availableColors = [];
+        this.selectedColors = [];
+      },
     });
+  }
+
+  updateSelectedColors() {
+    const usedColors = this.product.variants.map((v) => v.colorName).filter((c) => c);
+    this.selectedColors = usedColors;
   }
 
   loadProduct(slug: string): void {
@@ -129,26 +139,36 @@ export class ProductFormComponent implements OnInit {
           compareAtPrice: data.compareAtPrice ?? null,
           sizeFit: data.sizeFit || { fitType: '', modelHeight: null, wearingSize: '' },
           sizeGuid: data.sizeGuid || { description: '', image: null },
-          variants: data.variants?.map(v => ({
-            colorName: v.colorName,
-            colorCode: v.colorCode ?? '#000000',
-            images: v.images || [],
-            sizes: v.sizes.map(s => ({
-              size: s.size,
-              stock: s.stock,
-              sku: s.sku || ''
-            }))
-          })) || []
+          variants:
+            data.variants?.map((v) => ({
+              colorName: v.colorName,
+              colorCode: v.colorCode ?? '#000000',
+              images: v.images || [],
+              sizes: v.sizes.map((s) => ({
+                size: s.size,
+                stock: s.stock,
+                sku: s.sku || '',
+              })),
+            })) || [],
         };
         this.loading.set(false);
-        this.errors['features'] = this.product.features.length > 0 ? null : this._translate.instant('admin.products.errors.features_required');
+        this.errors['features'] =
+          this.product.features.length > 0
+            ? null
+            : this._translate.instant('admin.products.errors.features_required');
+        this.updateSelectedColors();
+        this.initColorDropdowns();
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to load product');
         this.loading.set(false);
-      }
+      },
     });
+  }
+
+  initColorDropdowns() {
+    this.colorDropdownOpen = this.product.variants.map(() => false);
   }
 
   getTranslatedName(item: AttributeItem): string {
@@ -171,24 +191,65 @@ export class ProductFormComponent implements OnInit {
 
   removeFeature(index: number): void {
     this.product.features.splice(index, 1);
-    this.errors['features'] = this.product.features.length > 0 ? null : this._translate.instant('admin.products.errors.features_required');
-    if (this.product.features.length > 0 && this.error() === this._translate.instant('admin.products.errors.form_invalid')) {
+    this.errors['features'] =
+      this.product.features.length > 0
+        ? null
+        : this._translate.instant('admin.products.errors.features_required');
+    if (
+      this.product.features.length > 0 &&
+      this.error() === this._translate.instant('admin.products.errors.form_invalid')
+    ) {
       this.error.set(null);
     }
     this.cdr.detectChanges();
   }
 
+  canAddVariant(): boolean {
+    return this.availableColors.length > this.selectedColors.length;
+  }
+
   addVariant(): void {
+    if (!this.canAddVariant()) {
+      this._toast.warning('All available colors are already added');
+      return;
+    }
+    const available = this.availableColors.filter((c) => !this.selectedColors.includes(c));
+    const firstColor = available[0];
     this.product.variants.push({
-      colorName: '',
+      colorName: firstColor,
       colorCode: '#000000',
       images: [],
-      sizes: []
+      sizes: [],
     });
+    this.updateSelectedColors();
+    this.colorDropdownOpen.push(false);
+    this.cdr.detectChanges();
   }
 
   removeVariant(index: number): void {
     this.product.variants.splice(index, 1);
+    this.updateSelectedColors();
+    this.colorDropdownOpen.splice(index, 1);
+    this.cdr.detectChanges();
+  }
+
+  toggleColorDropdown(index: number): void {
+    this.colorDropdownOpen[index] = !this.colorDropdownOpen[index];
+  }
+
+  selectColor(index: number, color: string): void {
+    this.product.variants[index].colorName = color;
+    this.colorDropdownOpen[index] = false;
+    this.updateSelectedColors();
+    this.cdr.detectChanges();
+  }
+
+  getAvailableColorsForVariant(index: number): string[] {
+    const currentColor = this.product.variants[index].colorName;
+    const usedColors = this.product.variants
+      .map((v, i) => (i !== index ? v.colorName : null))
+      .filter((c) => c);
+    return this.availableColors.filter((c) => !usedColors.includes(c) || c === currentColor);
   }
 
   uploadVariantImage(variantIndex: number, event: Event): void {
@@ -205,11 +266,15 @@ export class ProductFormComponent implements OnInit {
     }
 
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
-    this._uploadMultipleVariantImages(variantIndex, filesToUpload);
+    this._uploadMultipleVariantImages(variantIndex, filesToUpload).finally(() => {
+      input.value = '';
+    });
   }
 
   private async _uploadMultipleVariantImages(variantIndex: number, files: File[]): Promise<void> {
     this.isUploading = true;
+    this.cdr.detectChanges();
+
     try {
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData();
@@ -217,22 +282,23 @@ export class ProductFormComponent implements OnInit {
         const result = await firstValueFrom(this._adminService.uploadImage(formData));
         return {
           url: result?.data.url || '',
-          publicId: result?.data.publicId ?? null
+          publicId: result?.data.publicId ?? null,
         } as Image;
       });
 
       const uploadedImages = await Promise.all(uploadPromises);
       this.product.variants[variantIndex].images.push(...uploadedImages);
-      this.isUploading = false;
+      this.cdr.detectChanges();
+
       if (uploadedImages.length > 0) {
         this._toast.success(`${uploadedImages.length} image(s) uploaded successfully`);
       }
     } catch (error) {
+      console.error('Upload error:', error);
       this._toast.error('Failed to upload images');
-      this.isUploading = false;
     } finally {
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-      if (input) input.value = '';
+      this.isUploading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -244,7 +310,7 @@ export class ProductFormComponent implements OnInit {
     this.product.variants[variantIndex].sizes.push({
       size: '',
       stock: 0,
-      sku: ''
+      sku: '',
     });
   }
 
@@ -255,27 +321,86 @@ export class ProductFormComponent implements OnInit {
   validateField(field: string): void {
     switch (field) {
       case 'name':
-        this.errors['name'] = this.product.name.trim() ? null : this._translate.instant('admin.products.errors.name_required');
+        this.errors['name'] = this.product.name.trim()
+          ? null
+          : this._translate.instant('admin.products.errors.name_required');
         break;
       case 'productType':
-        this.errors['productType'] = this.product.productType ? null : this._translate.instant('admin.products.errors.product_type_required');
+        this.errors['productType'] = this.product.productType
+          ? null
+          : this._translate.instant('admin.products.errors.product_type_required');
         break;
       case 'collection':
-        this.errors['collection'] = this.product.collection ? null : this._translate.instant('admin.products.errors.collection_required');
+        this.errors['collection'] = this.product.collection
+          ? null
+          : this._translate.instant('admin.products.errors.collection_required');
         break;
       case 'price':
-        this.errors['price'] = (this.product.price && this.product.price > 0) ? null : this._translate.instant('admin.products.errors.price_positive');
+        if (
+          this.product.compareAtPrice !== null &&
+          this.product.compareAtPrice !== undefined &&
+          this.product.compareAtPrice <= this.product.price
+        ) {
+          this.errors['price'] = this._translate.instant(
+            'admin.products.errors.price_less_than_compare',
+          );
+        } else {
+          this.errors['price'] =
+            this.product.price && this.product.price > 0
+              ? null
+              : this._translate.instant('admin.products.errors.price_positive');
+        }
         break;
       case 'features':
-        this.errors['features'] = this.product.features.length > 0 ? null : this._translate.instant('admin.products.errors.features_required');
+        this.errors['features'] =
+          this.product.features.length > 0
+            ? null
+            : this._translate.instant('admin.products.errors.features_required');
         break;
       case 'fitType':
-        this.errors['fitType'] = this.product.sizeFit.fitType.trim() ? null : this._translate.instant('admin.products.errors.fit_type_required');
+        this.errors['fitType'] = this.product.sizeFit.fitType.trim()
+          ? null
+          : this._translate.instant('admin.products.errors.fit_type_required');
         break;
       case 'variants':
-        this.errors['variants'] = this.product.variants.length > 0 ? null : this._translate.instant('admin.products.errors.variants_required');
+        this.validateVariants();
         break;
     }
+  }
+
+  validateVariants(): void {
+    if (this.product.variants.length === 0) {
+      this.errors['variants'] = this._translate.instant('admin.products.errors.variants_required');
+      return;
+    }
+    for (let i = 0; i < this.product.variants.length; i++) {
+      const variant = this.product.variants[i];
+      if (!variant.colorName || variant.colorName.trim() === '') {
+        this.errors['variants'] = this._translate.instant(
+          'admin.products.errors.variant_color_required',
+          { index: i + 1 },
+        );
+        return;
+      }
+      if (variant.sizes.length === 0) {
+        this.errors['variants'] = this._translate.instant(
+          'admin.products.errors.variant_no_sizes',
+          { color: variant.colorName },
+        );
+        return;
+      }
+      for (let j = 0; j < variant.sizes.length; j++) {
+        const size = variant.sizes[j];
+        if (!size.size || size.size.trim() === '') {
+          this.errors['variants'] = this._translate.instant(
+            'admin.products.errors.variant_size_empty',
+            { color: variant.colorName, index: j + 1 },
+          );
+          return;
+        }
+      }
+    }
+    this.errors['variants'] = null;
   }
 
   validateAll(): boolean {
@@ -286,7 +411,7 @@ export class ProductFormComponent implements OnInit {
     this.validateField('features');
     this.validateField('fitType');
     this.validateField('variants');
-    return Object.values(this.errors).every(e => e === null);
+    return Object.values(this.errors).every((e) => e === null);
   }
 
   async uploadSizeGuideImage(event: Event): Promise<void> {
@@ -301,7 +426,7 @@ export class ProductFormComponent implements OnInit {
       const result = await firstValueFrom(this._adminService.uploadImage(formData));
       const image: Image = {
         url: result?.data.url || '',
-        publicId: result?.data.publicId ?? null
+        publicId: result?.data.publicId ?? null,
       };
       if (!this.product.sizeGuid) {
         this.product.sizeGuid = { description: '', image: null };
@@ -316,7 +441,9 @@ export class ProductFormComponent implements OnInit {
 
   saveProduct(): void {
     if (!this.validateAll()) {
-      this.error.set(this._translate.instant('admin.products.errors.form_invalid'));
+      this.error.set(
+        this.errors['variants'] || this._translate.instant('admin.products.errors.form_invalid'),
+      );
       return;
     }
 
@@ -331,17 +458,27 @@ export class ProductFormComponent implements OnInit {
       price: this.product.price,
       compareAtPrice: this.product.compareAtPrice,
       sizeFit: this.product.sizeFit,
-      sizeGuid: this.product.sizeGuid,
-      variants: this.product.variants.map(v => ({
+      sizeGuid: this.product.sizeGuid
+        ? {
+            description: this.product.sizeGuid.description || '',
+            image: this.product.sizeGuid.image
+              ? (() => {
+                  const { _id, ...img } = this.product.sizeGuid.image;
+                  return img;
+                })()
+              : null,
+          }
+        : null,
+      variants: this.product.variants.map((v) => ({
         colorName: v.colorName,
         colorCode: v.colorCode ?? null,
-        images: v.images,
-        sizes: v.sizes.map(s => ({
+        images: v.images.map(({ _id, ...img }) => img),
+        sizes: v.sizes.map((s) => ({
           size: s.size,
           stock: s.stock,
-          sku: s.sku || undefined
-        }))
-      }))
+          sku: s.sku || undefined,
+        })),
+      })),
     };
 
     const request: Observable<AdminProductRequest> = this.isEditMode
@@ -357,7 +494,7 @@ export class ProductFormComponent implements OnInit {
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to save product');
         this.saving.set(false);
-      }
+      },
     });
   }
 
@@ -372,51 +509,6 @@ export class ProductFormComponent implements OnInit {
     return 'In Stock';
   }
 
-  toggleProductTypeDropdown() {
-    this.productTypeDropdownOpen = !this.productTypeDropdownOpen;
-  }
-
-  selectProductType(type: string) {
-    this.product.productType = type;
-    this.productTypeDropdownOpen = false;
-  }
-
-  toggleCollectionDropdown() {
-    this.collectionDropdownOpen = !this.collectionDropdownOpen;
-  }
-
-  selectCollection(col: string) {
-    this.product.collection = col;
-    this.collectionDropdownOpen = false;
-  }
-
-  toggleSizeDropdown(variantIndex: number, sizeIndex: number): void {
-    const key = `${variantIndex}-${sizeIndex}`;
-    this.sizeDropdownOpen[key] = !this.sizeDropdownOpen[key];
-  }
-
-  selectSize(variantIndex: number, sizeIndex: number, value: string): void {
-    this.product.variants[variantIndex].sizes[sizeIndex].size = value;
-    const key = `${variantIndex}-${sizeIndex}`;
-    this.sizeDropdownOpen[key] = false;
-  }
-
-  isSizeDropdownOpen(variantIndex: number, sizeIndex: number): boolean {
-    const key = `${variantIndex}-${sizeIndex}`;
-    return this.sizeDropdownOpen[key] || false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  clickOutside(event: Event) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.product-type-dropdown')) {
-      this.productTypeDropdownOpen = false;
-    }
-    if (!target.closest('.collection-dropdown')) {
-      this.collectionDropdownOpen = false;
-    }
-  }
-
   get sizeGuideDescription(): string {
     return this.product.sizeGuid?.description || '';
   }
@@ -427,5 +519,24 @@ export class ProductFormComponent implements OnInit {
     } else {
       this.product.sizeGuid = { description: value, image: null };
     }
+  }
+
+  selectSize(variantIndex: number, sizeIndex: number, value: string): void {
+    this.product.variants[variantIndex].sizes[sizeIndex].size = value;
+  }
+
+  getSizesMap(): { value: string; label: string }[] {
+    return (this.sizesOptions || []).map((s) => ({ value: s, label: s }));
+  }
+
+  getTypesMap(): { value: string; label: string }[] {
+    return (this.productTypesOptions || []).map((item) => ({ value: item.name, label: item.name }));
+  }
+
+  getCollectionsMap(): { value: string; label: string }[] {
+    return (this.collectionTypesOptions || []).map((item) => ({
+      value: item.name,
+      label: item.name,
+    }));
   }
 }

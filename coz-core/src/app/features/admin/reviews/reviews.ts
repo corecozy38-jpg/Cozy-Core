@@ -1,7 +1,6 @@
-import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { Component, signal, computed } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
-import { Component, signal, computed } from '@angular/core';
 import { ToastService } from '../../../core/services/toast.service';
 import { AdminService } from '../../../core/services/admin.service';
 import { FeaturedReview, Review } from '../../../core/interfaces/product.interface';
@@ -9,6 +8,8 @@ import { ReviewsService } from '../../../core/services/reviews.service';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+
 @Component({
   selector: 'app-reviews',
   imports: [TranslatePipe, RouterModule, CommonModule, FontAwesomeModule],
@@ -17,10 +18,16 @@ import { faStar } from '@fortawesome/free-solid-svg-icons';
 })
 export class Reviews {
   faStar = faStar;
+  Math = Math;
   reviews = signal<Review[]>([]);
   loading = signal(true);
   statusFilter = signal('all');
   featuredReviews = signal<FeaturedReview[]>([]);
+
+  currentPage = 1;
+  totalPages = 1;
+  totalReviews = 0;
+  limit = 10;
 
   featuredMap = computed(() => {
     const map = new Map<string, string>();
@@ -46,17 +53,19 @@ export class Reviews {
   }
 
   loadReviews() {
-  this.loading.set(true);
-  const isFeatured = this.statusFilter() === 'featured';
-  const status = isFeatured ? 'all' : this.statusFilter();
-  this._adminService.getAllReviews(status, isFeatured).subscribe({
-    next: (res) => {
-      this.reviews.set(res.data);
-      this.loading.set(false);
-    },
-    error: () => this.loading.set(false)
-  });
-}
+    this.loading.set(true);
+    const isFeatured = this.statusFilter() === 'featured';
+    const status = isFeatured ? 'all' : this.statusFilter();
+    this._adminService.getAllReviews(status, isFeatured, this.currentPage, this.limit).subscribe({
+      next: (res) => {
+        this.reviews.set(res.data);
+        this.totalReviews = res.pagination.totalReviews;
+        this.totalPages = res.pagination.totalPages;
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
+  }
 
   loadFeaturedReviews() {
     this._reviewsService.getFeaturedReviews().subscribe({
@@ -66,9 +75,11 @@ export class Reviews {
       error: (err) => {}
     });
   }
+
   filterByStatus(status: string) {
     if (this.statusFilter() === status) return;
     this.statusFilter.set(status);
+    this.currentPage = 1;
     this.loadReviews();
   }
 
@@ -102,11 +113,11 @@ export class Reviews {
           this.loadFeaturedReviews();
           this.loadReviews();
         },
-        error: () => this._toast.error('Failed to add to featured')
+        error: (err) => 
+          this._toast.error('Failed to add to featured')
       });
     }
   }
-
 
   async deleteReview(reviewId: string) {
     const confirmed = await this._confirmDialog.open({
@@ -132,5 +143,23 @@ export class Reviews {
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  openImage(url: string): void {
+    window.open(url, '_blank');
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.loadReviews();
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) this.goToPage(this.currentPage - 1);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.goToPage(this.currentPage + 1);
   }
 }

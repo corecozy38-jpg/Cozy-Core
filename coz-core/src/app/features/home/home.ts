@@ -6,7 +6,6 @@ import { ProductService } from '../../core/services/product.service';
 import { CommonModule } from '@angular/common';
 import { AdaptedProduct, FeaturedReview, Image, Product, Review } from '../../core/interfaces/product.interface';
 import { Faq } from '../../core/interfaces/admin.interface';
-import { UserService } from '../../core/services/user.service';
 import { SiteSettingsService } from '../../core/services/site-settings.service';
 import { ReviewsService } from '../../core/services/reviews.service';
 
@@ -126,6 +125,7 @@ export class Home implements OnInit, OnDestroy {
     this._reviewsService.getFeaturedReviews().subscribe({
       next: (res) => {
         if (res && res.data) {
+          console.log(res.data)
           const featuredReviews = res.data.map((Freview: FeaturedReview) => ({
             ...Freview,
           }));

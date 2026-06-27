@@ -4,8 +4,8 @@
     "collections": "Collections",
     "summer_collection": "Summer Collection",
     "winter_collection": "Winter Collection",
-    "spring_collection":"Spring Collection",
-    "fall_collection":"Fall Collection",
+    "spring_collection": "Spring Collection",
+    "fall_collection": "Fall Collection",
     "all_products": "All Products",
     "search_placeholder": "Search products...",
     "sign_in": "Sign In",
@@ -59,6 +59,10 @@
     }
   },
   "product": {
+    "previous": "Previous",
+    "next": "Next",
+    "no_image": "No image",
+    "no_image_available": "No images available for this color",
     "size_guide_title": "Size Guide",
     "reviews": "reviews",
     "color": "Color",
@@ -98,6 +102,7 @@
     "hero_text": "Elevate your performance with premium sportswear",
     "login_title": "Welcome Back",
     "login_subtitle": "Sign in to your account",
+    "logout_failed": "Logout failed, please try again",
     "register_title": "Create an Account",
     "register_subtitle": "Join us and start shopping",
     "forgot_title": "Forgot Password?",
@@ -167,7 +172,8 @@
     "verification_link_expired_sent_new": "Your verification link has expired. A new link has been sent to your email. Please verify before logging in.",
     "verification_email_recently_sent": "A verification email was recently sent. Please check your inbox (or spam folder) and verify your email before logging in.",
     "resend_verification": "Resend verification link",
-    "resend_failed": "Failed to resend verification link, please try again"
+    "resend_failed": "Failed to resend verification link, please try again",
+    "password_changed": "Password changed successfully"
   },
   "products": {
     "filters": "Filters",
@@ -295,6 +301,7 @@
       "logout": "Logout"
     },
     "delete_account": "Delete Account",
+    "deleted_success":"Account deleted successfully",
     "delete_account_warning": "Once you delete your account, all your data will be permanently removed and cannot be recovered.",
     "delete_account_confirm": "To confirm deletion, please enter your password."
   },
@@ -443,6 +450,7 @@
       "remove": "Remove",
       "addSize": "Add Size",
       "add": "Add",
+      "save_product": "Saving...",
       "errors": {
         "name_required": "Product name is required",
         "product_type_required": "Product type is required",
@@ -451,7 +459,11 @@
         "features_required": "Add at least one feature",
         "fit_type_required": "Fit type is required",
         "variants_required": "Add at least one color",
-        "form_invalid": "Please fix the errors in the form"
+        "form_invalid": "Please fix the errors in the form",
+        "variant_no_sizes": "Color {{color}} must have at least one size",
+        "variant_color_required": "Color #{{index}} must have a name",
+        "variant_size_empty": "Size #{{index}} for color {{color}} must have a value",
+        "price_less_than_compare": "Price must be less than compare price"
       }
     },
     "orders": {
@@ -544,11 +556,11 @@
       "user": "User",
       "admin": "Admin",
       "title": "Users Managment",
-      "deleted_success":"User deleted successfully",
+      "deleted_success": "User deleted successfully",
       "phone": "Phone Number",
       "addresses_count": "Addresses Count",
       "addresses": "Addresses",
-      "change_role_confirmation":"Are you sure you want to change this user's role?"
+      "change_role_confirmation": "Are you sure you want to change this user's role?"
     },
     "settings": {
       "hero": "Hero Section",
@@ -585,7 +597,7 @@
       "banner_label": "Main Banner Image",
       "add_banner": "Add Banner",
       "banner_hint": "Recommended: high-quality image at least 1200×500 pixels",
-      "banner_size":"Maz size is 10MB",
+      "banner_size": "Maz size is 10MB",
       "banner_uploading": "Uploading banner...",
       "attributes": "Attributes",
       "product_types": "Product Types",
@@ -708,6 +720,9 @@
     "browse_products": "Browse Products"
   },
   "error": {
-    "FTL": "Failed to load"
+    "FTL": "Failed to load",
+    "too_many_requests": "You have exceeded the allowed number of requests. Please try again after {{seconds}} seconds.",
+    "server_error": "Internal server error, please try again later.",
+    "network_error": "Network error, please check your internet connection."
   }
 }

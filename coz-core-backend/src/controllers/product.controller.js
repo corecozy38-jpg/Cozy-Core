@@ -2,22 +2,27 @@ import asyncHandler from 'express-async-handler';
 import { getFilteredProductsService, getProductBySlugService } from '../services/product.service.js';
 import SiteSettings from '../models/siteSettings.model.js';
 import { getSiteSettingsService } from "../services/siteSettings.service.js";
-const toArray = (value) => {
-    if (!value) return [];
-    if (Array.isArray(value)) return value;
-    return [value];
+const toArray = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+        if (val.includes(',')) {
+            return val.split(',').map(v => v.trim()).filter(Boolean);
+        }
+        return [val];
+    }
+    return [val];
 };
 
 const getAllProducts = asyncHandler(async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
 
-    let productType = toArray(req.query.productType);
-    let collection = toArray(req.query.collection);
+    let productType = toArray(req.query.productType).map(v => v.toLowerCase());
+    let collection = toArray(req.query.collection).map(v => v.toLowerCase());
     let colors = toArray(req.query.colors);
     let sizes = toArray(req.query.sizes);
     let availability = toArray(req.query.availability);
-    
     const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : undefined;
     const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
     const sort = req.query.sort;
@@ -36,7 +41,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
     const sizesList = settings.sizes;
 
     const filterAndValidate = (values, validList, originalValues) => {
-        const valid = values.filter(v => validList.includes(v));
+        const lowerValidList = validList.map(v => v.toLowerCase());
+        const valid = values.filter(v => lowerValidList.includes(v.toLowerCase()));
         if (originalValues.length > 0 && valid.length === 0) {
             return { empty: true };
         }
@@ -118,7 +124,7 @@ const getProductBySlug = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Product retrieved successfully', data: product });
 });
 
-export { 
-    getAllProducts, 
+export {
+    getAllProducts,
     getProductBySlug
 };

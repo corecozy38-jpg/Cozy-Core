@@ -3,723 +3,427 @@
     <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 tracking-tight">
       {{ (isEditMode ? 'admin.products.edit_title' : 'admin.products.add_title') | translate }}
     </h1>
-    <button
-      (click)="_router.navigate(['/admin/products'])"
-      class="flex items-center gap-2 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-4 sm:px-5 py-2.5 rounded-full transition-all duration-200 text-sm sm:text-base shadow-sm hover:shadow"
-    >
+    <button (click)="_router.navigate(['/admin/products'])"
+      class="flex items-center gap-2 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-4 sm:px-5 py-2.5 rounded-full transition-all duration-200 text-sm sm:text-base shadow-sm hover:shadow">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 19l-7-7m0 0l7-7m-7 7h18"
-        />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
       </svg>
       {{ 'common.back' | translate }}
     </button>
   </div>
 
   @if (loading()) {
-    <div class="flex justify-center py-20">
-      <div
-        class="animate-spin rounded-full h-14 w-14 border-4 border-gray-300 border-t-gray-800"
-      ></div>
-    </div>
+  <div class="flex justify-center py-20">
+    <div class="animate-spin rounded-full h-14 w-14 border-4 border-gray-300 border-t-gray-800"></div>
+  </div>
   }
 
   @if (error()) {
-    <div
-      class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center mb-6 text-sm sm:text-base shadow-sm"
-    >
-      {{ error() | translate }}
-    </div>
+  <div
+    class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center mb-6 text-sm sm:text-base shadow-sm">
+    {{ error() | translate }}
+  </div>
   }
 
   @if (!loading()) {
-    <form (ngSubmit)="saveProduct()" #productForm="ngForm" class="space-y-8">
-      <!-- ===== Basic Info ===== -->
-      <div
-        class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden"
-      >
-        <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
-            {{ 'admin.products.basic_info' | translate }}
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Name -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.name' | translate }} <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                [(ngModel)]="product.name"
-                name="name"
-                required
-                (blur)="validateField('name')"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                [class.border-red-500]="errors['name']"
-                [class.bg-red-50]="errors['name']"
-                placeholder="Enter product name"
-              />
-              @if (errors['name']) {
-                <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                  <span>⚠️</span> {{ errors['name'] }}
-                </p>
-              }
-            </div>
-
-            <!-- Product Type -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.product_type' | translate }} <span class="text-red-500">*</span>
-              </label>
-              <div class="relative product-type-dropdown">
-                <button
-                  type="button"
-                  (click)="toggleProductTypeDropdown()"
-                  class="flex items-center justify-between w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 hover:bg-white hover:border-gray-400 focus:ring-2 focus:ring-gray-400 transition-all duration-200 text-sm"
-                  [class.border-red-500]="errors['productType']"
-                  [class.bg-red-50]="errors['productType']"
-                >
-                  <span class="{{ !product.productType ? 'text-gray-400' : 'text-gray-800' }}">
-                    {{ product.productType || ('admin.products.select_product_type' | translate) }}
-                  </span>
-                  <svg
-                    class="w-5 h-5 text-gray-500 transition-transform duration-200"
-                    [class.rotate-180]="productTypeDropdownOpen"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                @if (productTypeDropdownOpen) {
-                  <div
-                    class="absolute z-50 mt-2 w-full bg-white rounded-xl shadow-xl border border-gray-200 py-2 max-h-60 overflow-y-auto animate-slideDown"
-                  >
-                    @for (item of productTypesOptions; track item.name) {
-                      <button
-                        type="button"
-                        (click)="selectProductType(item.name)"
-                        class="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors duration-150 {{
-                          product.productType === item.name ? 'bg-gray-100 font-medium' : ''
-                        }}"
-                      >
-                        {{ getTranslatedName(item) }}
-                      </button>
-                    }
-                  </div>
-                }
-              </div>
-              @if (errors['productType']) {
-                <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                  <span>⚠️</span> {{ errors['productType'] }}
-                </p>
-              }
-            </div>
-
-            <!-- Collection -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.collection' | translate }} <span class="text-red-500">*</span>
-              </label>
-              <div class="relative collection-dropdown">
-                <button
-                  type="button"
-                  (click)="toggleCollectionDropdown()"
-                  class="flex items-center justify-between w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 hover:bg-white hover:border-gray-400 focus:ring-2 focus:ring-gray-400 transition-all duration-200 text-sm"
-                  [class.border-red-500]="errors['collection']"
-                  [class.bg-red-50]="errors['collection']"
-                >
-                  <span class="{{ !product.collection ? 'text-gray-400' : 'text-gray-800' }}">
-                    {{ product.collection || ('admin.products.select_collection' | translate) }}
-                  </span>
-                  <svg
-                    class="w-5 h-5 text-gray-500 transition-transform duration-200"
-                    [class.rotate-180]="collectionDropdownOpen"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                @if (collectionDropdownOpen) {
-                  <div
-                    class="absolute z-50 mt-2 w-full bg-white rounded-xl shadow-xl border border-gray-200 py-2 max-h-60 overflow-y-auto animate-slideDown"
-                  >
-                    @for (item of collectionTypesOptions; track item.name) {
-                      <button
-                        type="button"
-                        (click)="selectCollection(item.name)"
-                        class="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors duration-150 {{
-                          product.collection === item.name ? 'bg-gray-100 font-medium' : ''
-                        }}"
-                      >
-                        {{ getTranslatedName(item) }}
-                      </button>
-                    }
-                  </div>
-                }
-              </div>
-              @if (errors['collection']) {
-                <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                  <span>⚠️</span> {{ errors['collection'] }}
-                </p>
-              }
-            </div>
-
-            <!-- Price -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.price' | translate }} <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                [(ngModel)]="product.price"
-                name="price"
-                step="0.01"
-                min="0"
-                required
-                (blur)="validateField('price')"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                [class.border-red-500]="errors['price']"
-                [class.bg-red-50]="errors['price']"
-                placeholder="0.00"
-              />
-              @if (errors['price']) {
-                <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                  <span>⚠️</span> {{ errors['price'] }}
-                </p>
-              }
-            </div>
-
-            <!-- Compare Price -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.compare_price' | translate }}
-              </label>
-              <input
-                type="number"
-                [(ngModel)]="product.compareAtPrice"
-                name="compareAtPrice"
-                step="0.01"
-                min="0"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
-          <!-- Features -->
+  <form (ngSubmit)="saveProduct()" #productForm="ngForm" class="space-y-8">
+    <div
+      class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+      <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
+          {{ 'admin.products.basic_info' | translate }}
+        </h2>
+      </div>
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Name -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-              {{ 'admin.products.features' | translate }}
+              {{ 'admin.products.name' | translate }} <span class="text-red-500">*</span>
             </label>
-            <div class="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                name="newFeature"
-                [(ngModel)]="newFeature"
-                (keyup.enter)="addFeature()"
-                placeholder="Add a feature..."
-                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                [class.border-red-500]="errors['features']"
-                [class.bg-red-50]="errors['features']"
-              />
-              <button
-                type="button"
-                (click)="addFeature()"
-                class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-all duration-200 font-medium text-sm shadow-sm hover:shadow"
-              >
-                + {{ 'admin.products.add' | translate }}
+            <input type="text" [(ngModel)]="product.name" name="name" required (blur)="validateField('name')"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              [class.border-red-500]="errors['name']" [class.bg-red-50]="errors['name']"
+              placeholder="Enter product name" />
+            @if (errors['name']) {
+            <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+              <span>⚠️</span> {{ errors['name'] }}
+            </p>
+            }
+          </div>
+
+          <!-- Product Type -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.product_type' | translate }} <span class="text-red-500">*</span>
+            </label>
+            <app-generic-drop-list [options]="getTypesMap()" [selectedValue]="product.productType"
+              (selectionChange)="product.productType = $event" position="absolute"></app-generic-drop-list>
+            @if (errors['productType']) {
+            <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+              <span>⚠️</span> {{ errors['productType'] }}
+            </p>
+            }
+          </div>
+
+          <!-- Collection -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.collection' | translate }} <span class="text-red-500">*</span>
+            </label>
+            <app-generic-drop-list [options]="getCollectionsMap()" [selectedValue]="product.collection"
+              (selectionChange)="product.collection = $event" position="absolute"></app-generic-drop-list>
+            @if (errors['collection']) {
+            <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+              <span>⚠️</span> {{ errors['collection'] }}
+            </p>
+            }
+          </div>
+
+          <!-- Price -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.price' | translate }} <span class="text-red-500">*</span>
+            </label>
+            <input type="number" [(ngModel)]="product.price" name="price" step="0.01" min="0" required
+              (blur)="validateField('price')"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              [class.border-red-500]="errors['price']" [class.bg-red-50]="errors['price']" placeholder="0.00" />
+            @if (errors['price']) {
+            <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+              <span>⚠️</span> {{ errors['price'] }}
+            </p>
+            }
+          </div>
+
+          <!-- Compare Price -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.compare_price' | translate }}
+            </label>
+            <input type="number" [(ngModel)]="product.compareAtPrice" name="compareAtPrice" step="0.01" min="0"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              placeholder="0.00" />
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+            {{ 'admin.products.features' | translate }}
+          </label>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input type="text" name="newFeature" [(ngModel)]="newFeature" (keyup.enter)="addFeature()"
+              placeholder="Add a feature..."
+              class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              [class.border-red-500]="errors['features']" [class.bg-red-50]="errors['features']" />
+            <button type="button" (click)="addFeature()"
+              class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-all duration-200 font-medium text-sm shadow-sm hover:shadow">
+              + {{ 'admin.products.add' | translate }}
+            </button>
+          </div>
+          @if (errors['features']) {
+          <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+            <span>⚠️</span> {{ errors['features'] }}
+          </p>
+          }
+          <div class="flex flex-wrap gap-2 mt-3">
+            @for (feature of product.features; track $index) {
+            <span
+              class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-all duration-150 shadow-sm hover:shadow">
+              {{ feature }}
+              <button type="button" (click)="removeFeature($index)"
+                class="text-gray-400 hover:text-red-500 transition-colors duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+      <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
+          {{ 'admin.products.size_fit' | translate }}
+        </h2>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.fit_type' | translate }} <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="product.sizeFit.fitType" name="fitType" required
+              (blur)="validateField('fitType')"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              [class.border-red-500]="errors['fitType']" [class.bg-red-50]="errors['fitType']"
+              placeholder="Regular Fit" />
+            @if (errors['fitType']) {
+            <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+              <span>⚠️</span> {{ errors['fitType'] }}
+            </p>
+            }
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.model_height' | translate }}
+            </label>
+            <input type="number" [(ngModel)]="product.sizeFit.modelHeight" name="modelHeight"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              placeholder="180" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.wearing_size' | translate }}
+            </label>
+            <input type="text" [(ngModel)]="product.sizeFit.wearingSize" name="wearingSize"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              placeholder="M" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+      <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
+          {{ 'admin.products.size_guide' | translate }}
+        </h2>
+      </div>
+      <div class="p-6 space-y-6">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+            {{ 'admin.products.size_guide_description' | translate }}
+          </label>
+          <textarea [(ngModel)]="sizeGuideDescription" name="sizeGuideDescription" rows="3"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm resize-y"
+            placeholder="Describe the size guide..."></textarea>
+        </div>
+
+        <!-- Size Guide Image -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+            {{ 'admin.products.size_guide_image' | translate }}
+          </label>
+          <div
+            class="relative border-2 border-dashed border-gray-300 hover:border-gray-500 rounded-xl p-6 transition-all duration-200 text-center bg-gray-50/50 hover:bg-gray-50 cursor-pointer min-h-[150px] flex items-center justify-center">
+            <input type="file" (change)="uploadSizeGuideImage($event)"
+              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" [disabled]="uploadingSizeGuide"
+              accept="image/*" />
+            @if (product.sizeGuid && product.sizeGuid.image && product.sizeGuid.image.url) {
+            <div class="relative w-full h-full flex items-center justify-center">
+              <img [src]="product.sizeGuid.image.url" class="max-h-48 object-contain rounded-lg" />
+              <button type="button" (click)="product.sizeGuid.image = null"
+                class="absolute top-2 right-2 bg-black/70 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-black transition-colors duration-200 shadow-lg z-10">
+                ✕
               </button>
             </div>
-            @if (errors['features']) {
-              <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                <span>⚠️</span> {{ errors['features'] }}
+            } @else {
+            <div class="flex flex-col items-center justify-center">
+              <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-sm text-gray-500 font-medium">
+                {{
+                uploadingSizeGuide
+                ? 'Uploading...'
+                : 'Click or drag to upload size guide image'
+                }}
               </p>
+              <p class="text-xs text-gray-400 mt-1">PNG, JPG, WEBP (Max 10MB)</p>
+            </div>
             }
-            <div class="flex flex-wrap gap-2 mt-3">
-              @for (feature of product.features; track $index) {
-                <span
-                  class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-all duration-150 shadow-sm hover:shadow"
-                >
-                  {{ feature }}
-                  <button
-                    type="button"
-                    (click)="removeFeature($index)"
-                    class="text-gray-400 hover:text-red-500 transition-colors duration-150"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 ">
+      <div
+        class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
+          {{ 'admin.products.variants' | translate }}
+        </h2>
+        <button type="button" (click)="addVariant()" [disabled]="!canAddVariant()"
+          class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2 text-sm shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          {{ 'admin.products.add_color' | translate }}
+        </button>
+      </div>
+      <div class="p-6 space-y-6">
+        @if (product.variants.length === 0) {
+        <div class="text-center py-12 text-gray-400 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+          <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+          </svg>
+          <p>{{ 'admin.products.no_colors' | translate }}</p>
+          <p class="text-xs mt-1">Click the button above to add your first color</p>
+        </div>
+        } @else if (errors['variants']) {
+        <p class="text-sm text-red-600 flex items-center gap-1">
+          <span>⚠️</span> {{ errors['variants'] }}
+        </p>
+        }
+
+        @for (variant of product.variants; track $index; let vi = $index) {
+        <div
+          class="border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-all duration-200 p-5 space-y-5 shadow-sm hover:shadow">
+          <div class="flex justify-between items-start">
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-gray-800 text-white text-xs flex items-center justify-center">{{ vi +
+                1 }}</span>
+              Color #{{ vi + 1 }}
+            </h3>
+            <button type="button" (click)="removeVariant(vi)"
+              class="text-sm text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-full transition-all duration-200">
+              {{ 'admin.products.remove' | translate }}
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                {{ 'admin.products.color_name' | translate }}
+                <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <button type="button" (click)="toggleColorDropdown(vi)"
+                  class="flex items-center justify-between w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl bg-gray-50 hover:bg-white hover:border-gray-400 focus:ring-2 focus:ring-gray-400 transition-all duration-200 text-sm">
+                  <span class="{{ !variant.colorName ? 'text-gray-400' : 'text-gray-800' }}">
+                    {{ variant.colorName || ('admin.products.select_color' | translate) }}
+                  </span>
+                  <svg class="w-5 h-5 text-gray-500 transition-transform duration-200"
+                    [class.rotate-180]="colorDropdownOpen[vi]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                @if (colorDropdownOpen[vi]) {
+                <div
+                  class="absolute z-30 mt-1 w-full bg-white rounded-xl shadow-xl border border-gray-200 py-1 max-h-48 overflow-y-auto">
+                  @for (color of getAvailableColorsForVariant(vi); track color) {
+                  <button type="button" (click)="selectColor(vi, color)"
+                    class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-150">
+                    {{ color }}
                   </button>
-                </span>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Size & Fit ===== -->
-      <div
-        class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden"
-      >
-        <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
-            {{ 'admin.products.size_fit' | translate }}
-          </h2>
-        </div>
-        <div class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.fit_type' | translate }} <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                [(ngModel)]="product.sizeFit.fitType"
-                name="fitType"
-                required
-                (blur)="validateField('fitType')"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                [class.border-red-500]="errors['fitType']"
-                [class.bg-red-50]="errors['fitType']"
-                placeholder="Regular Fit"
-              />
-              @if (errors['fitType']) {
-                <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                  <span>⚠️</span> {{ errors['fitType'] }}
-                </p>
-              }
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.model_height' | translate }}
-              </label>
-              <input
-                type="number"
-                [(ngModel)]="product.sizeFit.modelHeight"
-                name="modelHeight"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                placeholder="180"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                {{ 'admin.products.wearing_size' | translate }}
-              </label>
-              <input
-                type="text"
-                [(ngModel)]="product.sizeFit.wearingSize"
-                name="wearingSize"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                placeholder="M"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Size Guide ===== -->
-      <div
-        class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden"
-      >
-        <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
-            {{ 'admin.products.size_guide' | translate }}
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-              {{ 'admin.products.size_guide_description' | translate }}
-            </label>
-            <textarea
-              [(ngModel)]="sizeGuideDescription"
-              name="sizeGuideDescription"
-              rows="3"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm resize-y"
-              placeholder="Describe the size guide..."
-            ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-              {{ 'admin.products.size_guide_image' | translate }}
-            </label>
-            <div
-              class="relative border-2 border-dashed border-gray-300 hover:border-gray-500 rounded-xl p-6 transition-all duration-200 text-center bg-gray-50/50 hover:bg-gray-50 cursor-pointer"
-            >
-              <input
-                type="file"
-                (change)="uploadSizeGuideImage($event)"
-                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                [disabled]="uploadingSizeGuide"
-                accept="image/*"
-              />
-              <div class="flex flex-col items-center justify-center">
-                <svg
-                  class="w-12 h-12 text-gray-400 mb-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <p class="text-sm text-gray-500 font-medium">
-                  {{
-                    uploadingSizeGuide ? 'Uploading...' : 'Click or drag to upload size guide image'
-                  }}
-                </p>
-                <p class="text-xs text-gray-400 mt-1">PNG, JPG, WEBP (Max 10MB)</p>
+                  }
+                </div>
+                }
               </div>
             </div>
-            @if (product.sizeGuid && product.sizeGuid.image && product.sizeGuid.image.url) {
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                {{ 'admin.products.color_code' | translate }}
+              </label>
+              <div class="flex items-center gap-3">
+                <div
+                  class="relative w-10 h-10 rounded-xl border-2 border-gray-200 overflow-hidden flex-shrink-0 hover:border-gray-400 transition-all duration-200">
+                  <input type="color" [(ngModel)]="variant.colorCode" name="colorCode-{{ vi }}"
+                    [ngModelOptions]="{ standalone: true }" class="absolute inset-0 w-full h-full cursor-pointer"
+                    style="border: none; padding: 0" />
+                </div>
+                <input type="text" [(ngModel)]="variant.colorCode" name="colorCode-{{ vi }}"
+                  class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+                  placeholder="#000000" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Images -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              {{ 'admin.products.images' | translate }}
+            </label>
+            <div
+              class="relative border-2 border-dashed border-gray-300 hover:border-gray-500 rounded-xl p-6 transition-all duration-200 text-center bg-gray-50/50 hover:bg-gray-50 cursor-pointer">
+              <input type="file" (change)="uploadVariantImage(vi, $event)"
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" [disabled]="isUploading" multiple
+                accept="image/*" />
+              <div class="flex flex-col items-center justify-center">
+                <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-sm text-gray-500 font-medium">
+                  {{ isUploading ? 'Uploading...' : 'Drag & drop or click to upload images' }}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">PNG, JPG, WEBP (Multiple allowed)</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-3 mt-4">
+              @for (img of variant.images; track $index; let ii = $index) {
               <div
-                class="relative group mt-4 w-32 h-32 rounded-xl overflow-hidden shadow-lg border-2 border-gray-200 hover:border-gray-400 transition-all duration-200"
-              >
-                <img [src]="product.sizeGuid.image.url" class="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  (click)="product.sizeGuid.image = null"
-                  class="absolute top-2 right-2 bg-black/70 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-black transition-colors duration-200 opacity-0 group-hover:opacity-100 shadow-lg"
-                >
+                class="relative group w-24 h-24 rounded-xl overflow-hidden shadow-lg border-2 border-gray-200 hover:border-gray-400 transition-all duration-200">
+                <img [src]="img.url" class="w-full h-full object-cover" />
+                <button type="button" (click)="removeVariantImage(vi, ii)"
+                  class="absolute top-1.5 right-1.5 bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black transition-colors duration-200 opacity-0 group-hover:opacity-100 shadow-md">
                   ✕
                 </button>
               </div>
-            }
+              }
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- ===== Variants ===== -->
-      <div
-        class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden"
-      >
-        <div
-          class="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-        >
-          <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <span class="w-1 h-6 bg-gray-800 rounded-full"></span>
-            {{ 'admin.products.variants' | translate }}
-          </h2>
-          <button
-            type="button"
-            (click)="addVariant()"
-            class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2 text-sm shadow-sm hover:shadow"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {{ 'admin.products.add_color' | translate }}
-          </button>
-        </div>
-        <div class="p-6 space-y-6">
-          @if (product.variants.length === 0) {
-            <div
-              class="text-center py-12 text-gray-400 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200"
-            >
-              <svg
-                class="w-16 h-16 mx-auto text-gray-300 mb-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M12 4v16m8-8H4"
-                />
+          @for (size of variant.sizes; track $index; let si = $index) {
+          <div
+            class="flex flex-wrap items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200">
+            <!-- Dropdown -->
+            <div class="relative w-28 flex-shrink-0">
+              <app-generic-drop-list [options]="getSizesMap()" [selectedValue]="size.size"
+                (selectionChange)="selectSize(vi, si, $event)" position="absolute"></app-generic-drop-list>
+            </div>
+
+            <!-- Stock -->
+            <input type="number" [(ngModel)]="size.stock" name="stock-{{ vi }}-{{ si }}" placeholder="Stock"
+              class="w-20 px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-white text-sm"
+              required min="0" />
+
+            <!-- SKU -->
+            <input type="text" [(ngModel)]="size.sku" placeholder="SKU" name="sku-{{ vi }}-{{ si }}"
+              class="flex-1 min-w-[80px] px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-white text-sm" />
+
+            <!-- Remove Button -->
+            <button type="button" (click)="removeSize(vi, si)"
+              class="text-red-400 hover:text-red-600 transition-colors duration-200 flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <p>{{ 'admin.products.no_colors' | translate }}</p>
-              <p class="text-xs mt-1">Click the button above to add your first color</p>
-            </div>
-          } @else if (errors['variants']) {
-            <p class="text-sm text-red-600 flex items-center gap-1">
-              <span>⚠️</span> {{ errors['variants'] }}
-            </p>
-          }
-
-          @for (variant of product.variants; track $index; let vi = $index) {
-            <div
-              class="border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-all duration-200 p-5 space-y-5 shadow-sm hover:shadow"
-            >
-              <div class="flex justify-between items-start">
-                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-                  <span
-                    class="w-6 h-6 rounded-full bg-gray-800 text-white text-xs flex items-center justify-center"
-                    >{{ vi + 1 }}</span
-                  >
-                  Color #{{ vi + 1 }}
-                </h3>
-                <button
-                  type="button"
-                  (click)="removeVariant(vi)"
-                  class="text-sm text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-full transition-all duration-200"
-                >
-                  {{ 'admin.products.remove' | translate }}
-                </button>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                    {{ 'admin.products.color_name' | translate }}
-                    <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    [(ngModel)]="variant.colorName"
-                    name="colorName-{{ vi }}"
-                    class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                    placeholder="e.g. Black"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                    {{ 'admin.products.color_code' | translate }}
-                  </label>
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="relative w-10 h-10 rounded-xl border-2 border-gray-200 overflow-hidden flex-shrink-0 hover:border-gray-400 transition-all duration-200"
-                    >
-                      <input
-                        type="color"
-                        [(ngModel)]="variant.colorCode"
-                        name="colorCode-{{ vi }}"
-                        [ngModelOptions]="{ standalone: true }"
-                        class="absolute inset-0 w-full h-full cursor-pointer"
-                        style="border: none; padding: 0"
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      [(ngModel)]="variant.colorCode"
-                      name="colorCode-{{ vi }}"
-                      class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
-                      placeholder="#000000"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Images -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                  {{ 'admin.products.images' | translate }}
-                </label>
-                <div
-                  class="relative border-2 border-dashed border-gray-300 hover:border-gray-500 rounded-xl p-6 transition-all duration-200 text-center bg-gray-50/50 hover:bg-gray-50 cursor-pointer"
-                >
-                  <input
-                    type="file"
-                    (change)="uploadVariantImage(vi, $event)"
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    [disabled]="isUploading"
-                    multiple
-                    accept="image/*"
-                  />
-                  <div class="flex flex-col items-center justify-center">
-                    <svg
-                      class="w-10 h-10 text-gray-400 mb-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.5"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    <p class="text-sm text-gray-500 font-medium">
-                      {{ isUploading ? 'Uploading...' : 'Drag & drop or click to upload images' }}
-                    </p>
-                    <p class="text-xs text-gray-400 mt-1">PNG, JPG, WEBP (Multiple allowed)</p>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-3 mt-4">
-                  @for (img of variant.images; track $index; let ii = $index) {
-                    <div
-                      class="relative group w-24 h-24 rounded-xl overflow-hidden shadow-lg border-2 border-gray-200 hover:border-gray-400 transition-all duration-200"
-                    >
-                      <img [src]="img.url" class="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        (click)="removeVariantImage(vi, ii)"
-                        class="absolute top-1.5 right-1.5 bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black transition-colors duration-200 opacity-0 group-hover:opacity-100 shadow-md"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  }
-                </div>
-              </div>
-
-              <!-- Sizes -->
-              <div>
-                <div
-                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3"
-                >
-                  <label class="text-sm font-semibold text-gray-700">
-                    {{ 'admin.products.sizes' | translate }}
-                  </label>
-                  <button
-                    type="button"
-                    (click)="addSize(vi)"
-                    class="text-sm text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-full transition-all duration-200"
-                  >
-                    + {{ 'admin.products.addSize' | translate }}
-                  </button>
-                </div>
-                @if (variant.sizes.length === 0) {
-                  <p class="text-sm text-gray-400 italic">No sizes added yet.</p>
-                }
-                <div class="space-y-3 mt-3">
-                  @for (size of variant.sizes; track $index; let si = $index) {
-                    <div
-                      class="flex flex-wrap items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200"
-                    >
-                      <div class="relative w-28 flex-shrink-0">
-                        <button
-                          type="button"
-                          (click)="toggleSizeDropdown(vi, si)"
-                          class="flex items-center justify-between w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-white hover:border-gray-400 focus:ring-2 focus:ring-gray-400 transition-all duration-200 text-sm font-medium"
-                        >
-                          <span class="{{ !size.size ? 'text-gray-400' : 'text-gray-700' }}">
-                            {{ size.size || ('admin.products.select_size' | translate) }}
-                          </span>
-                          <svg
-                            class="w-4 h-4 text-gray-500 transition-transform duration-200"
-                            [class.rotate-180]="isSizeDropdownOpen(vi, si)"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </button>
-                        @if (isSizeDropdownOpen(vi, si)) {
-                          <div
-                            class="absolute z-50 mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-1 max-h-48 overflow-y-auto animate-slideDown"
-                          >
-                            @for (s of sizesOptions; track s) {
-                              <button
-                                type="button"
-                                (click)="selectSize(vi, si, s)"
-                                class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors duration-150 {{
-                                  size.size === s ? 'bg-gray-100 font-medium' : ''
-                                }}"
-                              >
-                                {{ s }}
-                              </button>
-                            }
-                          </div>
-                        }
-                      </div>
-                      <input
-                        type="number"
-                        [(ngModel)]="size.stock"
-                        name="stock-{{ vi }}-{{ si }}"
-                        placeholder="Stock"
-                        class="w-20 px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-white text-sm"
-                        required
-                        min="0"
-                      />
-                      <input
-                        type="text"
-                        [(ngModel)]="size.sku"
-                        placeholder="SKU"
-                        name="sku-{{ vi }}-{{ si }}"
-                        class="flex-1 min-w-[80px] px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-white text-sm"
-                      />
-                      <button
-                        type="button"
-                        (click)="removeSize(vi, si)"
-                        class="text-red-400 hover:text-red-600 transition-colors duration-200 flex-shrink-0"
-                      >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
+            </button>
+          </div>
           }
         </div>
+        }
       </div>
+    </div>
 
-      <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          (click)="_router.navigate(['/admin/products'])"
-          class="px-8 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50 transition-all duration-200 font-medium text-gray-700 text-sm sm:text-base hover:border-gray-400"
-        >
-          {{ 'common.cancel' | translate }}
-        </button>
-        <button
-          type="submit"
-          [disabled]="saving()"
-          class="px-8 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-full transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base flex items-center justify-center gap-2 min-w-[140px]"
-        >
-          @if (saving()) {
-            <span
-              class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"
-            ></span>
-            <span>Saving...</span>
-          } @else {
-            {{ (isEditMode ? 'common.save' : 'admin.products.add_btn') | translate }}
-          }
-        </button>
-      </div>
-    </form>
+    <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
+      <button type="button" (click)="_router.navigate(['/admin/products'])"
+        class="px-8 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50 transition-all duration-200 font-medium text-gray-700 text-sm sm:text-base hover:border-gray-400">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button type="submit" [disabled]="saving()"
+        class="px-8 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-full transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base flex items-center justify-center gap-2 min-w-[140px]">
+        @if (saving()) {
+        <span class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
+        <span>{{ 'admin.products.save_product' | translate }}</span>
+        } @else {
+        {{ (isEditMode ? 'common.save' : 'admin.products.add_btn') | translate }}
+        }
+      </button>
+    </div>
+  </form>
   }
 </div>

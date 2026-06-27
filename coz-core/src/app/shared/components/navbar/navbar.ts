@@ -5,7 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { LanguageService } from '../../../core/services/language.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { RefreshTokenService } from '../../../core/services/refresh-token.service';
-import { filter, Subscription, map } from 'rxjs';
+import { filter, Subscription, map, distinctUntilChanged } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../core/services/cart.service';
 import { UserService } from '../../../core/services/user.service';
@@ -66,7 +66,7 @@ export class Navbar implements OnInit, OnDestroy {
     private _tokenService: RefreshTokenService,
     private _router: Router,
     private _cartService: CartService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.navLinks = JSON.parse(JSON.stringify(this.staticNavLinks));
@@ -77,10 +77,11 @@ export class Navbar implements OnInit, OnDestroy {
       this.loadCollections();
     });
 
-    this.cartSubscription = this._cartService.cartCount$.subscribe(count => {
-      this.cartCount = count;
-    });
-
+    this.cartSubscription = this._cartService.cartCount$
+      .pipe(distinctUntilChanged())
+      .subscribe(count => {
+        this.cartCount = count;
+      });
     this.checkLoginStatus();
     this.authSubscription = this._tokenService.accessToken$.subscribe(() => {
       this.checkLoginStatus();

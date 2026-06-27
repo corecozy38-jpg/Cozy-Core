@@ -1,9 +1,10 @@
 import { configDotenv } from "dotenv";
 configDotenv();
+
 import cookieParser from "cookie-parser";
 import express, { json, urlencoded } from "express";
 import cors from "cors";
-import { rateLimit,ipKeyGenerator } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 
 import redisClient from "../src/utils/redisClient.util.js";
@@ -32,11 +33,10 @@ const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = [
             'http://localhost:4200',
-            
         ];
 
-        const isVercelCozyCore = origin && 
-            origin.includes('vercel.app') && 
+        const isVercelCozyCore = origin &&
+            origin.includes('vercel.app') &&
             origin.includes('cozy-core');
 
         if (!origin || allowedOrigins.includes(origin) || isVercelCozyCore) {
@@ -54,15 +54,16 @@ app.use(cors(corsOptions));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-const store = new RedisStore({
-    sendCommand: (...args) => redisClient.sendCommand(args),
-});
+const sendCommand = (...args) => redisClient.sendCommand(args);
 
-app.use(rateLimit({
+const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,
     keyGenerator: (req) => ipKeyGenerator(req.ip),
-    store: store,
+    store: new RedisStore({
+        sendCommand,
+        prefix: 'rl:api:',
+    }),
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -71,7 +72,32 @@ app.use(rateLimit({
             message: 'Too many requests. Please try again later.',
         });
     }
-}));
+});
+
+const strictLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    keyGenerator: (req) => ipKeyGenerator(req.ip),
+    store: new RedisStore({
+        sendCommand,
+        prefix: 'rl:strict:',
+    }),
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        res.status(429).json({
+            success: false,
+            message: 'Too many login attempts. Please try again later.',
+        });
+    }
+});
+
+app.use(apiLimiter);
+
+app.use("/auth/login", strictLimiter);
+app.use("/auth/register", strictLimiter);
+app.use("/auth/forgot-password", strictLimiter);
+app.use("/auth/verify-otp", strictLimiter);
 
 let dbConnected = false;
 app.use(async (req, res, next) => {
@@ -82,7 +108,7 @@ app.use(async (req, res, next) => {
             console.log("DB Connected via middleware");
         } catch (err) {
             console.error("DB Connection Failed:", err.message);
-            return res.status(500).json({ 
+            return res.status(500).json({
                 message: "Database connection failed",
                 error: err.message
             });

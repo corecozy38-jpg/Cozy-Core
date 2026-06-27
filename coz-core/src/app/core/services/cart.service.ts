@@ -15,42 +15,56 @@ export class CartService {
     this.updateCartCount();
   }
 
-
   getCart(): Observable<CartI> {
-    return this.http.get<{ message: string; data: CartI }>(`${this.apiUrl}/cart`)
-      .pipe(map(response => response.data));
+    return this.http.get<{ message: string; data: CartI }>(`${this.apiUrl}/cart`).pipe(
+      map((response) => response.data),
+      tap((data) => {
+        const count = data.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+        this.cartCountSubject.next(count);
+      }),
+    );
   }
 
-  addToCart(variantId: string, size: string, quantity: number = 1, note?: string): Observable<CartI> {
-    return this.http.post<{ message: string; data: CartI }>(`${this.apiUrl}/cart/items/${variantId}`, { size, quantity, note })
+  addToCart(
+    variantId: string,
+    size: string,
+    quantity: number = 1,
+    note?: string,
+  ): Observable<CartI> {
+    return this.http
+      .post<{
+        message: string;
+        data: CartI;
+      }>(`${this.apiUrl}/cart/items/${variantId}`, { size, quantity, note })
       .pipe(
-        map(response => response.data),
-        tap(() => this.updateCartCount())
+        map((response) => response.data),
+        tap(() => this.updateCartCount()),
       );
   }
 
   updateQuantity(itemId: string, quantity: number): Observable<CartI> {
-    return this.http.put<{ message: string; data: CartI }>(`${this.apiUrl}/cart/items/${itemId}`, { quantity })
+    return this.http
+      .put<{ message: string; data: CartI }>(`${this.apiUrl}/cart/items/${itemId}`, { quantity })
       .pipe(
-        map(response => response.data),
-        tap(() => this.updateCartCount())
+        map((response) => response.data),
+        tap(() => this.updateCartCount()),
       );
   }
 
   removeItem(itemId: string): Observable<CartI> {
-    return this.http.delete<{ message: string; data: CartI }>(`${this.apiUrl}/cart/items/${itemId}`)
+    return this.http
+      .delete<{ message: string; data: CartI }>(`${this.apiUrl}/cart/items/${itemId}`)
       .pipe(
-        map(response => response.data),
-        tap(() => this.updateCartCount())
+        map((response) => response.data),
+        tap(() => this.updateCartCount()),
       );
   }
 
   clearCart(): Observable<CartI> {
-    return this.http.delete<{ message: string; data: CartI }>(`${this.apiUrl}/cart`)
-      .pipe(
-        map(response => response.data),
-        tap(() => this.updateCartCount())
-      );
+    return this.http.delete<{ message: string; data: CartI }>(`${this.apiUrl}/cart`).pipe(
+      map((response) => response.data),
+      tap(() => this.updateCartCount()),
+    );
   }
 
   updateCartCount() {
@@ -59,7 +73,7 @@ export class CartService {
         const count = res?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
         this.cartCountSubject.next(count);
       },
-      error: () => this.cartCountSubject.next(0)
+      error: () => this.cartCountSubject.next(0),
     });
   }
 }

@@ -1,4 +1,5 @@
 export interface Image {
+  _id?:string;
   url: string;
   publicId: string | null;
 }
@@ -142,6 +143,7 @@ export interface FeaturedReview {
   reviewerName: string;
   productName: string;
   reviewId?: string | null;
+  images?: { url: string; publicId: string }[]
 }
 
 export interface FeaturedReviewResponse {

@@ -16,6 +16,7 @@ import {
   verifyOTPResponse,
 } from '../interfaces/user.interface';
 import { RefreshTokenService } from './refresh-token.service';
+import { CartService } from '../../core/services/cart.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -28,7 +29,9 @@ export class AuthService {
     private http: HttpClient,
     private tokenService: RefreshTokenService,
     private guestService: GustService,
-    private router: Router
+    private router: Router,
+    private _cartService: CartService,
+    private _guestService: GustService
   ) {
     // FOR IF I LOGOUT FROM ANY TAB IN BROWSER EVERY OTHER TAB WILL BE LOGGED OUT
     window.addEventListener('storage', (event: StorageEvent) => {
@@ -48,7 +51,6 @@ export class AuthService {
 
     if (!token || logoutFlag) {
       this.tokenService.clearAccessToken();
-      this.guestService.clearGuestId();
       localStorage.removeItem('user');
       this.isLoggedInSubject.next(false);
       this.router.navigate(['/']);
@@ -56,28 +58,40 @@ export class AuthService {
   }
 
   Login(body: LoginBody): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, body, { withCredentials: true })
+    return this.http
+      .post<LoginResponse>(`${this.baseUrl}/auth/login`, body, { withCredentials: true })
       .pipe(
-        tap(response => {
+        tap((response) => {
           this.tokenService.setAccessToken(response.accessToken);
           localStorage.removeItem('logout');
+          this._cartService.getCart().subscribe();
           this.isLoggedInSubject.next(true);
           this.router.navigate(['/home']);
-        })
+        }),
       );
   }
 
-  logout(): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true })
+  logout(): Observable<{ message: string; guestId?: string }> {
+    const guestId = this.guestService.getGuestId();
+
+    return this.http
+      .post<{ message: string; guestId?: string, cart:any }>(
+        `${this.baseUrl}/auth/logout`,
+        { guestId },
+        { withCredentials: true },
+      )
       .pipe(
-        tap(() => {
+        tap((response) => {
+          console.log(response);
           this.tokenService.clearAccessToken();
-          this.guestService.clearGuestId();
           localStorage.removeItem('user');
           localStorage.setItem('logout', Date.now().toString());
           this.isLoggedInSubject.next(false);
-          this.router.navigate(['/auth']);
-        })
+          if (response.guestId) {
+            this._guestService.setGuestId(response.guestId);
+          }
+          this._cartService.updateCartCount();
+        }),
       );
   }
 
@@ -94,7 +108,11 @@ export class AuthService {
   }
 
   verifyOtp(header: verfiyOTPBody): Observable<verifyOTPResponse> {
-    return this.http.post<verifyOTPResponse>(`${this.baseUrl}/auth/verify-otp`, { otp: header.otp }, { headers: { Authorization: `Bearer ${header.token}` } });
+    return this.http.post<verifyOTPResponse>(
+      `${this.baseUrl}/auth/verify-otp`,
+      { otp: header.otp },
+      { headers: { Authorization: `Bearer ${header.token}` } },
+    );
   }
 
   verifyEmail(token: string): Observable<{ message: string }> {
@@ -108,19 +126,19 @@ export class AuthService {
   }
 
   refreshToken(): Observable<{ accessToken: string }> {
-    return this.http.post<{ accessToken: string }>(`${this.baseUrl}/auth/refresh-token`, {}, { withCredentials: true })
-      .pipe(
-        tap(response => this.tokenService.setAccessToken(response.accessToken))
-      );
+    return this.http
+      .post<{
+        accessToken: string;
+      }>(`${this.baseUrl}/auth/refresh-token`, {}, { withCredentials: true })
+      .pipe(tap((response) => this.tokenService.setAccessToken(response.accessToken)));
   }
 
-  deleteAccount(payload: { password: string }): Observable<{message :string}> {
-    return this.http.delete<{message :string}>(`${this.baseUrl}/auth/delete-account`, {
+  deleteAccount(payload: { password: string }): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.baseUrl}/auth/delete-account`, {
       body: payload,
-      withCredentials: true
+      withCredentials: true,
     });
   }
-
 
   resendVerification(payload: { email: string }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.baseUrl}/auth/resend-verification`, payload);

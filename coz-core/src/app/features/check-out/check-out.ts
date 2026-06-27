@@ -82,7 +82,8 @@ export class CheckOut implements OnInit{
         this.loadingCart.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load cart');
+        this.error.set(err.error?.message || 
+          `${this._translate.instant('error.FTL')} ${this._translate.instant('cart.title')} `);
         this.loadingCart.set(false);
       }
     });
@@ -182,9 +183,14 @@ export class CheckOut implements OnInit{
 
     this._orderService.createOrder(orderData).subscribe({
       next: (res) => {
+        const isLogedIn= this._refreshTokenService.getAccessToken()? true : false;
         this._toast.success(this._translate.instant('checkout.order_placed'));
         this._cartService.updateCartCount();
-        this._router.navigate(['/user/orders']);
+        if (isLogedIn) {
+          this._router.navigate(['/user/orders']);
+        }else{
+          this._router.navigate(['home']);
+        }
       },
       error: (err) => {
         this.error.set(err.error?.message || this._translate.instant('checkout.order_failed'));

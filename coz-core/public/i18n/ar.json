@@ -4,8 +4,8 @@
     "collections": "المجموعات",
     "summer_collection": "مجموعة الصيف",
     "winter_collection": "مجموعة الشتاء",
-    "spring_collection":"مجموعة الربيع",
-    "fall_collection":"مجموعة الخريف",
+    "spring_collection": "مجموعة الربيع",
+    "fall_collection": "مجموعة الخريف",
     "all_products": "جميع المنتجات",
     "search_placeholder": "ابحث عن منتجات...",
     "cart": "السلة",
@@ -59,6 +59,10 @@
     }
   },
   "product": {
+    "previous": "السابق",
+    "next": "التالي",
+    "no_image": "لا توجد صورة",
+    "no_image_available": "لا توجد صور متاحة لهذا اللون",
     "size_guide_title": "لوحة المقاسات",
     "reviews": "تقييمات",
     "color": "اللون",
@@ -167,7 +171,9 @@
     "verification_link_expired_sent_new": "انتهت صلاحية رابط التأكيد. تم إرسال رابط جديد إلى بريدك الإلكتروني. يرجى التأكيد قبل تسجيل الدخول.",
     "verification_email_recently_sent": "تم إرسال بريد تأكيد مؤخراً. يرجى التحقق من صندوق الوارد (أو مجلد البريد المزعج) وتأكيد بريدك الإلكتروني قبل تسجيل الدخول.",
     "resend_verification": "إعادة إرسال رابط التأكيد",
-    "resend_failed": "فشل إعادة إرسال رابط التأكيد، يرجى المحاولة مرة أخرى"
+    "resend_failed": "فشل إعادة إرسال رابط التأكيد، يرجى المحاولة مرة أخرى",
+    "password_changed": "تم تغيير كلمة المرور بنجاح",
+    "logout_failed": "فشل تسجيل الخروج، يرجى المحاولة مرة أخرى"
   },
   "products": {
     "filters": "الفلاتر",
@@ -295,6 +301,7 @@
       "logout": "تسجيل الخروج"
     },
     "delete_account": "حذف الحساب",
+    "deleted_success":"تم حذف حسابك بنجاح",
     "delete_account_warning": "بمجرد حذف حسابك، سيتم حذف جميع بياناتك نهائياً ولا يمكن استعادتها.",
     "delete_account_confirm": "لتأكيد الحذف، يرجى إدخال كلمة المرور الخاصة بك."
   },
@@ -443,6 +450,7 @@
       "remove": "حذف",
       "addSize": "أضف حجم",
       "add": "أضف",
+      "save_product": "... جاري حفظ المنتج",
       "errors": {
         "name_required": "اسم المنتج مطلوب",
         "product_type_required": "نوع المنتج مطلوب",
@@ -451,7 +459,11 @@
         "features_required": "أضف ميزة واحدة على الأقل",
         "fit_type_required": "نوع القصة مطلوب",
         "variants_required": "أضف لون واحد على الأقل",
-        "form_invalid": "يرجى تصحيح الأخطاء في النموذج"
+        "form_invalid": "يرجى تصحيح الأخطاء في النموذج",
+        "variant_no_sizes": "اللون {{color}} يجب أن يحتوي على مقاس واحد على الأقل",
+        "variant_color_required": "اللون رقم {{index}} يجب أن يكون له اسم",
+        "variant_size_empty": "المقاس رقم {{index}} في اللون {{color}} يجب أن يكون له قيمة",
+        "price_less_than_compare": "السعر يجب أن يكون أقل من سعر المقارنة"
       }
     },
     "orders": {
@@ -551,8 +563,8 @@
       "phone": "رقم التلفون",
       "addresses_count": "عدد العناويين",
       "addresses": "العناوين",
-      "change_role_confirmation":"هل انت متاكد من تغيير دور هذا المستخدم؟",
-      "deleted_success":"تم حذف المستخدم بنجاح"
+      "change_role_confirmation": "هل انت متاكد من تغيير دور هذا المستخدم؟",
+      "deleted_success": "تم حذف المستخدم بنجاح"
     },
     "settings": {
       "title": "إعدادات الموقع",
@@ -589,7 +601,7 @@
       "banner_label": "صورة البنر الرئيسية",
       "add_banner": "إضافة بنر",
       "banner_hint": "يفضل استخدام صورة عالية الجودة بأبعاد 1200×500 بكسل على الأقل",
-      "banner_size":"حجم الصورة بحد أعلى 10ميجابايت",
+      "banner_size": "حجم الصورة بحد أعلى 10ميجابايت",
       "banner_uploading": "جاري رفع البنر...",
       "attributes": "الخصائص",
       "product_types": "أنواع المنتجات",
@@ -702,6 +714,9 @@
     "browse_products": "تصفح المنتجات"
   },
   "error": {
-    "FTL": "فشل تحميل"
+    "FTL": "فشل تحميل",
+    "too_many_requests": "لقد تجاوزت عدد الطلبات المسموح بها. حاول مرة أخرى بعد {{seconds}} ثانية.",
+    "server_error": "حدث خطأ في السيرفر، يرجى المحاولة لاحقاً.",
+    "network_error": "فشل الاتصال بالخادم، تحقق من اتصالك بالإنترنت."
   }
 }

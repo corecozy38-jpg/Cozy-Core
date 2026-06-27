@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { AdminProductRequest, FeaturedReviewResponse, Image, ReviewsResponse } from '../interfaces/product.interface';
+import { AdminProductRequest, FeaturedReview, FeaturedReviewResponse, Image, ReviewsResponse } from '../interfaces/product.interface';
 import { Observable } from 'rxjs';
 import { AdminProductResponse, AdminUserListResponse, AdminUserResponse, AdminVariantListResponse, AdminVariantResponse, FaqListResponse, FaqResponse, SiteSettings, SiteSettingsResponse, UploadImageResponse, UploadMultipleImagesResponse } from '../interfaces/admin.interface';
 import { Faq } from '../interfaces/admin.interface';
@@ -63,16 +63,19 @@ export class AdminService {
     return this._http.delete<{ message: string }>(`${this.baseUrl}/admin/reviews/${reviewId}`);
   }
 
-  addFeaturedReview(reviewId: string): Observable<{ data: any }> {
-    return this._http.post<{ data: any }>(`${this.baseUrl}/featured-reviews/${reviewId}`, {});
+  addFeaturedReview(reviewId: string): Observable<{ message: string, data: FeaturedReview }> {
+    return this._http.post<{ message: string, data: FeaturedReview }>(`${this.baseUrl}/featured-reviews/${reviewId}`, {});
   }
 
   removeFeaturedReview(featuredId: string): Observable<{ message: string }> {
     return this._http.delete<{ message: string }>(`${this.baseUrl}/featured-reviews/${featuredId}`);
   }
 
-  getAllReviews(status?: string, isFeatured?: boolean): Observable<AdminReviewListResponse> {
-    let params = new HttpParams();
+  getAllReviews(status?: string, isFeatured?: boolean, 
+    page: number = 1, limit: number = 10): Observable<AdminReviewListResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
     if (status && status !== 'all') {
       params = params.set('status', status);
     }
@@ -190,8 +193,8 @@ export class AdminService {
   }
 
   // BANNER
-  updateBanner(body:Image):Observable<{message : string, data:Image}>{
-    return this._http.put<{message : string, data:Image}>(`${this.baseUrl}/admin/settings/banner`,body);
+  updateBanner(body: Image): Observable<{ message: string, data: Image }> {
+    return this._http.put<{ message: string, data: Image }>(`${this.baseUrl}/admin/settings/banner`, body);
   }
 
   updateAttributes(data: Partial<ProductAttributes>): Observable<AttributesResponse> {

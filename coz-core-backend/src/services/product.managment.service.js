@@ -1,6 +1,8 @@
 import Product from "../models/product.model.js";
 import Variant from "../models/variant.model.js";
 import Review from "../models/review.model.js";
+import FeaturedReview from "../models/featuredReview.model.js";
+
 import {
     translateProductToArabic,
     translateEnToAr,
@@ -236,6 +238,26 @@ const updateProductService = async (slug, updateData) => {
     }
 
     if (updateData.variants !== undefined && Array.isArray(updateData.variants)) {
+        const oldVariants = await Variant.find({ product: product._id });
+        const oldPublicIds = [];
+        for (const variant of oldVariants) {
+            if (variant.images && variant.images.length) {
+                for (const img of variant.images) {
+                    if (img.publicId) oldPublicIds.push(img.publicId);
+                }
+            }
+        }
+
+        if (oldPublicIds.length) {
+            const deletePromises = oldPublicIds.map((publicId) =>
+                cloudinary.uploader.destroy(publicId).catch((err) => {
+                    console.error(`Failed to delete image ${publicId}:`, err.message);
+                    return null;
+                })
+            );
+            await Promise.all(deletePromises);
+        }
+
         await Variant.deleteMany({ product: product._id });
 
         const colorNamesToTranslate = updateData.variants.map(v => v.colorName);
@@ -300,7 +322,6 @@ const deleteProductService = async (slug) => {
             }
         }
     }
-
     if (publicIds.length) {
         const deletePromises = publicIds.map((publicId) =>
             cloudinary.uploader.destroy(publicId).catch((err) => {
@@ -312,7 +333,15 @@ const deleteProductService = async (slug) => {
     }
 
     await Variant.deleteMany({ product: product._id });
+
+    const reviewIds = await Review.find({ product: product._id }).distinct('_id');
+    
+    if (reviewIds.length) {
+        await FeaturedReview.deleteMany({ review: { $in: reviewIds } });
+    }
+
     await Review.deleteMany({ product: product._id });
+
     await product.deleteOne();
 
     return {

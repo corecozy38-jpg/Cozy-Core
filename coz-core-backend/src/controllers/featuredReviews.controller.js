@@ -14,7 +14,7 @@ const getFeaturedReviews = asyncHandler(async (req, res) => {
 });
 
 const addFeaturedReview = asyncHandler(async (req, res) => {
-    const { reviewId } = req.body;
+    const { reviewId } = req.params;
     const addedBy = req.user._id;
 
     if (!reviewId) {
@@ -29,8 +29,8 @@ const addFeaturedReview = asyncHandler(async (req, res) => {
 });
 
 const removeFeaturedReview = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const result = await removeFeaturedReviewService(id);
+    const { reviewId } = req.params;
+    const result = await removeFeaturedReviewService(reviewId);
     res.status(200).json(result);
 });
 

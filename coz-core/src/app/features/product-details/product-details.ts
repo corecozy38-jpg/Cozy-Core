@@ -20,11 +20,12 @@ import {
 } from '../../core/interfaces/product.interface';
 import { CartItem, CartI } from '../../core/interfaces/cart.interface';
 import { AdminService } from '../../core/services/admin.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe, FormsModule,NgOptimizedImage],
+  imports: [CommonModule, RouterModule, TranslatePipe, FormsModule, NgOptimizedImage],
   templateUrl: './product-details.html',
   styleUrls: ['./product-details.css']
 })
@@ -59,12 +60,12 @@ export class ProductDetails implements OnInit, OnDestroy {
     guestEmail: string;
     images: { url: string; publicId: string }[];
   } = {
-    rating: 0,
-    content: '',
-    guestName: '',
-    guestEmail: '',
-    images: []
-  };
+      rating: 0,
+      content: '',
+      guestName: '',
+      guestEmail: '',
+      images: []
+    };
   reviewSubmitting: boolean = false;
   reviewSubmitError: string = '';
   reviewSubmitSuccess: boolean = false;
@@ -75,6 +76,7 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   private cartItems: CartItem[] = [];
   currentLang: string = 'en';
+  private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
@@ -87,25 +89,33 @@ export class ProductDetails implements OnInit, OnDestroy {
     private authService: AuthService,
     private refreshTokenService: RefreshTokenService,
     private adminService: AdminService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.currentLang = this.langService.getCurrentLang();
-    this.langService.currentLang$.subscribe((lang: string) => {
-      this.currentLang = lang;
-    });
+    this.langService.currentLang$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((lang: string) => {
+        this.currentLang = lang;
+      });
+
     const token = this.refreshTokenService.getAccessToken();
     this.isLoggedIn = !!token;
 
-    this.route.paramMap.subscribe((params) => {
-      const slug = params.get('slug');
-      if (slug) {
-        this.loadProduct(slug);
-      }
-    });
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        const slug = params.get('slug');
+        if (slug) {
+          this.loadProduct(slug);
+        }
+      });
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   loadProduct(slug: string): void {
     this.loading = true;
@@ -182,9 +192,9 @@ export class ProductDetails implements OnInit, OnDestroy {
         this.quantity = 1;
         this.refreshCartAndUpdateMaxQuantity();
       } else {
-        this.selectedSize = '';
+        this.selectedSize = variant.sizes[0]?.size || '';
         this.maxQuantity = 0;
-        this.quantity = 0;
+        this.quantity = 1;
         this.toast.warning(this.translate.instant('products.color_out_of_stock'));
       }
     }
@@ -197,16 +207,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   private refreshCartAndUpdateMaxQuantity(): void {
-    this.cartService.getCart().subscribe({
-      next: (cart: CartI) => {
-        this.cartItems = cart.items || [];
-        this.updateMaxQuantity();
-      },
-      error: () => {
-        this.cartItems = [];
-        this.updateMaxQuantity();
-      }
-    });
+    this.updateMaxQuantity();
   }
 
   updateMaxQuantity(): void {
@@ -244,12 +245,10 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   addToCart(): void {
     if (!this.product) return;
-
     if (this.isSelectedSizeOutOfStock) {
       this.toast.error(this.translate.instant('products.size_out_of_stock'));
       return;
     }
-
     const variantId = this.product.variants[this.selectedColorIndex]?._id;
     if (!variantId || !this.selectedSize) {
       this.toast.error(this.translate.instant('products.invalid_selection'));
@@ -295,28 +294,48 @@ export class ProductDetails implements OnInit, OnDestroy {
     return product.variants?.[0]?.images?.[0]?.url || '';
   }
 
+  hasColorImages(index: number): boolean {
+    const variant = this.product?.variants[index];
+    return variant?.images ? variant.images.length > 0 : false;
+  }
+
   loadReviews(page: number): void {
-    if (!this.product) return;
-    this.reviewsLoading = true;
-    this.reviewsService.getProductReviews(this.product._id, page, this.reviewsLimit)
-      .subscribe({
-        next: (res: ReviewsResponse) => {
-          if (page === 1) {
-            this.reviews = res.data;
-          } else {
-            this.reviews = [...this.reviews, ...res.data];
-          }
-          this.reviewsPage = page;
-          this.reviewsTotal = res.pagination.totalReviews;
-          this.reviewsTotalPages = res.pagination.totalPages;
-          this.allReviewsLoaded = page >= this.reviewsTotalPages;
-          this.reviewsLoading = false;
-        },
-        error: () => {
-          this.reviewsLoading = false;
-          this.toast.error('Failed to load reviews');
-        }
-      });
+  if (!this.product) return;
+  this.reviewsLoading = true;
+  this.reviewsService.getProductReviews(this.product._id, page, this.reviewsLimit)
+    .subscribe({
+      next: (res: ReviewsResponse) => {
+        this.reviews = res.data; 
+        this.reviewsPage = page;
+        this.reviewsTotal = res.pagination.totalReviews;
+        this.reviewsTotalPages = res.pagination.totalPages;
+        this.allReviewsLoaded = page >= this.reviewsTotalPages;
+        this.reviewsLoading = false;
+      },
+      error: () => {
+        this.reviewsLoading = false;
+        this.toast.error('Failed to load reviews');
+      }
+    });
+}
+  reviewImageIndices: { [reviewId: string]: number } = {};
+
+  getReviewImageIndex(reviewId: string): number {
+    return this.reviewImageIndices[reviewId] || 0;
+  }
+
+  nextReviewImage(reviewId: string, imagesCount: number): void {
+    const current = this.reviewImageIndices[reviewId] || 0;
+    this.reviewImageIndices[reviewId] = (current + 1) % imagesCount;
+  }
+
+  setReviewImageIndex(reviewId: string, index: number): void {
+    this.reviewImageIndices[reviewId] = index;
+  }
+
+  prevReviewImage(reviewId: string, imagesCount: number): void {
+    const current = this.reviewImageIndices[reviewId] || 0;
+    this.reviewImageIndices[reviewId] = (current - 1 + imagesCount) % imagesCount;
   }
 
   loadMoreReviews(): void {
@@ -406,4 +425,30 @@ export class ProductDetails implements OnInit, OnDestroy {
       }
     });
   }
+
+  relatedCurrentIndex: number = 0;
+
+  nextRelated(): void {
+    if (this.relatedCurrentIndex < this.relatedProducts.length - 3) {
+      this.relatedCurrentIndex++;
+    }
+  }
+
+  prevRelated(): void {
+    if (this.relatedCurrentIndex > 0) {
+      this.relatedCurrentIndex--;
+    }
+  }
+
+  nextReviewPage(): void {
+  if (this.reviewsPage < this.reviewsTotalPages) {
+    this.loadReviews(this.reviewsPage + 1);
+  }
+}
+
+prevReviewPage(): void {
+  if (this.reviewsPage > 1) {
+    this.loadReviews(this.reviewsPage - 1);
+  }
+}
 }

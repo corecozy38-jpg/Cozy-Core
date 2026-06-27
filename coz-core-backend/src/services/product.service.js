@@ -20,8 +20,12 @@ const getFilteredProductsService = async (queryOptions) => {
     const skip = (page - 1) * limit;
 
     const productMatch = {};
-    if (productType.length > 0) productMatch.productType = { $in: productType };
-    if (collection.length > 0) productMatch.collection = { $in: collection };
+    if (productType.length > 0) {
+        productMatch.productType = { $in: productType.map(p => new RegExp(`^${p}$`, 'i')) };
+    }
+    if (collection.length > 0) {
+        productMatch.collection = { $in: collection.map(c => new RegExp(`^${c}$`, 'i')) };
+    }
 
     const searchMatch = search
         ? {
@@ -194,7 +198,6 @@ const getFilteredProductsService = async (queryOptions) => {
         limit,
     };
 };
-
 const getProductBySlugService = async (slug, lang = "en") => {
     const product = await Product.findOne({ slug }).lean();
     if (!product) return null;

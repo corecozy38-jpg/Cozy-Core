@@ -5,6 +5,11 @@ const getFeaturedReviewsService = async () => {
     const featured = await FeaturedReview.find({ isActive: true })
         .populate({
             path: 'review',
+            match: { 
+                status: 'approved',
+                content: { $ne: '' },
+                rating: { $gt: 0 }
+            },
             populate: [
                 { path: 'user', select: 'fullName' },
                 { path: 'product', select: 'name' }
@@ -13,14 +18,17 @@ const getFeaturedReviewsService = async () => {
         .sort({ createdAt: -1 })  
         .lean();
 
-    return featured.map(item => ({
-        _id: item._id,
-        rating: item.review?.rating || 0,
-        content: item.review?.content || '',
-        reviewerName: item.review?.user?.fullName || item.review?.guestName || 'Anonymous',
-        productName: item.review?.product?.name || '',
-        reviewId: item.review?._id || null, 
-    }));
+    return featured
+        .filter(item => item.review !== null)  
+        .map(item => ({
+            _id: item._id,
+            rating: item.review.rating,
+            content: item.review.content,
+            reviewerName: item.review.user?.fullName || item.review.guestName || 'Anonymous',
+            productName: item.review.product?.name || '',
+            reviewId: item.review._id,
+            images: item.review.images
+        }));
 };
 
 const addFeaturedReviewService = async (reviewId, addedBy) => {

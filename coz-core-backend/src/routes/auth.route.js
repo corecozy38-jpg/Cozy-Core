@@ -12,7 +12,7 @@ router.post('/change-password',Protect, changePassword);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-otp', verifyOTP);
 router.post('/reset-password', resetPassword);
-router.post("/logout", logout);
+router.post("/logout", Protect , logout);
 router.post("/refresh-token", refreshAccessToken);
 router.get('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerification);
