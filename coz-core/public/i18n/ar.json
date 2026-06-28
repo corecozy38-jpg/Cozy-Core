@@ -611,7 +611,14 @@
       "add": "إضافة",
       "name_en": "الاسم بالإنجليزية",
       "name_ar": "الاسم بالعربية",
-      "no_items": "لا توجد عناصر مضافة"
+      "no_items": "لا توجد عناصر مضافة",
+      "confirm_delete_image": "هل تريد حذف هذه الصورة؟",
+      "confirm_delete_banner":"هل تريد حذف هذا البنر؟",
+      "confirm_delete_product_type": "هل تريد حذف هذا النوع من المنتجات؟",
+      "confirm_delete_collection_type": "هل تريد حذف هذا النوع من المجموعات؟",
+      "confirm_delete_color": "هل تريد حذف هذه اللون؟",
+      "confirm_delete_size": "هل تريد حذف هذا المقاس؟",
+      "confirm_delete_term": "هل تريد حذف هذا البند؟"
     },
     "faq": {
       "title": "الأسئلة الشائعة",

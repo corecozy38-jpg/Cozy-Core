@@ -607,7 +607,15 @@
       "add": "Add",
       "name_en": "Name (EN)",
       "name_ar": "Name (AR)",
-      "no_items": "No items added"
+      "no_items": "No items added",
+      "confirm_delete_image":"Are you sure you want to delete this image?",
+      "confirm_delete_banner":"Are you sure you want to delete this banner?",
+      "confirm_delete_product_type":"Are you sure you want to delete this product type?",
+      "confirm_delete_collection_type":"Are you sure you want to delete this collection type?",
+      "confirm_delete_color":"Are you sure you want to delete this color?",
+      "confirm_delete_size":"Are you sure you want to delete this size?",
+      "confirm_delete_attribute":"Are you sure you want to delete this attribute?",
+      "confirm_delete_term":"Are you sure you want to delete this term?"
     },
     "faq": {
       "no_faqs": "No FAQs found",
