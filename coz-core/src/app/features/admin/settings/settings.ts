@@ -1,13 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AboutInfo, AttributeItem, ColorItem, ContactInfo, OrderGuide, OrderGuideImage, TermItem } from '../../../core/interfaces/settings';
 import { SiteSettingsService } from '../../../core/services/site-settings.service';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Image } from '../../../core/interfaces/product.interface';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-settings',
@@ -37,7 +38,9 @@ export class Settings {
   constructor(
     private _adminService: AdminService,
     private _toast: ToastService,
-    private _siteSettingsService: SiteSettingsService
+    private _siteSettingsService: SiteSettingsService,
+    private _confirmDialog: ConfirmDialogService,
+    private _translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -200,44 +203,64 @@ export class Settings {
     }
   }
 
-  addProductType() {
+  async addProductType() {
     this.productTypes.update(items => [...items, { name: '', name_ar: '' }]);
   }
 
-  removeProductType(index: number) {
-    if (confirm('Are you sure you want to remove this product type?')) {
-      this.productTypes.update(items => items.filter((_, i) => i !== index));
-    }
+  async removeProductType(index: number) {
+    const confirmed = await this._confirmDialog.open({
+      title: this._translate.instant('common.confirm'),
+      message: this._translate.instant('admin.settings.confirm_delete_product_type'),
+      confirmText: this._translate.instant('common.delete'),
+      cancelText: this._translate.instant('common.cancel')
+    });
+    if (!confirmed) return;
+    this.productTypes.update(items => items.filter((_, i) => i !== index));
   }
 
-  addCollectionType() {
+  async addCollectionType() {
     this.collectionTypes.update(items => [...items, { name: '', name_ar: '' }]);
   }
 
-  removeCollectionType(index: number) {
-    if (confirm('Are you sure you want to remove this collection type?')) {
-      this.collectionTypes.update(items => items.filter((_, i) => i !== index));
-    }
+  async removeCollectionType(index: number) {
+    const confirmed = await this._confirmDialog.open({
+      title: this._translate.instant('common.confirm'),
+      message: this._translate.instant('admin.settings.confirm_delete_collection_type'),
+      confirmText: this._translate.instant('common.delete'),
+      cancelText: this._translate.instant('common.cancel')
+    });
+    if (!confirmed) return;
+    this.collectionTypes.update(items => items.filter((_, i) => i !== index));
   }
 
-  addColor() {
+  async addColor() {
     this.colors.update(items => [...items, { name: '', name_ar: '', code: '#000000' }]);
   }
 
-  removeColor(index: number) {
-    if (confirm('Are you sure you want to remove this color?')) {
-      this.colors.update(items => items.filter((_, i) => i !== index));
-    }
+  async removeColor(index: number) {
+    const confirmed = await this._confirmDialog.open({
+      title: this._translate.instant('common.confirm'),
+      message: this._translate.instant('admin.settings.confirm_delete_color'),
+      confirmText: this._translate.instant('common.delete'),
+      cancelText: this._translate.instant('common.cancel')
+    });
+    if (!confirmed) return;
+    this.colors.update(items => items.filter((_, i) => i !== index));
   }
 
-  addSize() {
+  async addSize() {
     this.sizes.update(items => [...items, '']);
   }
 
-  removeSize(index: number) {
-    if (confirm('Are you sure you want to remove this size?')) {
-      this.sizes.update(items => items.filter((_, i) => i !== index));
-    }
+  async removeSize(index: number) {
+    const confirmed = await this._confirmDialog.open({
+      title: this._translate.instant('common.confirm'),
+      message: this._translate.instant('admin.settings.confirm_delete_size'),
+      confirmText: this._translate.instant('common.delete'),
+      cancelText: this._translate.instant('common.cancel')
+    });
+    if (!confirmed) return;
+    this.sizes.update(items => items.filter((_, i) => i !== index));
   }
 
   onBannerImageSelected(event: Event): void {
@@ -271,30 +294,45 @@ export class Settings {
     });
   }
 
-  removeBannerImage(): void {
-    if (confirm('Are you sure you want to remove the banner?')) {
-      this.banner.set({ url: '', publicId: '' });
-      this._toast.info('Banner removed. Click Save to apply.');
-    }
+  async removeBannerImage(): Promise<void> {
+    const confirmed = await this._confirmDialog.open({
+      title: this._translate.instant('common.confirm'),
+      message: this._translate.instant('admin.settings.confirm_delete_banner'),
+      confirmText: this._translate.instant('common.delete'),
+      cancelText: this._translate.instant('common.cancel')
+    });
+    if (!confirmed) return;
+    this.banner.set({ url: '', publicId: '' });
+    this._toast.info('Banner removed. Click Save to apply.');
   }
 
-  addTerm(): void {
+  async addTerm(): Promise<void> {
     this.terms.update(items => [...items, { title: '', content: '' }]);
   }
 
-  removeTerm(index: number): void {
-    if (confirm('Are you sure you want to remove this term?')) {
-      this.terms.update(items => items.filter((_, i) => i !== index));
-    }
+  async removeTerm(index: number): Promise<void> {
+    const confirmed = await this._confirmDialog.open({
+      title: this._translate.instant('common.confirm'),
+      message: this._translate.instant('admin.settings.confirm_delete_term'),
+      confirmText: this._translate.instant('common.delete'),
+      cancelText: this._translate.instant('common.cancel')
+    });
+    if (!confirmed) return;
+    this.terms.update(items => items.filter((_, i) => i !== index));
   }
 
-  removeOrderGuideImage(index: number): void {
-    if (confirm('Are you sure you want to remove this image?')) {
-      const current = this.orderGuide().images;
-      current.splice(index, 1);
-      this.orderGuide.set({ images: [...current] });
-      this._toast.info('Image removed. Click Save to apply.');
-    }
+  async removeOrderGuideImage(index: number): Promise<void> {
+    const confirmed = await this._confirmDialog.open({
+      title: this._translate.instant('common.confirm'),
+      message: this._translate.instant('admin.settings.confirm_delete_image'),
+      confirmText: this._translate.instant('common.delete'),
+      cancelText: this._translate.instant('common.cancel')
+    });
+    if (!confirmed) return;
+    const current = this.orderGuide().images;
+    current.splice(index, 1);
+    this.orderGuide.set({ images: [...current] });
+    this._toast.info('Image removed. Click Save to apply.');
   }
 
   onOrderGuideImagesSelected(event: Event): void {
