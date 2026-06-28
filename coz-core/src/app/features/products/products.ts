@@ -128,8 +128,8 @@ export class Products implements OnInit {
     this.loadProducts();
   }
 
-  getProductImage(product: Product): string {
-    return product.variants?.[0]?.images?.[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image';
+  getProductImage(product: any): string {
+  return product.variants?.[0]?.images?.[0]?.url || '';
   }
 
   goToPage(page: number) {
