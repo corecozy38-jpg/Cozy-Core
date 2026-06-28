@@ -36,7 +36,7 @@ export class Products implements OnInit {
   private querySub!: Subscription;
   @ViewChild(Filter) filter!: Filter;
   readonly productsContainer = viewChild<ElementRef>('productsContainer');
-    selectedSort: string = 'newest';
+  selectedSort: string = 'newest';
   sortOptions: DropdownOption[] = [
   { value: 'newest', label: 'products.sort_newest' },
   { value: 'price_asc', label: 'products.sort_price_low_high' },
@@ -87,11 +87,11 @@ export class Products implements OnInit {
     this.loading = true;
 
     const params: any = {
-      page: this.currentPage,
-      limit: this.pageSize,
-      sort: this.sortOption,
-      search: this.searchQuery || searchQ || ''
-    };
+    page: this.currentPage,
+    limit: this.pageSize,
+    sort: this.sortOption,
+    search: this.searchQuery || searchQ || ''
+  };
 
     if (this.filterParams.collections?.length)
           params.collection = this.filterParams.collections.join(',');
@@ -164,9 +164,10 @@ export class Products implements OnInit {
     }
   }
   onSortChange(value: string): void {
+  this.sortOption = value;
   this.selectedSort = value;
   this.currentPage = 1;
   this.loadProducts();
-  }
+}
 
 }

@@ -1,6 +1,6 @@
 import { Component, ElementRef, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LanguageService } from '../../core/services/language.service';
 import { ProductService } from '../../core/services/product.service';
 import { CommonModule } from '@angular/common';
@@ -8,10 +8,13 @@ import { AdaptedProduct, FeaturedReview, Image, Product, Review } from '../../co
 import { Faq } from '../../core/interfaces/admin.interface';
 import { SiteSettingsService } from '../../core/services/site-settings.service';
 import { ReviewsService } from '../../core/services/reviews.service';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 interface FaqItem extends Faq {
   isOpen: boolean;
 }
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -40,19 +43,32 @@ export class Home implements OnInit, OnDestroy {
   intervalId: any;
   currentLang: string = 'en';
 
+  private destroy$ = new Subject<void>();
 
   constructor(
     private _productService: ProductService,
     public _langService: LanguageService,
     private _siteSettingService: SiteSettingsService,
-    private _reviewsService: ReviewsService
+    private _reviewsService: ReviewsService,
+    private _route: ActivatedRoute
   ) { }
 
   ngOnInit() {
     this.currentLang = this._langService.getCurrentLang();
-    this._langService.currentLang$.subscribe(lang => {
-      this.currentLang = lang;
-    });
+    this._langService.currentLang$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(lang => {
+        this.currentLang = lang;
+      });
+
+    this._route.fragment
+      .pipe(
+        filter(fragment => fragment === 'faq'),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.scrollToFaq();
+      });
 
     this.loadBanner();
     this.loadTopProducts();
@@ -61,8 +77,12 @@ export class Home implements OnInit, OnDestroy {
     this.startAutoPlay();
   }
 
-
-
+  private scrollToFaq() {
+    const element = document.getElementById('faq');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
   loadBanner() {
     this.isLoadingBanner.set(true);
@@ -76,6 +96,7 @@ export class Home implements OnInit, OnDestroy {
       }
     });
   }
+
   loadTopProducts() {
     this.isLoadingProducts.set(true);
     this._productService.getTopProducts(10).subscribe({
@@ -92,12 +113,12 @@ export class Home implements OnInit, OnDestroy {
         this.isLoadingProducts.set(false);
       },
       error: (err) => {
-
         this.error = true;
         this.isLoadingProducts.set(false);
       }
     });
   }
+
   loadActiveFaqs() {
     this.isLoadingFaq.set(true);
     this._siteSettingService.getActiveFaqs().subscribe({
@@ -108,12 +129,10 @@ export class Home implements OnInit, OnDestroy {
             isOpen: false
           }));
           this.faqItems.set(faqItemsData);
-
         }
         this.isLoadingFaq.set(false);
       },
       error: (err) => {
-
         this.error = true;
         this.isLoadingFaq.set(false);
       }
@@ -230,5 +249,7 @@ export class Home implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopAutoPlay();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
