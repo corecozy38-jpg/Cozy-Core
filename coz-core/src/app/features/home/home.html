@@ -295,7 +295,7 @@
     </p>
   </div>
 
-  <div id="faq"  class="max-w-3xl mx-auto space-y-4" id="faq">
+  <div  class="max-w-3xl mx-auto space-y-4" id="faq">
     @if (isLoadingFaq()) {
     @for (item of [1,2,3]; track item) {
     <div class="bg-white rounded-2xl shadow-md p-5 animate-pulse">
@@ -310,7 +310,7 @@
     }
     } @else {
     @for (item of faqItems(); track item._id; let i = $index) {
-    <div
+    <div id="faq" 
       class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
       <button (click)="toggleFaq(i)"
         class="flex justify-between items-center w-full text-left p-5 focus:outline-none group">
