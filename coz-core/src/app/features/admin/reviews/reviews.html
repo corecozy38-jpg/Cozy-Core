@@ -156,10 +156,10 @@
   @if (totalPages > 1) {
   <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
     <p class="text-sm text-gray-500">
-      {{ 'admin.reviews.showing' | translate }}
+      {{ 'admin.products.showing' | translate }}
       {{ (currentPage - 1) * limit + 1 }} –
       {{ Math.min(currentPage * limit, totalReviews) }}
-      {{ 'admin.reviews.of' | translate }}
+      {{ 'admin.products.of' | translate }}
       {{ totalReviews }}
     </p>
     <div class="flex gap-1">

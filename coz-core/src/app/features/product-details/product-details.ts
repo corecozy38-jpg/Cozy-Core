@@ -305,7 +305,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   this.reviewsService.getProductReviews(this.product._id, page, this.reviewsLimit)
     .subscribe({
       next: (res: ReviewsResponse) => {
-        this.reviews = res.data; 
+        this.reviews = res.data;
         this.reviewsPage = page;
         this.reviewsTotal = res.pagination.totalReviews;
         this.reviewsTotalPages = res.pagination.totalPages;

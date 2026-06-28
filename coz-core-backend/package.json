@@ -32,5 +32,8 @@
     "redis": "^6.0.0",
     "sharp": "^0.35.2",
     "slugify": "^1.6.9"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.5.0"
   }
 }

@@ -97,9 +97,9 @@
             </span>
           </td>
           @if(order.status === 'pending') {
-            <td class="px-6 py-4 relative z-10">
+            <td class="px-6 py-4 relative">
             <app-generic-drop-list [options]="orderStatusOptions" [selectedValue]="order.status"
-              (selectionChange)="changeStatus(order._id, $event)" 
+              (selectionChange)="changeStatus(order._id, $event)"
               class="w-full"></app-generic-drop-list>
           </td>
           }

@@ -45,7 +45,7 @@ export class Reviews {
     private _translate: TranslateService,
     private _adminService: AdminService,
     private _reviewsService: ReviewsService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.loadReviews();
@@ -53,26 +53,29 @@ export class Reviews {
   }
 
   loadReviews() {
-    this.loading.set(true);
-    const isFeatured = this.statusFilter() === 'featured';
-    const status = isFeatured ? 'all' : this.statusFilter();
-    this._adminService.getAllReviews(status, isFeatured, this.currentPage, this.limit).subscribe({
-      next: (res) => {
-        this.reviews.set(res.data);
-        this.totalReviews = res.pagination.totalReviews;
-        this.totalPages = res.pagination.totalPages;
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false)
-    });
-  }
+  this.loading.set(true);
+  const isFeatured = this.statusFilter() === 'featured';
+  const status = isFeatured ? 'all' : this.statusFilter();
+  this._adminService.getAllReviews(status, isFeatured, this.currentPage, this.limit).subscribe({
+    next: (res) => {
+      this.reviews.set(res.data);
+      this.totalReviews = res.pagination.totalReviews;
+      this.totalPages = res.pagination.totalPages;
+      this.loading.set(false);
+    },
+    error: (err) => {
+      this.loading.set(false);
+      this._toast.error(this._translate.instant('error.ftr'));
+    },
+  });
+}
 
   loadFeaturedReviews() {
     this._reviewsService.getFeaturedReviews().subscribe({
       next: (res) => {
         this.featuredReviews.set(res.data);
       },
-      error: (err) => {}
+      error: () => {},
     });
   }
 
@@ -83,13 +86,26 @@ export class Reviews {
     this.loadReviews();
   }
 
-  updateStatus(reviewId: string, status: 'approved' | 'rejected') {
-    this._adminService.updateReviewStatus(reviewId, status).subscribe({
+  updateStatus(reviewId: string, newStatus: 'approved' | 'rejected') {
+    const review = this.reviews().find(r => r._id === reviewId);
+    if (!review) return;
+    const oldStatus = review.status;
+
+    this.reviews.update(reviews =>
+      reviews.map(r => r._id === reviewId ? { ...r, status: newStatus } : r)
+    );
+
+    this._adminService.updateReviewStatus(reviewId, newStatus).subscribe({
       next: () => {
         this._toast.success('Review status updated');
         this.loadReviews();
       },
-      error: () => this._toast.error('Update failed')
+      error: () => {
+        this.reviews.update(reviews =>
+          reviews.map(r => r._id === reviewId ? { ...r, status: oldStatus } : r)
+        );
+        this._toast.error('Update failed');
+      },
     });
   }
 
@@ -104,7 +120,7 @@ export class Reviews {
           this.loadFeaturedReviews();
           this.loadReviews();
         },
-        error: () => this._toast.error('Failed to remove from featured')
+        error: () => this._toast.error('Failed to remove from featured'),
       });
     } else {
       this._adminService.addFeaturedReview(review._id).subscribe({
@@ -113,8 +129,7 @@ export class Reviews {
           this.loadFeaturedReviews();
           this.loadReviews();
         },
-        error: (err) => 
-          this._toast.error('Failed to add to featured')
+        error: () => this._toast.error('Failed to add to featured'),
       });
     }
   }
@@ -124,16 +139,26 @@ export class Reviews {
       title: this._translate.instant('common.confirm'),
       message: this._translate.instant('admin.reviews.delete_confirmation'),
       confirmText: this._translate.instant('common.delete'),
-      cancelText: this._translate.instant('common.cancel')
+      cancelText: this._translate.instant('common.cancel'),
     });
     if (!confirmed) return;
+
+    const deletedReview = this.reviews().find(r => r._id === reviewId);
+
+    this.reviews.update(reviews => reviews.filter(r => r._id !== reviewId));
+
     this._adminService.deleteReview(reviewId).subscribe({
       next: () => {
         this._toast.success('Review deleted');
         this.loadReviews();
         this.loadFeaturedReviews();
       },
-      error: () => this._toast.error('Delete failed')
+      error: () => {
+        if (deletedReview) {
+          this.reviews.update(reviews => [...reviews, deletedReview]);
+        }
+        this._toast.error('Delete failed');
+      },
     });
   }
 
@@ -141,7 +166,7 @@ export class Reviews {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 

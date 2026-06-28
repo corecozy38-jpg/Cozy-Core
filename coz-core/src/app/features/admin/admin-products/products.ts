@@ -112,24 +112,32 @@ export class adminProducts implements OnInit {
   }
 
   async deleteProduct(slug: string) {
-    const confirmed = await this._confirmDialog.open({
-      title: this._translate.instant('common.confirm'),
-      message: this._translate.instant('admin.products.delete_confirmation'),
-      confirmText: this._translate.instant('common.delete'),
-      cancelText: this._translate.instant('common.cancel'),
-    });
-    if (!confirmed) return;
+  const confirmed = await this._confirmDialog.open({
+    title: this._translate.instant('common.confirm'),
+    message: this._translate.instant('admin.products.delete_confirmation'),
+    confirmText: this._translate.instant('common.delete'),
+    cancelText: this._translate.instant('common.cancel'),
+  });
+  if (!confirmed) return;
 
-    this._adminService.deleteProduct(slug).subscribe({
-      next: () => {
-        this._toast.success('admin.products.delete_success');
-        this.loadProducts();
-      },
-      error: (err) => {
-        this._toast.error(err.error?.message || 'admin.products.delete_failed');
-      },
-    });
-  }
+  const deletedProduct = this.products().find(p => p.slug === slug);
+
+  this.products.update(products => products.filter(p => p.slug !== slug));
+  this.totalProducts--;
+
+  this._adminService.deleteProduct(slug).subscribe({
+    next: () => {
+      this._toast.success(this._translate.instant('admin.products.delete_success'));
+    },
+    error: (err) => {
+      if (deletedProduct) {
+        this.products.update(products => [...products, deletedProduct]);
+        this.totalProducts++;
+      }
+      this._toast.error(err.error?.message || this._translate.instant('admin.products.delete_failed'));
+    },
+  });
+}
 
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages) return;

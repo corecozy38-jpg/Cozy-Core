@@ -723,6 +723,7 @@
     "FTL": "Failed to load",
     "too_many_requests": "You have exceeded the allowed number of requests. Please try again after {{seconds}} seconds.",
     "server_error": "Internal server error, please try again later.",
-    "network_error": "Network error, please check your internet connection."
+    "network_error": "Network error, please check your internet connection.",
+    "ftr":"Failed to refresh reviews. Please reload the page."
   }
 }

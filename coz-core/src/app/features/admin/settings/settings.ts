@@ -38,7 +38,7 @@ export class Settings {
     private _adminService: AdminService,
     private _toast: ToastService,
     private _siteSettingsService: SiteSettingsService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.loadAllSettings();
@@ -48,25 +48,23 @@ export class Settings {
     this.loading.set(true);
     this._siteSettingsService.getContact().subscribe({
       next: (res) => { this.contact.set(res.data); },
-      error: () => { }
+      error: () => {}
     });
     this._siteSettingsService.getAbout().subscribe({
       next: (res) => { this.about.set(res.data); },
-      error: () => { }
+      error: () => {}
     });
     this._siteSettingsService.getTerms().subscribe({
-      next: (res) => {
-        this.terms.set((res.data) || []);
-      },
-      error: () => { }
+      next: (res) => { this.terms.set(res.data || []); },
+      error: () => {}
     });
     this._siteSettingsService.getOrderGuide().subscribe({
       next: (res) => { this.orderGuide.set(res.data); },
-      error: () => { }
+      error: () => {}
     });
     this._siteSettingsService.getBanner().subscribe({
       next: (res) => { this.banner.set(res.data); },
-      error: () => { }
+      error: () => {}
     });
     this._siteSettingsService.getAttributes().subscribe({
       next: (res) => {
@@ -75,7 +73,7 @@ export class Settings {
         this.colors.set(res.data.colors || []);
         this.sizes.set(res.data.sizes || []);
       },
-      error: () => { }
+      error: () => {}
     });
     setTimeout(() => this.loading.set(false), 500);
   }
@@ -101,11 +99,11 @@ export class Settings {
           instagram: this.contact().instagram
         }).subscribe({
           next: () => {
-            this._toast.success('admin.settings.save_success');
+            this._toast.success('Settings saved successfully (contact)');
             this.saving.set(false);
           },
           error: (err) => {
-            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.error.set(err.error?.message || 'Failed to save settings');
             this.saving.set(false);
           }
         });
@@ -117,11 +115,11 @@ export class Settings {
           description: this.about().description
         }).subscribe({
           next: () => {
-            this._toast.success('admin.settings.save_success');
+            this._toast.success('Settings saved successfully (about)');
             this.saving.set(false);
           },
           error: (err) => {
-            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.error.set(err.error?.message || 'Failed to save settings');
             this.saving.set(false);
           }
         });
@@ -132,11 +130,11 @@ export class Settings {
           terms: this.terms()
         }).subscribe({
           next: () => {
-            this._toast.success('admin.settings.save_success');
+            this._toast.success('Settings saved successfully (terms)');
             this.saving.set(false);
           },
           error: (err) => {
-            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.error.set(err.error?.message || 'Failed to save settings');
             this.saving.set(false);
           }
         });
@@ -152,11 +150,11 @@ export class Settings {
           images: cleanedImages
         }).subscribe({
           next: () => {
-            this._toast.success('admin.settings.save_success');
+            this._toast.success('Settings saved successfully (order guide)');
             this.saving.set(false);
           },
           error: (err) => {
-            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.error.set(err.error?.message || 'Failed to save settings');
             this.saving.set(false);
           }
         });
@@ -168,11 +166,11 @@ export class Settings {
           publicId: this.banner().publicId
         }).subscribe({
           next: () => {
-            this._toast.success('admin.settings.save_success');
+            this._toast.success('Settings saved successfully (banner)');
             this.saving.set(false);
           },
           error: (err) => {
-            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.error.set(err.error?.message || 'Failed to save settings');
             this.saving.set(false);
           }
         });
@@ -186,12 +184,12 @@ export class Settings {
           sizes: this.sizes()
         }).subscribe({
           next: () => {
-            this._toast.success('admin.settings.save_success');
+            this._toast.success('Settings saved successfully (attributes)');
             this.saving.set(false);
             this._siteSettingsService.notifyAttributesUpdated();
           },
           error: (err) => {
-            this.error.set(err.error?.message || 'admin.settings.save_failed');
+            this.error.set(err.error?.message || 'Failed to save settings');
             this.saving.set(false);
           }
         });
@@ -207,7 +205,9 @@ export class Settings {
   }
 
   removeProductType(index: number) {
-    this.productTypes.update(items => items.filter((_, i) => i !== index));
+    if (confirm('Are you sure you want to remove this product type?')) {
+      this.productTypes.update(items => items.filter((_, i) => i !== index));
+    }
   }
 
   addCollectionType() {
@@ -215,7 +215,9 @@ export class Settings {
   }
 
   removeCollectionType(index: number) {
-    this.collectionTypes.update(items => items.filter((_, i) => i !== index));
+    if (confirm('Are you sure you want to remove this collection type?')) {
+      this.collectionTypes.update(items => items.filter((_, i) => i !== index));
+    }
   }
 
   addColor() {
@@ -223,7 +225,9 @@ export class Settings {
   }
 
   removeColor(index: number) {
-    this.colors.update(items => items.filter((_, i) => i !== index));
+    if (confirm('Are you sure you want to remove this color?')) {
+      this.colors.update(items => items.filter((_, i) => i !== index));
+    }
   }
 
   addSize() {
@@ -231,66 +235,66 @@ export class Settings {
   }
 
   removeSize(index: number) {
-    this.sizes.update(items => items.filter((_, i) => i !== index));
+    if (confirm('Are you sure you want to remove this size?')) {
+      this.sizes.update(items => items.filter((_, i) => i !== index));
+    }
   }
 
   onBannerImageSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  if (!input.files || input.files.length === 0) return;
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-  const file = input.files[0];
-  const formData = new FormData();
-  formData.append('image', file);
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
 
-  this.uploadingBanner.set(true);
-  this._adminService.uploadImage(formData).subscribe({
-    next: (res) => {
-      const imageData = res.data || res;
-      const newImage = { url: imageData.url || '', publicId: imageData.publicId || '' };
-      if (newImage.url && newImage.publicId) {
-        this._adminService.updateBanner(newImage).subscribe({
-          next: () => {
-            this.banner.set(newImage);
-            this._toast.success('Banner updated successfully');
-            this.uploadingBanner.set(false);
-          },
-          error: (err) => {
-            this._toast.error(err.error?.message || 'Failed to save banner');
-            this.uploadingBanner.set(false);
-          }
-        });
-      } else {
-        this._toast.error('Invalid response from server');
+    this.uploadingBanner.set(true);
+
+    this._adminService.uploadImage(formData).subscribe({
+      next: (res) => {
+        const imageData = res.data || res;
+        const newImage = { url: imageData.url || '', publicId: imageData.publicId || '' };
+        if (newImage.url && newImage.publicId) {
+          this.banner.set(newImage);
+          this._toast.success('Banner uploaded. Click Save to apply.');
+        } else {
+          this._toast.error('Invalid response from server');
+        }
         this.uploadingBanner.set(false);
+        input.value = '';
+      },
+      error: (err) => {
+        this._toast.error(err.error?.message || 'Upload failed');
+        this.uploadingBanner.set(false);
+        input.value = '';
       }
-      input.value = '';
-    },
-    error: (err) => {
-      this._toast.error(err.error?.message || 'Upload failed');
-      this.uploadingBanner.set(false);
-      input.value = '';
-    }
-  });
-}
+    });
+  }
 
   removeBannerImage(): void {
-    this.banner.set({ url: '', publicId: '' });
+    if (confirm('Are you sure you want to remove the banner?')) {
+      this.banner.set({ url: '', publicId: '' });
+      this._toast.info('Banner removed. Click Save to apply.');
+    }
   }
 
   addTerm(): void {
-    const current = this.terms();
-    this.terms.set([...current, { title: '', content: '' }]);
+    this.terms.update(items => [...items, { title: '', content: '' }]);
   }
 
   removeTerm(index: number): void {
-    const current = this.terms();
-    this.terms.set(current.filter((_, i) => i !== index));
+    if (confirm('Are you sure you want to remove this term?')) {
+      this.terms.update(items => items.filter((_, i) => i !== index));
+    }
   }
 
   removeOrderGuideImage(index: number): void {
-    const current = this.orderGuide().images;
-    current.splice(index, 1);
-    this.orderGuide.set({ images: [...current] });
+    if (confirm('Are you sure you want to remove this image?')) {
+      const current = this.orderGuide().images;
+      current.splice(index, 1);
+      this.orderGuide.set({ images: [...current] });
+      this._toast.info('Image removed. Click Save to apply.');
+    }
   }
 
   onOrderGuideImagesSelected(event: Event): void {
@@ -302,17 +306,15 @@ export class Settings {
     formData.append('image', file);
 
     this.uploading.set(true);
+
     this._adminService.uploadImage(formData).subscribe({
       next: (res) => {
         const imageData = res.data || res;
-        const newImage = {
-          url: imageData.url || '',
-          publicId: imageData.publicId || ''
-        };
+        const newImage = { url: imageData.url || '', publicId: imageData.publicId || '' };
         if (newImage.url && newImage.publicId) {
           const current = this.orderGuide().images;
           this.orderGuide.set({ images: [...current, newImage] });
-          this._toast.success('Image uploaded successfully');
+          this._toast.success('Image uploaded. Click Save to apply.');
         } else {
           this._toast.error('Invalid response from server');
         }
