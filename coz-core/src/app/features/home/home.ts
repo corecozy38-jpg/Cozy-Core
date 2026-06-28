@@ -78,7 +78,7 @@ export class Home implements OnInit, OnDestroy {
   }
 
   private scrollToFaq() {
-    const element = document.getElementById('faq');
+    const element = document.querySelector('[data-faq-section]');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
