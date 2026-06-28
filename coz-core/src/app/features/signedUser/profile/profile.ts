@@ -23,6 +23,12 @@ export class Profile {
   editMode = false;
   editFullName = '';
   editPhone = '';
+  showPassword = false;
+  passwordTouched = false;
+  showNewPassword=false;
+  newPasswordTouched=false;
+  showConfirmPassword=false;
+  confirmPasswordTouched=false;
 
   showPasswordModal = false;
   changePasswordData = {

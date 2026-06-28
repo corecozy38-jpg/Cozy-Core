@@ -9,6 +9,7 @@ import { Address } from '../../core/interfaces/user.interface';
 import { RefreshTokenService } from '../../core/services/refresh-token.service';
 import { Image } from '../../core/interfaces/product.interface';
 import { SiteSettingsService } from '../../core/services/site-settings.service';
+import { ToastService } from '../../core/services/toast.service';
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'verify-otp' | 'reset-password';
 
@@ -66,8 +67,9 @@ export class Auth implements OnInit {
     private _authService: AuthService,
     private _refreshTokenService: RefreshTokenService,
     private translate: TranslateService,
-    private _siteSettingService: SiteSettingsService
-    
+    private _siteSettingService: SiteSettingsService,
+    private _toast:ToastService,
+    private _translate:TranslateService
   ) { }
 
   ngOnInit() {
@@ -416,7 +418,7 @@ export class Auth implements OnInit {
     }).subscribe({
       next: () => {
         this.setMode('login');
-        this.errorMessage.set('auth.password_reset_success');
+        this._toast.success(this._translate.instant('auth.password_reset_success'))
         sessionStorage.removeItem('resetToken');
         sessionStorage.removeItem('verificationToken');
         this.loading = false;
