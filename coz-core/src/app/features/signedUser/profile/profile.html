@@ -159,7 +159,7 @@
             'auth.current_password' | translate
             }}</label>
           <div class="relative">
-            <input type="password" [type]="showPassword ? 'text' : 'password'" (blur)="passwordTouched = true"
+            <input type="text" [style.-webkit-text-security]="showPassword ? 'none' : 'disc'" (blur)="passwordTouched = true"
               (input)="passwordTouched = true" [(ngModel)]="changePasswordData.currentPassword" class="w-full px-4 py-2 border
               border-gray-300 rounded-lg focus:ring-2
               focus:ring-gray-400 focus:outline-none" />
@@ -185,7 +185,7 @@
             'auth.new_password' | translate
             }}</label>
           <div class="relative">
-            <input [type]="showNewPassword ? 'text' : 'password'" (blur)="newPasswordTouched = true"
+            <input type="text" [style.-webkit-text-security]="showNewPassword ? 'none' : 'disc'" (blur)="newPasswordTouched = true"
               (input)="newPasswordTouched = true" [(ngModel)]="changePasswordData.newPassword" class="w-full px-4 py-2 border
               border-gray-300 rounded-lg focus:ring-2
               focus:ring-gray-400 focus:outline-none" />
@@ -211,8 +211,7 @@
             'auth.confirm_new_password' | translate
             }}</label>
           <div class="relative">
-            <input
-                [type]="showConfirmPassword ? 'text' : 'password'"
+            <input type="text" [style.-webkit-text-security]="showConfirmPassword ? 'none' : 'disc'"
                 (blur)="confirmPasswordTouched = true"
                 (input)="confirmPasswordTouched = true"
                 [(ngModel)]="changePasswordData.confirmNewPassword"

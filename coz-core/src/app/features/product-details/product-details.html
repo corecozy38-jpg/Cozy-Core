@@ -463,52 +463,42 @@
 
   @if (relatedProducts.length) {
   <div class="mt-16">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-800">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl md:text-2xl font-bold text-gray-800">
         {{ 'product.you_may_also_like' | translate }}
       </h2>
     </div>
 
     <div class="relative">
       <div class="overflow-hidden">
-        <div class="flex transition-transform duration-500 ease-in-out"
+        <div class="flex transition-transform duration-300 ease-in-out"
           [style.transform]="'translateX(-' + (relatedCurrentIndex * 100 / relatedProducts.length) + '%)'">
           @for (related of relatedProducts; track related._id) {
-          <div class="min-w-[50%] sm:min-w-[33.333%] lg:min-w-[25%] xl:min-w-[20%] px-2 flex-shrink-0">
+          <div class="min-w-[33.333%] md:min-w-[25%] lg:min-w-[20%] px-2 flex-shrink-0">
             <div
-              class="bg-white rounded-2xl border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
-              <a [routerLink]="['/product-details', related.slug]" class="block overflow-hidden bg-gray-50">
+              class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 p-2">
+              <a [routerLink]="['/product-details', related.slug]" class="block">
                 @if (getProductImage(related)) {
                 <img [src]="getProductImage(related)" [alt]="related.name"
-                  class="w-full aspect-[4/3] object-cover transition-transform duration-500 hover:scale-105" />
+                  class="w-full h-28 sm:h-32 md:h-40 object-cover rounded-lg" />
                 } @else {
-                <div class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center">
-                  <span class="text-gray-400 text-sm">{{ 'product.no_image' | translate }}</span>
+                <div
+                  class="w-full h-28 sm:h-32 md:h-40 bg-gray-50 rounded-lg flex flex-col items-center justify-center text-gray-400">
+                  <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span class="text-xs">{{ 'product.no_image' | translate }}</span>
                 </div>
                 }
+                <h3
+                  class="mt-2 font-medium text-xs md:text-sm line-clamp-2 text-gray-800 hover:text-gray-600 transition-colors">
+                  {{ currentLang === 'ar' ? (related.name_ar || related.name) : related.name }}
+                </h3>
+                <p class="text-gray-800 font-bold text-sm md:text-base mt-1">
+                  {{ related.price }} {{ 'product.currency' | translate }}
+                </p>
               </a>
-              <div class="p-3 flex flex-col flex-1">
-                <a [routerLink]="['/product-details', related.slug]" class="block">
-                  <h3
-                    class="text-sm md:text-base font-semibold text-gray-800 hover:text-gray-600 transition line-clamp-2">
-                    {{ currentLang === 'ar' ? (related.name_ar || related.name) : related.name }}
-                  </h3>
-                </a>
-                <div class="mt-1 flex items-center gap-2">
-                  <span class="text-sm md:text-base font-bold text-gray-900">
-                    {{ related.price }} {{ 'product.currency' | translate }}
-                  </span>
-                  @if (related.compareAtPrice) {
-                  <span class="text-xs text-gray-400 line-through">
-                    {{ related.compareAtPrice }} {{ 'product.currency' | translate }}
-                  </span>
-                  }
-                </div>
-                <button [routerLink]="['/product-details', related.slug]"
-                  class="mt-auto w-full py-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium rounded-lg transition active:scale-95">
-                  {{ 'home.products.quick_view' | translate }}
-                </button>
-              </div>
             </div>
           </div>
           }
@@ -517,14 +507,14 @@
 
       @if (relatedProducts.length > 3) {
       <button (click)="prevRelated()" [disabled]="relatedCurrentIndex === 0"
-        class="absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border border-gray-300 p-2 rounded-full shadow-md transition disabled:opacity-30 disabled:cursor-not-allowed z-10">
-        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        class="absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition disabled:opacity-30 disabled:cursor-not-allowed">
+        <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
       <button (click)="nextRelated()" [disabled]="relatedCurrentIndex >= relatedProducts.length - 3"
-        class="absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border border-gray-300 p-2 rounded-full shadow-md transition disabled:opacity-30 disabled:cursor-not-allowed z-10">
-        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        class="absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition disabled:opacity-30 disabled:cursor-not-allowed">
+        <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </button>

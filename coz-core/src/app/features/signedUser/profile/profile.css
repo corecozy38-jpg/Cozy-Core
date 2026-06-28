@@ -1,0 +1,7 @@
+input.password-input {
+  -webkit-text-security: disc;
+}
+
+input.password-input.visible {
+  -webkit-text-security: none;
+}

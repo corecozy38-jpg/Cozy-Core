@@ -300,24 +300,24 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   loadReviews(page: number): void {
-  if (!this.product) return;
-  this.reviewsLoading = true;
-  this.reviewsService.getProductReviews(this.product._id, page, this.reviewsLimit)
-    .subscribe({
-      next: (res: ReviewsResponse) => {
-        this.reviews = res.data;
-        this.reviewsPage = page;
-        this.reviewsTotal = res.pagination.totalReviews;
-        this.reviewsTotalPages = res.pagination.totalPages;
-        this.allReviewsLoaded = page >= this.reviewsTotalPages;
-        this.reviewsLoading = false;
-      },
-      error: () => {
-        this.reviewsLoading = false;
-        this.toast.error('Failed to load reviews');
-      }
-    });
-}
+    if (!this.product) return;
+    this.reviewsLoading = true;
+    this.reviewsService.getProductReviews(this.product._id, page, this.reviewsLimit)
+      .subscribe({
+        next: (res: ReviewsResponse) => {
+          this.reviews = res.data;
+          this.reviewsPage = page;
+          this.reviewsTotal = res.pagination.totalReviews;
+          this.reviewsTotalPages = res.pagination.totalPages;
+          this.allReviewsLoaded = page >= this.reviewsTotalPages;
+          this.reviewsLoading = false;
+        },
+        error: () => {
+          this.reviewsLoading = false;
+          this.toast.error('Failed to load reviews');
+        }
+      });
+  }
   reviewImageIndices: { [reviewId: string]: number } = {};
 
   getReviewImageIndex(reviewId: string): number {
@@ -441,14 +441,14 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   nextReviewPage(): void {
-  if (this.reviewsPage < this.reviewsTotalPages) {
-    this.loadReviews(this.reviewsPage + 1);
+    if (this.reviewsPage < this.reviewsTotalPages) {
+      this.loadReviews(this.reviewsPage + 1);
+    }
   }
-}
 
-prevReviewPage(): void {
-  if (this.reviewsPage > 1) {
-    this.loadReviews(this.reviewsPage - 1);
+  prevReviewPage(): void {
+    if (this.reviewsPage > 1) {
+      this.loadReviews(this.reviewsPage - 1);
+    }
   }
-}
 }

@@ -495,7 +495,8 @@
             }}</label>
             <div class="relative">
               <input
-                [type]="showNewPassword ? 'text' : 'password'"
+                type="text"
+                [style.-webkit-text-security]="showNewPassword ? 'none' : 'disc'"
                 [(ngModel)]="password"
                 class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none pr-10"
                 placeholder="••••••••"
@@ -537,7 +538,8 @@
             }}</label>
             <div class="relative">
               <input
-                [type]="showResetConfirmPassword ? 'text' : 'password'"
+                type="text"
+                [style.-webkit-text-security]="showResetConfirmPassword ? 'none' : 'disc'"
                 [(ngModel)]="confirmPassword"
                 class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-400 focus:outline-none pr-10"
                 placeholder="••••••••"
