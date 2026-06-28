@@ -78,12 +78,14 @@ export class Home implements OnInit, OnDestroy {
   }
 
   private scrollToFaq() {
-    const element = document.querySelector('[data-faq-section]');
+  setTimeout(() => {
+    const element = document.getElementById('faq-section');
+    
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }
-
+  }, 300);
+}
   loadBanner() {
     this.isLoadingBanner.set(true);
     this._siteSettingService.getBanner().subscribe({
