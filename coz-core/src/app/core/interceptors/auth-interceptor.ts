@@ -1,5 +1,5 @@
 import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
-import { inject, Injector } from '@angular/core'; 
+import { inject, Injector } from '@angular/core';
 import { catchError, switchMap, throwError, BehaviorSubject, filter, take, finalize } from 'rxjs';
 import { Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
@@ -10,54 +10,66 @@ import { Router } from '@angular/router';
 
 let isRefreshing = false;
 let refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
-let refreshFailed = false; 
+let refreshFailed = false;
 
-export const authInterceptor: HttpInterceptorFn = 
-(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
-  const injector = inject(Injector);
-  const tokenService = inject(RefreshTokenService);
-  const authService = inject(AuthService);
-  const router = inject(Router);
-  
-  const token = tokenService.getAccessToken();
+export const authInterceptor: HttpInterceptorFn =
+  (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
+    const injector = inject(Injector);
+    const tokenService = inject(RefreshTokenService);
+    const authService = inject(AuthService);
+    const router = inject(Router);
 
-  let clonedReq = req.clone({ withCredentials: true });
-  if (token) {
-    clonedReq = clonedReq.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
-  }
+    const token = tokenService.getAccessToken();
 
-  return next(clonedReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 429) {
-        const toast = injector.get(ToastService);
-        const translate = injector.get(TranslateService);
-        
-        const retryAfter = error.headers.get('Retry-After') || '60';
-        const seconds = parseInt(retryAfter, 10);
-        
-        const message = translate.instant('error.too_many_requests', { seconds });
-        toast.error(message);
-        
-        const enhancedError = { ...error, retryAfter: seconds };
-        return throwError(() => enhancedError);
-      }
-      
-      if (error.status === 401 && !clonedReq.url.includes('/refresh-token')) {
-        if (refreshFailed) {
-          tokenService.clearAccessToken();
-          authService.logout().subscribe();
-          router.navigate(['/auth']);
-          return throwError(() => error);
+    let clonedReq = req.clone({ withCredentials: true });
+    if (token) {
+      clonedReq = clonedReq.clone({
+        setHeaders: { Authorization: `Bearer ${token}` }
+      });
+    }
+
+    return next(clonedReq).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 429) {
+          const toast = injector.get(ToastService);
+          const translate = injector.get(TranslateService);
+
+          const retryAfter = error.headers.get('Retry-After');
+          let seconds = 60;
+          if (retryAfter) {
+            seconds = parseInt(retryAfter, 10);
+          } else {
+            const resetHeader = error.headers.get('ratelimit-reset');
+            if (resetHeader) {
+              seconds = parseInt(resetHeader, 10);
+            }
+          }
+
+          const minutes = Math.ceil(seconds / 60);
+          const message = translate.instant('error.too_many_requests', {
+            seconds: seconds,
+            minutes: minutes
+          });
+          toast.error(message);
+
+          const enhancedError = { ...error, retryAfter: seconds };
+          return throwError(() => enhancedError);
         }
-        return handle401Error(clonedReq, next, tokenService, authService, router);
-      }
-      
-      return throwError(() => error);
-    })
-  );
-};
+
+        if (error.status === 401 && !clonedReq.url.includes('/refresh-token')) {
+          if (refreshFailed) {
+            tokenService.clearAccessToken();
+            authService.logout().subscribe();
+            router.navigate(['/auth']);
+            return throwError(() => error);
+          }
+          return handle401Error(clonedReq, next, tokenService, authService, router);
+        }
+
+        return throwError(() => error);
+      })
+    );
+  };
 
 function handle401Error(
   req: HttpRequest<unknown>,
@@ -69,7 +81,7 @@ function handle401Error(
   if (!isRefreshing) {
     isRefreshing = true;
     refreshTokenSubject.next(null);
-    refreshFailed = false; 
+    refreshFailed = false;
 
     return authService.refreshToken().pipe(
       switchMap((response: { accessToken: string }) => {
