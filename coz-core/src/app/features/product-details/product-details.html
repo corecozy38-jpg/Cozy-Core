@@ -154,9 +154,14 @@
         <div class="pt-4 text-gray-600 text-xs md:text-sm">
           @if (activeTab === 'features') {
           <ul class="list-disc pl-5 space-y-1">
-            @for (feature of currentLang === 'ar' ? (product.features_ar || product.features) : product.features; track
-            feature) {
+            @if (currentLang === 'ar' && product.features_ar && product.features_ar.length > 0) {
+            @for (feature of product.features_ar; track feature) {
             <li>{{ feature }}</li>
+            }
+            } @else {
+            @for (feature of product.features; track feature) {
+            <li>{{ feature }}</li>
+            }
             }
           </ul>
           }
@@ -372,10 +377,12 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       @for (review of reviews; track review._id) {
-      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all duration-300 flex flex-col">
+      <div
+        class="bg-white rounded-2xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all duration-300 flex flex-col">
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold text-sm flex-shrink-0">
+            <div
+              class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold text-sm flex-shrink-0">
               {{ review.reviewerName ? review.reviewerName.charAt(0).toUpperCase() : '?' }}
             </div>
             <div>
