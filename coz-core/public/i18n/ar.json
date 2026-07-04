@@ -463,7 +463,8 @@
         "variant_no_sizes": "اللون {{color}} يجب أن يحتوي على مقاس واحد على الأقل",
         "variant_color_required": "اللون رقم {{index}} يجب أن يكون له اسم",
         "variant_size_empty": "المقاس رقم {{index}} في اللون {{color}} يجب أن يكون له قيمة",
-        "price_less_than_compare": "السعر يجب أن يكون أقل من سعر المقارنة"
+        "price_less_than_compare": "السعر يجب أن يكون أقل من سعر المقارنة",
+        "add_size":"أضف حجم"
       }
     },
     "orders": {

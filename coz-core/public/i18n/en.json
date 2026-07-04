@@ -412,6 +412,7 @@
       "delete_failed": "Failed to delete product",
       "search_placeholder": "Search for a product...",
       "showing": "Showing",
+      "add_size":"Add Size",
       "of": "of",
       "status": "Status",
       "in_stock": "In Stock",
