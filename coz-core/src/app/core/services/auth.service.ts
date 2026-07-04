@@ -59,13 +59,11 @@ export class AuthService {
       try {
         this._translate.get('auth.session_expired').subscribe({
           next: (msg) => this._toast.warning(msg),
-          error: (err) => console.log('translation error', err),
+          error:()=> this._toast.warning(this._translate.instant('auth.session_expired')),
         });
       } catch (error) {
-        console.log('this is the error', error);
+        this._toast.warning(this._translate.instant('auth.session_expired'));
       }
-
-
       this.router.navigate(['/']);
     }
   }
@@ -95,7 +93,6 @@ export class AuthService {
       )
       .pipe(
         tap((response) => {
-          console.log(response);
           this.tokenService.clearAccessToken();
           localStorage.removeItem('user');
           localStorage.setItem('logout', Date.now().toString());
