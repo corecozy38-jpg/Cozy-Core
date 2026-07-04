@@ -13,15 +13,19 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withViewTransitions({ skipInitialTransition: true })),
+
     provideHttpClient(withInterceptors([authInterceptor, guestInterceptor])),
+
     provideAnimationsAsync(),
+
     provideTranslateService({
       fallbackLang: 'en',
       loader: provideTranslateHttpLoader({
         prefix: 'i18n/',
-        suffix: '.json',
+        suffix: '.json'
       })
     }),
+
     provideAppInitializer(() => {
       const translate = inject(TranslateService);
       const savedLang = localStorage.getItem('lang') || 'en';
