@@ -16,8 +16,6 @@ export const authInterceptor: HttpInterceptorFn =
   (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
     const injector = inject(Injector);
     const tokenService = inject(RefreshTokenService);
-    const authService = inject(AuthService);
-    const router = inject(Router);
 
     const token = tokenService.getAccessToken();
 
@@ -57,6 +55,9 @@ export const authInterceptor: HttpInterceptorFn =
         }
 
         if (error.status === 401 && !clonedReq.url.includes('/refresh-token')) {
+          const authService = injector.get(AuthService);
+          const router = injector.get(Router);
+
           if (refreshFailed) {
             tokenService.clearAccessToken();
             authService.logout().subscribe();

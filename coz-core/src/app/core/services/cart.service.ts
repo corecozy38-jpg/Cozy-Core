@@ -12,7 +12,8 @@ export class CartService {
   cartCount$ = this.cartCountSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.updateCartCount();
+    
+    queueMicrotask(() => this.updateCartCount());
   }
 
   getCart(): Observable<CartI> {

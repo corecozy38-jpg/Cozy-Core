@@ -33,7 +33,6 @@ export class AuthService {
     private guestService: GustService,
     private router: Router,
     private _cartService: CartService,
-    private _guestService: GustService,
     private _toast: ToastService,
     private _translate: TranslateService
   ) {
@@ -58,11 +57,12 @@ export class AuthService {
       localStorage.removeItem('user');
       this.isLoggedInSubject.next(false);
       try {
-this._translate.get('auth.session_expired').subscribe(msg => {
-        this._toast.warning(msg);
-      });
+        this._translate.get('auth.session_expired').subscribe({
+          next: (msg) => this._toast.warning(msg),
+          error: (err) => console.log('translation error', err),
+        });
       } catch (error) {
-          console.log("this is the error", error)
+        console.log('this is the error', error);
       }
 
 
@@ -101,7 +101,7 @@ this._translate.get('auth.session_expired').subscribe(msg => {
           localStorage.setItem('logout', Date.now().toString());
           this.isLoggedInSubject.next(false);
           if (response.guestId) {
-            this._guestService.setGuestId(response.guestId);
+            this.guestService.setGuestId(response.guestId);
           }
           this._cartService.updateCartCount();
         }),
