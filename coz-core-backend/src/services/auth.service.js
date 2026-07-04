@@ -19,7 +19,7 @@ const registerUserService = async (userData, guestId = null) => {
 
     // create verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); 
+    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
 
     const user = new User({
@@ -41,18 +41,19 @@ const registerUserService = async (userData, guestId = null) => {
     if (guestId) query.guestId = guestId;
     if (user.email) query.guestEmail = user.email;
     await Order.updateMany(query, { $set: { user: user._id } });
-    
+
     await sendVerificationEmail(user.email, verificationToken);
-    
+
     const accessToken = user.generateToken();
     const refreshToken = user.generateRefreshToken();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
     await RefreshToken.create(
-        { token: refreshToken, 
-            user: user._id, 
-            expiresAt, 
-            revoked: false 
+        {
+            token: refreshToken,
+            user: user._id,
+            expiresAt,
+            revoked: false
         });
     return {
         user: {
@@ -63,7 +64,7 @@ const registerUserService = async (userData, guestId = null) => {
             phone: user.phone,
             addresses: user.address,
         },
-        
+
         priceChangedItems,
     };
 };
@@ -156,8 +157,9 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 const forgotPasswordService = async (email) => {
     const user = await User.findOne({ email });
-    if (!user)
-        throw new Error('User not found');
+    if (!user) {
+        return { verificationToken: null };
+    }
 
     await redis.del(`otp:${email}`);
     await redis.del(`otp:attempts:${email}`);

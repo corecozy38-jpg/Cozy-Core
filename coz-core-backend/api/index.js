@@ -26,8 +26,13 @@ import adminRoutes from "../src/routes/admin.route.js";
 import { errorHandler, notFoundHandler } from "../src/middlewares/notFoundHandler.middleware.js";
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(cookieParser());
+
+const allowedVercelDomains = [
+    'cozy-core.vercel.app'
+];
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -35,9 +40,15 @@ const corsOptions = {
             'http://localhost:4200',
         ];
 
-        const isVercelCozyCore = origin &&
-            origin.includes('vercel.app') &&
-            origin.includes('cozy-core');
+        let isVercelCozyCore = false;
+        if (origin) {
+            try {
+                const hostname = new URL(origin).hostname;
+                isVercelCozyCore = allowedVercelDomains.includes(hostname);
+            } catch (e) {
+                isVercelCozyCore = false;
+            }
+        }
 
         if (!origin || allowedOrigins.includes(origin) || isVercelCozyCore) {
             callback(null, true);
@@ -56,7 +67,6 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 
 const sendCommand = (...args) => redisClient.sendCommand(args);
-
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,

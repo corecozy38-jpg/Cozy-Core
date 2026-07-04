@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model.js";
-import { registerValidator, loginValidator, changePasswordValidator , forgotPasswordValidator , verifyOTPValidator , resetPasswordValidator } from "../validators/auth.validator.js";
-import { registerUserService, loginUserService,resendVerificationService, changePasswordService , forgotPasswordService , verifyOTPService , resetPasswordService } from "../services/auth.service.js";
+import { registerValidator, loginValidator, changePasswordValidator, forgotPasswordValidator, verifyOTPValidator, resetPasswordValidator } from "../validators/auth.validator.js";
+import { registerUserService, loginUserService, resendVerificationService, changePasswordService, forgotPasswordService, verifyOTPService, resetPasswordService } from "../services/auth.service.js";
 import { sendVerificationEmail } from "../utils/email.util.js";
 import Lock from "../models/lock.model.js";
 import Cart from "../models/cart.model.js";
@@ -9,11 +9,13 @@ import Order from '../models/order.model.js';
 import RefreshToken from '../models/refreshToken.model.js';
 import Review from "../models/review.model.js";
 
+
+const isProd = process.env.NODE_ENV === 'production';
+
 const register = asyncHandler(async (req, res) => {
     const { error } = registerValidator(req.body);
-    console.log("yessssssssssssssss")
     if (error) return res.status(400).json({ message: error.details[0].message });
-    const guestId = req.guestId || null;  
+    const guestId = req.guestId || null;
     const { user, priceChangedItems } = await registerUserService(req.body, guestId);
     res.status(201).json({
         user,
@@ -30,17 +32,18 @@ const login = asyncHandler(async (req, res) => {
 
     const { user, accessToken, refreshToken, priceChangedItems } = await loginUserService(req.body, guestId);
 
+
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure:  process.env.NODE_ENV === 'production',
-        sameSite: 'lax', 
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
         user,
         accessToken,
-        priceChangedItems,   
+        priceChangedItems,
     });
 });
 
@@ -58,14 +61,14 @@ const changePassword = asyncHandler(async (req, res) => {
 
 const forgotPassword = asyncHandler(async (req, res) => {
     const { error } = forgotPasswordValidator(req.body);
-    if (error) 
+    if (error)
         return res.status(400).json({ message: error.details[0].message });
-    
-    const { verificationToken, otp } = await forgotPasswordService(req.body.email);
-    
+
+    const { verificationToken } = await forgotPasswordService(req.body.email);
+
     res.status(200).json({
-        message: 'OTP sent to email successfully',
-        verificationToken,
+        message: 'If this email is registered, an OTP has been sent to it.',
+        verificationToken, 
     });
 });
 
@@ -202,7 +205,11 @@ const deleteAccount = asyncHandler(async (req, res) => {
         ]);
 
         await User.findByIdAndDelete(userId);
-        res.clearCookie('refreshToken');
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax',
+        });
 
         res.status(200).json({
             message: 'Account deleted successfully'

@@ -3,6 +3,8 @@ import RefreshToken from '../models/refreshToken.model.js';
 import User from "../models/user.model.js";
 import Cart from "../models/cart.model.js";
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const logout = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
@@ -21,7 +23,7 @@ const logout = asyncHandler(async (req, res) => {
             userCart.user = null;
             userCart.guestId = guestId;
             await userCart.save();
-            cart = userCart; 
+            cart = userCart;
         } else {
             cart = await Cart.findOneAndUpdate(
                 { guestId },
@@ -39,26 +41,30 @@ const logout = asyncHandler(async (req, res) => {
         }
     }
 
-    res.clearCookie("refreshToken");
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+    });
     res.status(200).json({
         message: "Logged out successfully",
         guestId: guestId,
-        cart: cart 
+        cart: cart
     });
 });
 
-const refreshAccessToken  = asyncHandler(async (req, res) => {
+const refreshAccessToken = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     console.log("now i refresh token")
-    if(!refreshToken){
+    if (!refreshToken) {
         return res.status(401).json({ message: "Refresh token not provided" });
     }
-    const refreshTokenDoc= await RefreshToken.findOne({ token: refreshToken , revoked: false });
+    const refreshTokenDoc = await RefreshToken.findOne({ token: refreshToken, revoked: false });
     if (!refreshTokenDoc || refreshTokenDoc.expiresAt < new Date()) {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
     const user = await User.findById(refreshTokenDoc.user);
-    if (!user) 
+    if (!user)
         return res.status(401).json({ message: "User not found" });
 
     const newAccessToken = user.generateToken();
