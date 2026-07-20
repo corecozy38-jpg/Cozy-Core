@@ -68,7 +68,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         message: 'If this email is registered, an OTP has been sent to it.',
-        verificationToken, 
+        
     });
 });
 

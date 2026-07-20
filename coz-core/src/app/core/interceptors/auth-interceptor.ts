@@ -60,7 +60,6 @@ export const authInterceptor: HttpInterceptorFn =
 
           if (refreshFailed) {
             tokenService.clearAccessToken();
-            authService.logout().subscribe();
             router.navigate(['/auth']);
             return throwError(() => error);
           }

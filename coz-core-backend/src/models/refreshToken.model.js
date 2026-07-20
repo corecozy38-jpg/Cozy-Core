@@ -19,6 +19,14 @@ const refreshTokenSchema = new Schema({
         type: Boolean,
         default: false
     },
+    revokedAt: {
+        type: Date,
+        default: null
+    },
+    replacedByToken: {
+        type: String,
+        default: null
+    },
 }, { timestamps: true });
 
 refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

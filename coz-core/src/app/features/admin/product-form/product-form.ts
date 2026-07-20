@@ -98,6 +98,15 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.relative')) {
+      this.colorDropdownOpen = this.colorDropdownOpen.map(() => false);
+      this.cdr.detectChanges();
+    }
+  }
+
   loadAttributes() {
     this._siteSettingsService.getAttributes().subscribe({
       next: (res) => {
@@ -304,6 +313,7 @@ export class ProductFormComponent implements OnInit {
 
   removeVariantImage(variantIndex: number, imageIndex: number): void {
     this.product.variants[variantIndex].images.splice(imageIndex, 1);
+    this.cdr.detectChanges();
   }
 
   addSize(variantIndex: number): void {
@@ -420,6 +430,8 @@ export class ProductFormComponent implements OnInit {
     if (!file) return;
 
     this.uploadingSizeGuide = true;
+    this.cdr.detectChanges();
+
     try {
       const formData = new FormData();
       formData.append('image', file);
@@ -433,9 +445,13 @@ export class ProductFormComponent implements OnInit {
       }
       this.product.sizeGuid.image = image;
       this.uploadingSizeGuide = false;
+      this.cdr.detectChanges();
     } catch {
       this._toast.error('Failed to upload size guide image');
       this.uploadingSizeGuide = false;
+      this.cdr.detectChanges();
+    } finally {
+      input.value = '';
     }
   }
 

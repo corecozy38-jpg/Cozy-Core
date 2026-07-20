@@ -103,6 +103,7 @@
               {{ 'admin.products.compare_price' | translate }}
             </label>
             <input type="number" [(ngModel)]="product.compareAtPrice" name="compareAtPrice" step="0.01" min="0"
+              (blur)="validateField('price')"
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
               placeholder="0.00" />
           </div>

@@ -131,7 +131,7 @@ const getUserByIdService = async (userId) => {
 };
 
 const updateUserRoleService = async (userId, newRole, currentAdminId) => {
-    if (userId === currentAdminId) {
+    if (userId === currentAdminId.toString()) {
         throw new Error("You cannot change your own role");
     }
 
@@ -148,7 +148,7 @@ const updateUserRoleService = async (userId, newRole, currentAdminId) => {
 };
 
 const deleteUserService = async (userId, currentAdminId) => {
-    if (userId === currentAdminId) {
+    if (userId === currentAdminId.toString()) {
         throw new Error("You cannot delete your own account");
     }
 
