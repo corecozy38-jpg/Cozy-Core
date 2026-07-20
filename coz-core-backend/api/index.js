@@ -31,101 +31,107 @@ app.set('trust proxy', 1);
 app.use(cookieParser());
 
 const allowedVercelDomains = [
-    'cozy-core.vercel.app'
+  'cozy-core.vercel.app'
 ];
 
 const corsOptions = {
-    origin: function (origin, callback) {
-        const allowedOrigins = [
-            'http://localhost:4200',
-        ];
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:4200',
+    ];
 
-        let isVercelCozyCore = false;
-        if (origin) {
-            try {
-                const hostname = new URL(origin).hostname;
-                isVercelCozyCore = allowedVercelDomains.includes(hostname);
-            } catch (e) {
-                isVercelCozyCore = false;
-            }
-        }
+    let isVercelCozyCore = false;
+    if (origin) {
+      try {
+        const hostname = new URL(origin).hostname;
+        isVercelCozyCore = allowedVercelDomains.includes(hostname);
+      } catch (e) {
+        isVercelCozyCore = false;
+      }
+    }
 
-        if (!origin || allowedOrigins.includes(origin) || isVercelCozyCore) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-guest-id'],
-    exposedHeaders: ['Retry-After', 'ratelimit-reset']
+    if (!origin || allowedOrigins.includes(origin) || isVercelCozyCore) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-guest-id'],
+  exposedHeaders: ['Retry-After', 'ratelimit-reset']
 };
 
 app.use(cors(corsOptions));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-const sendCommand = (...args) => {
-  const command = args[0].toLowerCase();
-  
-  if (command === 'set') {
-    const key = args[1];
-    const value = args[2];
-    const opts = {};
-    const rest = args.slice(3);
-    for (let i = 0; i < rest.length; i++) {
-      if (rest[i] === 'EX' && i + 1 < rest.length) {
-        opts.ex = parseInt(rest[i + 1], 10);
-        i++;
-      } else if (rest[i] === 'PX' && i + 1 < rest.length) {
-        opts.px = parseInt(rest[i + 1], 10);
-        i++;
-      } else if (rest[i] === 'NX') {
-        opts.nx = true;
-      } else if (rest[i] === 'XX') {
-        opts.xx = true;
+const sendCommand = async (...args) => {
+  try {
+    const command = args[0].toLowerCase();
+    if (command === 'set') {
+      const key = args[1];
+      const value = args[2];
+      const opts = {};
+      const rest = args.slice(3);
+      for (let i = 0; i < rest.length; i++) {
+        if (rest[i] === 'EX' && i + 1 < rest.length) {
+          opts.ex = parseInt(rest[i + 1], 10);
+          i++;
+        } else if (rest[i] === 'PX' && i + 1 < rest.length) {
+          opts.px = parseInt(rest[i + 1], 10);
+          i++;
+        } else if (rest[i] === 'NX') {
+          opts.nx = true;
+        } else if (rest[i] === 'XX') {
+          opts.xx = true;
+        }
       }
+      return await redisClient.set(key, value, opts);
     }
-    return redisClient.set(key, value, opts);
+    if (typeof redisClient[command] !== 'function') {
+      throw new Error(`redisClient.${command} is not a function. Available methods: ${Object.keys(redisClient)}`);
+    }
+    return await redisClient[command](...args.slice(1));
+  } catch (err) {
+    console.error('Redis sendCommand error:', err);
+    throw err;
   }
-      return redisClient[command](...args.slice(1));
-
 };
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 300,
-    keyGenerator: (req) => ipKeyGenerator(req.ip),
-    store: new RedisStore({
-        sendCommand,
-        prefix: 'rl:api:',
-    }),
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-        res.status(429).json({
-            success: false,
-            message: 'Too many requests. Please try again later.',
-        });
-    }
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  store: new RedisStore({
+    sendCommand,
+    prefix: 'rl:api:',
+  }),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: 'Too many requests. Please try again later.',
+    });
+  }
 });
 
 const strictLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    keyGenerator: (req) => ipKeyGenerator(req.ip),
-    store: new RedisStore({
-        sendCommand,
-        prefix: 'rl:strict:',
-    }),
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-        res.status(429).json({
-            success: false,
-            message: 'Too many login attempts. Please try again later.',
-        });
-    }
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  store: new RedisStore({
+    sendCommand,
+    prefix: 'rl:strict:',
+  }),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: 'Too many login attempts. Please try again later.',
+    });
+  }
 });
 
 app.use(apiLimiter);
@@ -137,20 +143,20 @@ app.use("/auth/verify-otp", strictLimiter);
 
 let dbConnected = false;
 app.use(async (req, res, next) => {
-    if (!dbConnected) {
-        try {
-            await ConnectDB();
-            dbConnected = true;
-            console.log("DB Connected via middleware");
-        } catch (err) {
-            console.error("DB Connection Failed:", err.message);
-            return res.status(500).json({
-                message: "Database connection failed",
-                error: err.message
-            });
-        }
+  if (!dbConnected) {
+    try {
+      await ConnectDB();
+      dbConnected = true;
+      console.log("DB Connected via middleware");
+    } catch (err) {
+      console.error("DB Connection Failed:", err.message);
+      return res.status(500).json({
+        message: "Database connection failed",
+        error: err.message
+      });
     }
-    next();
+  }
+  next();
 });
 
 app.use("/admin/upload", ImageRoutes);
@@ -170,12 +176,12 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 } else {
-    console.log("Server ready in production mode (Vercel)");
+  console.log("Server ready in production mode (Vercel)");
 }
 
 export default app;
