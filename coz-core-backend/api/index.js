@@ -69,29 +69,27 @@ app.use(urlencoded({ extended: true }));
 const sendCommand = async (...args) => {
   try {
     const command = args[0].toLowerCase();
-    
-    if (command === 'script') {
+        if (command === 'script') {
       const subCommand = args[1]?.toLowerCase();
       if (subCommand === 'load') {
         const scriptBody = args[2];
-        if (typeof redisClient.scriptLoad !== 'function') {
-          throw new Error('redisClient.scriptLoad is not a function');
-        }
         return await redisClient.scriptLoad(scriptBody);
       } else if (subCommand === 'exists') {
         const shas = args.slice(2);
-        if (typeof redisClient.scriptExists !== 'function') {
-          throw new Error('redisClient.scriptExists is not a function');
-        }
         return await redisClient.scriptExists(...shas);
       } else if (subCommand === 'flush') {
-        if (typeof redisClient.scriptFlush !== 'function') {
-          throw new Error('redisClient.scriptFlush is not a function');
-        }
         return await redisClient.scriptFlush();
       } else {
         throw new Error(`Unknown script subcommand: ${subCommand}`);
       }
+    }
+    
+    if (command === 'evalsha' || command === 'eval') {
+      const shaOrScript = args[1];
+      const numkeys = parseInt(args[2], 10);
+      const keys = args.slice(3, 3 + numkeys);
+      const argv = args.slice(3 + numkeys);
+      return await redisClient[command](shaOrScript, keys, argv);
     }
     
     if (command === 'set') {
