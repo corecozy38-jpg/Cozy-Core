@@ -166,8 +166,8 @@ const forgotPasswordService = async (email) => {
 
     const otp = generateOTP();
 
-    await redis.set(`otp:${email}`, otp, 'EX', 300);
-    await redis.set(`otp:attempts:${email}`, '0', 'EX', 300);
+    await redis.set(`otp:${email}`, otp, { ex: 300 });
+    await redis.set(`otp:attempts:${email}`, '0', { ex: 300 });
 
     await sendOTPEmail(email, otp);
 
@@ -205,7 +205,8 @@ const verifyOTPService = async (token, otp) => {
 
     if (storedOtp !== otp) {
         attempts++;
-        await redis.set(`otp:attempts:${email}`, attempts, 'EX', 600);
+        await redis.set(`otp:attempts:${email}`, attempts, { ex: 600 });
+
 
         if (attempts >= 5) {
             await redis.del(`otp:${email}`);

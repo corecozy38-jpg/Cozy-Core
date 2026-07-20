@@ -66,7 +66,32 @@ app.use(cors(corsOptions));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-const sendCommand = (...args) => redisClient.sendCommand(args);
+const sendCommand = (...args) => {
+  const command = args[0].toLowerCase();
+  
+  if (command === 'set') {
+    const key = args[1];
+    const value = args[2];
+    const opts = {};
+    const rest = args.slice(3);
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === 'EX' && i + 1 < rest.length) {
+        opts.ex = parseInt(rest[i + 1], 10);
+        i++;
+      } else if (rest[i] === 'PX' && i + 1 < rest.length) {
+        opts.px = parseInt(rest[i + 1], 10);
+        i++;
+      } else if (rest[i] === 'NX') {
+        opts.nx = true;
+      } else if (rest[i] === 'XX') {
+        opts.xx = true;
+      }
+    }
+    return redisClient.set(key, value, opts);
+  }
+      return redisClient[command](...args.slice(1));
+
+};
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,
