@@ -69,6 +69,31 @@ app.use(urlencoded({ extended: true }));
 const sendCommand = async (...args) => {
   try {
     const command = args[0].toLowerCase();
+    
+    if (command === 'script') {
+      const subCommand = args[1]?.toLowerCase();
+      if (subCommand === 'load') {
+        const scriptBody = args[2];
+        if (typeof redisClient.scriptLoad !== 'function') {
+          throw new Error('redisClient.scriptLoad is not a function');
+        }
+        return await redisClient.scriptLoad(scriptBody);
+      } else if (subCommand === 'exists') {
+        const shas = args.slice(2);
+        if (typeof redisClient.scriptExists !== 'function') {
+          throw new Error('redisClient.scriptExists is not a function');
+        }
+        return await redisClient.scriptExists(...shas);
+      } else if (subCommand === 'flush') {
+        if (typeof redisClient.scriptFlush !== 'function') {
+          throw new Error('redisClient.scriptFlush is not a function');
+        }
+        return await redisClient.scriptFlush();
+      } else {
+        throw new Error(`Unknown script subcommand: ${subCommand}`);
+      }
+    }
+    
     if (command === 'set') {
       const key = args[1];
       const value = args[2];
@@ -89,15 +114,17 @@ const sendCommand = async (...args) => {
       }
       return await redisClient.set(key, value, opts);
     }
+    
     if (typeof redisClient[command] !== 'function') {
-      throw new Error(`redisClient.${command} is not a function. Available methods: ${Object.keys(redisClient)}`);
+      throw new Error(`redisClient.${command} is not a function`);
     }
     return await redisClient[command](...args.slice(1));
   } catch (err) {
-    console.error('Redis sendCommand error:', err);
+    console.error('Redis sendCommand error:', err.message);
     throw err;
   }
 };
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,

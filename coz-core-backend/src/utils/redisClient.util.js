@@ -1,3 +1,5 @@
+import { config } from 'dotenv';
+config();
 import { Redis } from '@upstash/redis';
 
 const redisUrl = process.env.REDIS_URL;
