@@ -2,7 +2,7 @@ import { FeaturedReview } from './../interfaces/settings';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { CreateReviewPayload,FeaturedReviewDocumentResponse,FeaturedReviewResponse,Review, ReviewsResponse } from '../interfaces/product.interface';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 @Injectable({

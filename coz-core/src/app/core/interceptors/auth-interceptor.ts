@@ -83,7 +83,14 @@ function handle401Error(
     refreshTokenSubject.next(null);
     refreshFailed = false;
 
-    return authService.refreshToken().pipe(
+        return authService.refreshToken().pipe(
+      catchError((refreshError) => {
+        refreshFailed = true;
+        tokenService.clearAccessToken();
+        authService.logout().subscribe();
+        router.navigate(['/auth']);
+        return throwError(() => refreshError);
+      }),
       switchMap((response: { accessToken: string }) => {
         const newToken = response.accessToken;
         refreshTokenSubject.next(newToken);
@@ -91,17 +98,16 @@ function handle401Error(
         const retryReq = req.clone({
           setHeaders: { Authorization: `Bearer ${newToken}` }
         });
-        return next(retryReq);
+        return next(retryReq).pipe(
+          catchError((retryError) => {
+            tokenService.clearAccessToken();
+            router.navigate(['/auth']);
+            return throwError(() => retryError);
+          })
+        );
       }),
       finalize(() => {
         isRefreshing = false;
-      }),
-      catchError((refreshError) => {
-        refreshFailed = true;
-        tokenService.clearAccessToken();
-        authService.logout().subscribe();
-        router.navigate(['/auth']);
-        return throwError(() => refreshError);
       })
     );
   } else {

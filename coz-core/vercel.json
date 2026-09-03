@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://cozy-core-backend.vercel.app/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
