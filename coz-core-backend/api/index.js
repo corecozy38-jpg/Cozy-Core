@@ -34,9 +34,6 @@ const allowedVercelDomains = [
   'cozy-core.vercel.app'
 ];
 
-const isAllowedVercelPreview = (hostname) => {
-  return /^cozy-core-[a-z0-9-]+\.vercel\.app$/.test(hostname);
-};
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -48,7 +45,7 @@ const corsOptions = {
     if (origin) {
       try {
         const hostname = new URL(origin).hostname;
-        isVercelCozyCore = allowedVercelDomains.includes(hostname) || isAllowedVercelPreview(hostname);
+        isVercelCozyCore = allowedVercelDomains.includes(hostname) 
       } catch (e) {
         isVercelCozyCore = false;
       }
