@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 import { roles } from "../utils/constants.util.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const userSchema = new Schema(
     {
@@ -93,7 +94,7 @@ userSchema.methods.generateToken = function () {
 
 userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
-        { id: this._id },
+        { id: this._id, jti: crypto.randomUUID() },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '7d' }
     );
